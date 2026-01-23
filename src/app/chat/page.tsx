@@ -21,6 +21,9 @@ export default function ChatPage() {
     const [messageInput, setMessageInput] = useState('');
     const [loading, setLoading] = useState(true);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [showRoomList, setShowRoomList] = useState(true); // Default to list on mobile
+    const [isUploading, setIsUploading] = useState(false);
 
     const { sendMessage, sendJsonMessage, messages: wsMessages, isConnected } = useWebSocket(selectedRoom);
     const sendTyping = useTypingThrottle(sendJsonMessage);
@@ -42,6 +45,31 @@ export default function ChatPage() {
         if (messageInput.trim() && isConnected) {
             sendMessage(messageInput);
             setMessageInput('');
+        }
+    };
+
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !selectedRoom) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        // Optional: add text content if needed, or backend can handle it
+        // formData.append('content', `Uploaded ${file.name}`);
+
+        try {
+            setIsUploading(true);
+            await apiClient.postFormData(`/api/rooms/${selectedRoom}/attachments/`, formData);
+            // Success - message will come via WebSocket
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            alert('Failed to upload file');
+        } finally {
+            setIsUploading(false);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
         }
     };
 
@@ -137,12 +165,11 @@ export default function ChatPage() {
     }, [selectedRoom]);
 
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
     }, [messages, wsMessages]);
 
     const closeChat = async () => {
         if (!selectedRoom) return;
-        if (!confirm('Are you sure you want to close this chat?')) return;
 
         try {
             await apiClient.post(`/api/rooms/${selectedRoom}/close/`);
@@ -219,6 +246,19 @@ export default function ChatPage() {
                             {supportRooms.map(room => (
                                 <div key={room.id} className="glass" style={{ padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
                                     <h3>{room.name}</h3>
+                                    <div style={{
+                                        display: 'inline-block',
+                                        padding: '0.2rem 0.6rem',
+                                        borderRadius: '999px',
+                                        fontSize: '0.7rem',
+                                        backgroundColor: 'var(--color-bg-tertiary)',
+                                        marginBottom: '0.5rem',
+                                        marginTop: '0.2rem'
+                                    }}>
+                                        {room.room_type === 'all' ? 'General' :
+                                            room.room_type === 'player' ? 'Player Support' :
+                                                room.room_type === 'agent' ? 'Agent Support' : room.room_type}
+                                    </div>
                                     <div style={{ margin: '1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                         <div style={{
                                             width: '10px', height: '10px', borderRadius: '50%',
@@ -248,7 +288,7 @@ export default function ChatPage() {
     const selectedRoomData = rooms.find(r => r.id === selectedRoom);
 
     return (
-        <>
+        <div className={styles.pageWrapper}>
             <Header />
             <main className={styles.main}>
                 <div className={styles.container}>
@@ -277,24 +317,46 @@ export default function ChatPage() {
 
                     <div className={`${styles.chatContainer} ${user.user_type !== 'staff' ? styles.singleColumn : ''}`}>
                         {user.user_type === 'staff' && (
-                            <div className={`${styles.roomList} glass`}>
+                            <div className={`${styles.roomList} glass ${!showRoomList ? styles.hidden : ''}`}>
                                 <h2>Active Chats</h2>
                                 <div className={styles.rooms}>
                                     {rooms.filter(r => r.staff_assigned?.id === user.id).length > 0 ? (
-                                        rooms.filter(r => r.staff_assigned?.id === user.id).map((room) => (
-                                            <button
-                                                key={room.id}
-                                                className={`${styles.roomButton} ${selectedRoom === room.id ? styles.active : ''}`}
-                                                onClick={() => setSelectedRoom(room.id)}
-                                            >
-                                                <div className={styles.roomName}>
-                                                    {room.client ? room.client.username : room.name}
-                                                </div>
-                                                <div className={styles.roomStaff}>
-                                                    {room.participant_count || 0} participants
-                                                </div>
-                                            </button>
-                                        ))
+                                        rooms.filter(r => r.staff_assigned?.id === user.id).map((room) => {
+                                            const displayName = room.client ? room.client.username : room.name;
+                                            const initial = displayName.charAt(0).toUpperCase();
+
+                                            return (
+                                                <button
+                                                    key={room.id}
+                                                    className={`${styles.roomButton} ${selectedRoom === room.id ? styles.active : ''}`}
+                                                    onClick={() => {
+                                                        setSelectedRoom(room.id);
+                                                        setShowRoomList(false); // Hide list on mobile
+                                                    }}
+                                                >
+                                                    <div className={styles.roomAvatar}>
+                                                        {initial}
+                                                    </div>
+
+                                                    <div className={styles.roomInfo}>
+                                                        <div className={styles.roomName}>
+                                                            {displayName}
+                                                        </div>
+                                                        {/* <div className={styles.roomSubtext}>
+                                                            {room.room_type === 'player' ? 'Player' : room.room_type} • {room.participant_count || 1} online
+                                                        </div> */}
+                                                    </div>
+
+                                                    <div className={styles.roomMeta}>
+                                                        {room.unread_count && room.unread_count > 0 ? (
+                                                            <div className={styles.roomUnread}>
+                                                                {room.unread_count}
+                                                            </div>
+                                                        ) : null}
+                                                    </div>
+                                                </button>
+                                            )
+                                        })
                                     ) : (
                                         <div className={styles.noRooms}>No active chats</div>
                                     )}
@@ -302,16 +364,29 @@ export default function ChatPage() {
                             </div>
                         )}
 
-                        <div className={`${styles.chatArea} glass ${user.user_type !== 'staff' ? styles.fullWidth : ''}`}>
+
+
+                        <div className={`${styles.chatArea} glass ${user.user_type !== 'staff' ? styles.fullWidth : ''} ${showRoomList && user.user_type === 'staff' ? styles.hidden : ''}`}>
                             <div className={styles.chatHeader}>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                                    <h2>
-                                        {user.user_type === 'staff'
-                                            ? (selectedRoomData
-                                                ? (selectedRoomData.client ? `Chat with ${selectedRoomData.client.username}` : selectedRoomData.name)
-                                                : 'Select a chat to start')
-                                            : 'Chat with Support'}
-                                    </h2>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        {/* Back Button for Mobile */}
+                                        {user.user_type === 'staff' && (
+                                            <button
+                                                className={styles.backButton}
+                                                onClick={() => setShowRoomList(true)}
+                                            >
+                                                ←
+                                            </button>
+                                        )}
+                                        <h2>
+                                            {user.user_type === 'staff'
+                                                ? (selectedRoomData
+                                                    ? (selectedRoomData.client ? `${selectedRoomData.client.username}` : selectedRoomData.name)
+                                                    : 'Select a chat')
+                                                : 'Chat with Support'}
+                                        </h2>
+                                    </div>
                                     {user.user_type === 'staff' && selectedRoomData && (
                                         <button
                                             onClick={closeChat}
@@ -348,12 +423,36 @@ export default function ChatPage() {
                                                 {new Date(msg.timestamp).toLocaleTimeString()}
                                             </span>
                                         </div>
-                                        <div className={styles.messageContent}>{msg.content}</div>
+                                        <div className={styles.messageContent}>
+                                            {msg.attachment && (
+                                                <div className={styles.attachment}>
+                                                    {msg.attachment.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                                                        <a href={msg.attachment} target="_blank" rel="noopener noreferrer">
+                                                            <img src={msg.attachment} alt="Attachment" style={{ maxWidth: '200px', maxHeight: '200px', borderRadius: '8px', cursor: 'pointer' }} />
+                                                        </a>
+                                                    ) : msg.attachment.match(/\.(mp4|webm|ogg)$/i) ? (
+                                                        <video src={msg.attachment} controls style={{ maxWidth: '300px', borderRadius: '8px' }} />
+                                                    ) : (
+                                                        <a href={msg.attachment} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-primary)' }}>
+                                                            📄 Download File
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            )}
+                                            {msg.content}
+                                        </div>
                                     </div>
                                 ))}
 
                                 {wsMessages
-                                    .filter(msg => msg.type === 'chat_message')
+                                    .filter(msg => {
+                                        if (msg.type !== 'chat_message') return false;
+                                        // Deduplicate against historical messages
+                                        if (msg.message_id && messages.some(m => m.id === msg.message_id)) {
+                                            return false;
+                                        }
+                                        return true;
+                                    })
                                     .map((msg, idx) => (
                                         <div
                                             key={`ws-${idx}`}
@@ -366,7 +465,24 @@ export default function ChatPage() {
                                                     {msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString() : 'Just now'}
                                                 </span>
                                             </div>
-                                            <div className={styles.messageContent}>{msg.message}</div>
+                                            <div className={styles.messageContent}>
+                                                {msg.attachment && (
+                                                    <div className={styles.attachment}>
+                                                        {msg.attachment.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                                                            <a href={msg.attachment} target="_blank" rel="noopener noreferrer">
+                                                                <img src={msg.attachment} alt="Attachment" style={{ maxWidth: '200px', maxHeight: '200px', borderRadius: '8px', cursor: 'pointer' }} />
+                                                            </a>
+                                                        ) : msg.attachment.match(/\.(mp4|webm|ogg)$/i) ? (
+                                                            <video src={msg.attachment} controls style={{ maxWidth: '300px', borderRadius: '8px' }} />
+                                                        ) : (
+                                                            <a href={msg.attachment} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-primary)' }}>
+                                                                📄 Download File
+                                                            </a>
+                                                        )}
+                                                    </div>
+                                                )}
+                                                {msg.message}
+                                            </div>
                                         </div>
                                     ))}
 
@@ -385,13 +501,42 @@ export default function ChatPage() {
                             )}
 
                             <form className={styles.messageForm} onSubmit={handleSendMessage}>
+                                {isUploading && (
+                                    <div className={styles.uploadingIndicator}>
+                                        <div className="spinner-small"></div>
+                                        <span>Uploading file...</span>
+                                    </div>
+                                )}
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    onChange={handleFileSelect}
+                                    style={{ display: 'none' }}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className={styles.attachButton}
+                                    disabled={!isConnected}
+                                    style={{
+                                        marginRight: '0.5rem',
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        fontSize: '1.2rem',
+                                        color: 'var(--color-text-secondary)'
+                                    }}
+                                    title="Attach file"
+                                >
+                                    📎
+                                </button>
                                 <input
                                     type="text"
                                     value={messageInput}
                                     onChange={handleInput}
                                     placeholder="Type your message..."
                                     className={styles.messageInput}
-                                    disabled={!isConnected}
+                                    disabled={!isConnected || (selectedRoomData && !selectedRoomData.is_active)}
                                 />
                                 <button
                                     type="submit"
@@ -405,6 +550,6 @@ export default function ChatPage() {
                     </div>
                 </div>
             </main>
-        </>
+        </div>
     );
 }

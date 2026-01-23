@@ -19,11 +19,13 @@ export interface Room {
     created_at: string;
     is_active: boolean;
     participant_count?: number;
+    unread_count?: number;
 }
 
 export interface SupportRoom {
     id: number;
     name: string;
+    room_type?: 'player' | 'agent' | 'all';
     staff?: User;
     is_active: boolean;
 }
@@ -39,6 +41,7 @@ export interface Message {
     room: number;
     sender: User;
     content: string;
+    attachment?: string;
     timestamp: string;
     is_read: boolean;
 }
@@ -60,6 +63,7 @@ export interface WSMessage {
     user_id?: number;
     message_id?: number;
     timestamp?: string;
+    attachment?: string;
 }
 
 // Auth types
@@ -89,6 +93,7 @@ export interface StaffDashboard {
     statistics: {
         total_participants: number;
         total_messages: number;
+        assigned_rooms_count: number;
     };
     recent_messages: Message[];
 }

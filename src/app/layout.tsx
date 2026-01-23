@@ -6,8 +6,8 @@ import '@/styles/globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-    title: 'Deep Purple Casino - Chat Application',
-    description: 'Real-time chat application with WebSocket support',
+    title: 'Hi-Rollin Portal',
+    description: 'Officia; Support Portal for Hi-Rollin Players and Agents',
 };
 
 export default function RootLayout({

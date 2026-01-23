@@ -1,7 +1,23 @@
-.main {
-    min-height: calc(100vh - 80px);
-    padding: var(--spacing-lg);
+.pageWrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    background: var(--color-bg-primary);
 }
+
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: var(--spacing-lg);
+    position: relative;
+    /* Ensure z-index works */
+}
+
+/* ... existing styles ... */
 
 .loading {
     display: flex;
@@ -24,56 +40,120 @@
 
 .singleColumn {
     grid-template-columns: 1fr;
-    max-width: 1000px;
-    margin: 0 auto;
+    max-width: 100%;
+    /* Allow full width */
 }
 
 .roomList {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md);
     border-radius: var(--radius-lg);
     overflow-y: auto;
+    background: var(--color-bg-secondary);
+    border-right: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
 }
 
 .roomList h2 {
     margin-bottom: var(--spacing-md);
-    font-size: 1.25rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding-left: var(--spacing-xs);
+    color: var(--color-text-primary);
 }
 
 .rooms {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: 4px;
+    /* Tighter gap */
 }
 
 .roomButton {
     width: 100%;
-    text-align: left;
-    padding: var(--spacing-md);
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm);
+    background: transparent;
+    border: none;
     border-radius: var(--radius-md);
     transition: all var(--transition-fast);
+    cursor: pointer;
+    text-align: left;
 }
 
 .roomButton:hover {
     background: var(--color-bg-tertiary);
-    border-color: var(--color-primary);
 }
 
 .roomButton.active {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
+    background: var(--color-bg-tertiary);
+    /* OR a subtle active color */
+    background: rgba(37, 99, 235, 0.1);
+    /* Light blue tint */
+}
+
+/* Avatar Circle */
+.roomAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.roomInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    /* For truncation */
 }
 
 .roomName {
     font-weight: 600;
-    font-size: 1rem;
-    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
 }
 
-.roomStaff {
-    font-size: 0.75rem;
+.roomSubtext {
+    font-size: 0.8rem;
     color: var(--color-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.roomMeta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.roomUnread {
+    background: var(--color-error);
+    color: white;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 0 6px;
 }
 
 .chatArea {
@@ -89,6 +169,18 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+@media (max-width: 768px) {
+    .chatHeader {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 0.9rem;
+        min-height: 50px;
+    }
+
+    .chatHeader h2 {
+        font-size: 1rem;
+    }
 }
 
 .chatHeader h2 {
@@ -176,6 +268,36 @@
     border-top: 1px solid var(--color-border);
     display: flex;
     gap: var(--spacing-md);
+    position: relative;
+    /* Context for absolute indicator if needed, but flex is safer */
+}
+
+.uploadingIndicator {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    background: var(--color-bg-secondary);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-top: 1px solid var(--color-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 0.8rem;
+    color: var(--color-primary);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .messageInput {
@@ -219,16 +341,119 @@
 }
 
 @media (max-width: 768px) {
-    .chatContainer {
-        grid-template-columns: 1fr;
-        height: auto;
+    .main {
+        padding: 0;
+        /* Remove explicit height calc, rely on flex */
     }
 
+    .container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        width: 100%;
+        max-width: 100vw;
+        /* Prevent overflow */
+    }
+
+    .chatContainer {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        height: 100%;
+        position: relative;
+        min-height: 0;
+        width: 100%;
+    }
+
+    .roomList,
+    .chatArea {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        position: relative;
+        /* Relative for flex item */
+        border-radius: 0;
+        border: none;
+        background: var(--color-bg-primary);
+    }
+
+    /* Visibility Logic */
     .roomList {
-        max-height: 200px;
+        display: none;
     }
 
     .chatArea {
-        height: 600px;
+        display: none;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    /* When active (not hidden), display as flex */
+    .roomList:not(.hidden),
+    .chatArea:not(.hidden) {
+        display: flex;
+    }
+
+    /* Inner Layout */
+    .messagesContainer {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        padding: var(--spacing-md);
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .messageForm {
+        flex-shrink: 0;
+        padding: var(--spacing-md);
+        padding-bottom: calc(var(--spacing-md) + env(safe-area-inset-bottom, 20px));
+        background: var(--color-bg-primary);
+        border-top: 1px solid var(--color-border);
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .messageInput {
+        min-width: 0;
+    }
+
+    .chatHeader {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 0.9rem;
+        min-height: 50px;
+        flex-shrink: 0;
+    }
+
+    .backButton {
+        display: block;
+        margin-right: 1rem;
+        background: none;
+        border: none;
+        color: var(--color-text-primary);
+        font-size: 1.2rem;
+        cursor: pointer;
+    }
+}
+
+@media (min-width: 769px) {
+    .backButton {
+        display: none;
+    }
+
+    /* Ensure regular layout is enforced */
+    .roomList,
+    .chatArea {
+        display: flex !important;
+        /* Force flex in grid */
+        position: static;
+        width: auto;
+        height: auto;
     }
 }

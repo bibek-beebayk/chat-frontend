@@ -36,7 +36,16 @@ export const useWebSocket = (roomId: number | null): UseWebSocketReturn => {
             ws.current.onmessage = (event) => {
                 try {
                     const data: WSMessage = JSON.parse(event.data);
-                    setMessages((prev) => [...prev, data]);
+
+                    setMessages((prev) => {
+                        // Deduplicate by message_id if present
+                        if (data.type === 'chat_message' && data.message_id) {
+                            if (prev.some(m => m.message_id === data.message_id)) {
+                                return prev;
+                            }
+                        }
+                        return [...prev, data];
+                    });
                 } catch (err) {
                     console.error('Error parsing WebSocket message:', err);
                 }

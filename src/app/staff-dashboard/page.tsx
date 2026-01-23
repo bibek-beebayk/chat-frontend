@@ -92,8 +92,10 @@ export default function StaffDashboardPage() {
 
                                 <div className={`${styles.statCard} glass`}>
                                     <div className={styles.statIcon}>🏠</div>
-                                    <div className={styles.statValue}>{dashboard.room.name}</div>
-                                    <div className={styles.statLabel}>Assigned Room</div>
+                                    <div className={styles.statValue}>
+                                        {dashboard.statistics.assigned_rooms_count}
+                                    </div>
+                                    <div className={styles.statLabel}>Assigned Rooms</div>
                                 </div>
                             </div>
 

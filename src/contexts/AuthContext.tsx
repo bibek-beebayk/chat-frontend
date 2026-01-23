@@ -43,6 +43,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         // Then verify with backend
         checkAuth();
+
+        const handleUnauthorized = () => {
+            setUser(null);
+            localStorage.removeItem('user');
+            setLoading(false);
+        };
+
+        window.addEventListener('auth:unauthorized', handleUnauthorized);
+        return () => {
+            window.removeEventListener('auth:unauthorized', handleUnauthorized);
+        };
     }, []);
 
     const login = async (data: LoginData) => {

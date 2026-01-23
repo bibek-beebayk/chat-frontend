@@ -23,6 +23,11 @@ class ApiClient {
         return cookieValue;
     }
 
+    // Check if body is FormData
+    private isFormData(body: any): boolean {
+        return typeof FormData !== 'undefined' && body instanceof FormData;
+    }
+
     private async request<T>(
         endpoint: string,
         options: RequestInit = {}
@@ -30,9 +35,13 @@ class ApiClient {
         const url = `${this.baseURL}${endpoint}`;
 
         const headers: Record<string, string> = {
-            'Content-Type': 'application/json',
             ...(options.headers as Record<string, string>),
         };
+
+        // Only set Content-Type to application/json if it's NOT FormData
+        if (options.body && !this.isFormData(options.body)) {
+            headers['Content-Type'] = 'application/json';
+        }
 
         const csrfToken = this.getCookie('csrftoken');
         if (csrfToken) {
@@ -50,6 +59,12 @@ class ApiClient {
             const data = await response.json();
 
             if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                    // Dispatch event for AuthContext to handle
+                    if (typeof window !== 'undefined') {
+                        window.dispatchEvent(new Event('auth:unauthorized'));
+                    }
+                }
                 throw new Error(data.error || data.detail || 'An error occurred');
             }
 
@@ -72,6 +87,14 @@ class ApiClient {
         return this.request<T>(endpoint, {
             method: 'POST',
             body: JSON.stringify(data),
+        });
+    }
+
+    // POST FormData request
+    async postFormData<T>(endpoint: string, formData: FormData): Promise<T> {
+        return this.request<T>(endpoint, {
+            method: 'POST',
+            body: formData,
         });
     }
 
