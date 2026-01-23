@@ -410,6 +410,13 @@ export default function ChatPage() {
                                 </div>
                             </div>
 
+                            {/* Away Message Banner */}
+                            {user.user_type !== 'staff' && selectedRoomData && (!selectedRoomData.staff_assigned || !selectedRoomData.is_staff_online) && (
+                                <div className={styles.awayMessageBanner}>
+                                    All our staffs are away right now. Your messages might take some time to be responded.
+                                </div>
+                            )}
+
                             <div className={styles.messagesContainer}>
                                 {messages.map((msg) => (
                                     <div

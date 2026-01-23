@@ -20,6 +20,7 @@ export interface Room {
     is_active: boolean;
     participant_count?: number;
     unread_count?: number;
+    is_staff_online?: boolean;
 }
 
 export interface SupportRoom {
