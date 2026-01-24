@@ -289,7 +289,8 @@ export default function ChatPage() {
 
     return (
         <div className={styles.pageWrapper}>
-            <Header />
+            {/* Hide Header for Staff in Workstation */}
+            {!(user.user_type === 'staff' && mySupportRoom) && <Header />}
             <main className={styles.main}>
                 <div className={styles.container}>
                     {/* Leave Room Button for Staff */}
@@ -320,8 +321,8 @@ export default function ChatPage() {
                             <div className={`${styles.roomList} glass ${!showRoomList ? styles.hidden : ''}`}>
                                 <h2>Active Chats</h2>
                                 <div className={styles.rooms}>
-                                    {rooms.filter(r => r.staff_assigned?.id === user.id).length > 0 ? (
-                                        rooms.filter(r => r.staff_assigned?.id === user.id).map((room) => {
+                                    {rooms.length > 0 ? (
+                                        rooms.map((room) => {
                                             const displayName = room.client ? room.client.username : room.name;
                                             const initial = displayName.charAt(0).toUpperCase();
 
@@ -411,7 +412,7 @@ export default function ChatPage() {
                             </div>
 
                             {/* Away Message Banner */}
-                            {user.user_type !== 'staff' && selectedRoomData && (!selectedRoomData.staff_assigned || !selectedRoomData.is_staff_online) && (
+                            {user.user_type !== 'staff' && selectedRoomData && (!selectedRoomData.current_handler && !selectedRoomData.is_staff_online) && (
                                 <div className={styles.awayMessageBanner}>
                                     All our staffs are away right now. Your messages might take some time to be responded.
                                 </div>
@@ -543,7 +544,7 @@ export default function ChatPage() {
                                     onChange={handleInput}
                                     placeholder="Type your message..."
                                     className={styles.messageInput}
-                                    disabled={!isConnected || (selectedRoomData && !selectedRoomData.is_active)}
+                                    disabled={!isConnected || (selectedRoomData && selectedRoomData.status !== 'OPEN')}
                                 />
                                 <button
                                     type="submit"

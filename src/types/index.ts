@@ -14,10 +14,10 @@ export interface User {
 export interface Room {
     id: number;
     name: string;
-    staff_assigned?: User;
+    current_handler?: User;
     client?: User;
     created_at: string;
-    is_active: boolean;
+    status: 'OPEN' | 'CLOSED';
     participant_count?: number;
     unread_count?: number;
     is_staff_online?: boolean;
