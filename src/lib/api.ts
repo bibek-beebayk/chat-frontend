@@ -2,12 +2,18 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 class ApiClient {
     private baseURL: string;
+    private csrfToken: string | null = null;
 
     constructor() {
         this.baseURL = API_URL;
     }
 
+    public setCsrfToken(token: string) {
+        this.csrfToken = token;
+    }
+
     private getCookie(name: string): string | null {
+        if (typeof document === 'undefined') return null;
         if (typeof document === 'undefined') return null;
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -43,7 +49,7 @@ class ApiClient {
             headers['Content-Type'] = 'application/json';
         }
 
-        const csrfToken = this.getCookie('csrftoken');
+        const csrfToken = this.csrfToken || this.getCookie('csrftoken');
         if (csrfToken) {
             headers['X-CSRFToken'] = csrfToken;
         }

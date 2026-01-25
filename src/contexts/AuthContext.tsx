@@ -44,8 +44,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // Initialize Auth (CSRF + Me)
         const initAuth = async () => {
             try {
-                // Ensure CSRF cookie is set
-                await apiClient.get('/api/auth/csrf/');
+                // Ensure CSRF cookie is set and get token string
+                const response = await apiClient.get<{ csrfToken: string }>('/api/auth/csrf/');
+                if (response.csrfToken) {
+                    apiClient.setCsrfToken(response.csrfToken);
+                }
             } catch (err) {
                 console.warn('Failed to fetch CSRF token', err);
             }
