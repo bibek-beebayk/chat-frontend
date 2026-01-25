@@ -70,10 +70,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, []);
 
     const login = async (data: LoginData) => {
-        const response = await apiClient.post<{ user: User; message: string }>(
+        const response = await apiClient.post<{ user: User; message: string; csrfToken: string }>(
             '/api/auth/login/',
             data
         );
+
+        if (response.csrfToken) {
+            apiClient.setCsrfToken(response.csrfToken);
+        }
+
         setUser(response.user);
         localStorage.setItem('user', JSON.stringify(response.user));
         return response.user;
