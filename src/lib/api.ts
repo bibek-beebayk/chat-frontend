@@ -3,6 +3,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 class ApiClient {
     private baseURL: string;
     private csrfToken: string | null = null;
+    private sessionToken: string | null = null;
 
     constructor() {
         this.baseURL = API_URL;
@@ -10,6 +11,10 @@ class ApiClient {
 
     public setCsrfToken(token: string) {
         this.csrfToken = token;
+    }
+
+    public setSessionToken(token: string) {
+        this.sessionToken = token;
     }
 
     private getCookie(name: string): string | null {
@@ -52,6 +57,10 @@ class ApiClient {
         const csrfToken = this.csrfToken || this.getCookie('csrftoken');
         if (csrfToken) {
             headers['X-CSRFToken'] = csrfToken;
+        }
+
+        if (this.sessionToken) {
+            headers['Authorization'] = `Session ${this.sessionToken}`;
         }
 
         const config: RequestInit = {

@@ -41,6 +41,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setLoading(false);
         }
 
+        // Restore session token
+        const storedSessionKey = localStorage.getItem('sessionKey');
+        if (storedSessionKey) {
+            apiClient.setSessionToken(storedSessionKey);
+        }
+
         // Initialize Auth (CSRF + Me)
         const initAuth = async () => {
             try {
@@ -70,13 +76,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, []);
 
     const login = async (data: LoginData) => {
-        const response = await apiClient.post<{ user: User; message: string; csrfToken: string }>(
+        const response = await apiClient.post<{ user: User; message: string; csrfToken: string; sessionKey: string }>(
             '/api/auth/login/',
             data
         );
 
         if (response.csrfToken) {
             apiClient.setCsrfToken(response.csrfToken);
+        }
+
+        if (response.sessionKey) {
+            apiClient.setSessionToken(response.sessionKey);
+            localStorage.setItem('sessionKey', response.sessionKey);
         }
 
         setUser(response.user);
