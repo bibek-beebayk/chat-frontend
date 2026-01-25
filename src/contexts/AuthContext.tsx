@@ -41,8 +41,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setLoading(false);
         }
 
-        // Then verify with backend
-        checkAuth();
+        // Initialize Auth (CSRF + Me)
+        const initAuth = async () => {
+            try {
+                // Ensure CSRF cookie is set
+                await apiClient.get('/api/auth/csrf/');
+            } catch (err) {
+                console.warn('Failed to fetch CSRF token', err);
+            }
+            // Then verify with backend
+            checkAuth();
+        };
+        initAuth();
 
         const handleUnauthorized = () => {
             setUser(null);
