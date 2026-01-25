@@ -24,7 +24,9 @@ export const useWebSocket = (roomId: number | null): UseWebSocketReturn => {
         if (!roomId) return;
 
         try {
-            const wsUrl = `${WS_URL}/ws/chat/${roomId}/`;
+            const sessionKey = localStorage.getItem('sessionKey');
+            const wsUrl = `${WS_URL}/ws/chat/${roomId}/?token=${sessionKey}`;
+            console.log(`[useWebSocket] Connecting to: ${wsUrl}`);
             ws.current = new WebSocket(wsUrl);
 
             ws.current.onopen = () => {
