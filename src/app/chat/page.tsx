@@ -434,11 +434,11 @@ export default function ChatPage() {
                                         <div className={styles.messageContent}>
                                             {msg.attachment && (
                                                 <div className={styles.attachment}>
-                                                    {msg.attachment.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                                                    {msg.attachment.match(/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i) ? (
                                                         <a href={msg.attachment} target="_blank" rel="noopener noreferrer">
                                                             <img src={msg.attachment} alt="Attachment" style={{ maxWidth: '200px', maxHeight: '200px', borderRadius: '8px', cursor: 'pointer' }} />
                                                         </a>
-                                                    ) : msg.attachment.match(/\.(mp4|webm|ogg)$/i) ? (
+                                                    ) : msg.attachment.match(/\.(mp4|webm|ogg)(\?.*)?$/i) ? (
                                                         <video src={msg.attachment} controls style={{ maxWidth: '300px', borderRadius: '8px' }} />
                                                     ) : (
                                                         <a href={msg.attachment} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-primary)' }}>
@@ -476,11 +476,11 @@ export default function ChatPage() {
                                             <div className={styles.messageContent}>
                                                 {msg.attachment && (
                                                     <div className={styles.attachment}>
-                                                        {msg.attachment.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                                                        {msg.attachment.match(/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i) ? (
                                                             <a href={msg.attachment} target="_blank" rel="noopener noreferrer">
                                                                 <img src={msg.attachment} alt="Attachment" style={{ maxWidth: '200px', maxHeight: '200px', borderRadius: '8px', cursor: 'pointer' }} />
                                                             </a>
-                                                        ) : msg.attachment.match(/\.(mp4|webm|ogg)$/i) ? (
+                                                        ) : msg.attachment.match(/\.(mp4|webm|ogg)(\?.*)?$/i) ? (
                                                             <video src={msg.attachment} controls style={{ maxWidth: '300px', borderRadius: '8px' }} />
                                                         ) : (
                                                             <a href={msg.attachment} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-primary)' }}>
