@@ -30,7 +30,7 @@ export const Header: React.FC = () => {
             <div className={styles.container}>
                 <div className={styles.topRow}>
                     <Link href="/" className={styles.logo} onClick={closeMenu}>
-                        <span className="gradient-text">Hi-Rollon Portal</span>
+                        <span className="gradient-text">Hi-Rollin Portal</span>
                     </Link>
                     <button
                         className={styles.menuButton}

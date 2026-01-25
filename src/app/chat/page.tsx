@@ -7,7 +7,7 @@ import { Header } from '@/components/layout/Header';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useTypingThrottle } from '@/hooks/useTypingThrottle';
 import { apiClient } from '@/lib/api';
-import { Room, Message } from '@/types';
+import { Room, Message, SupportRoom } from '@/types';
 import { MessageActionMenu } from '@/components/chat/MessageActionMenu';
 import { Modal } from '@/components/ui/Modal';
 import styles from './page.module.css';
@@ -461,43 +461,64 @@ export default function ChatPage() {
                 <main className={styles.main}>
                     <div className={styles.container}>
                         <h1 className="gradient-text" style={{ marginBottom: '2rem' }}>Support Workstations</h1>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
-                            {supportRooms.map(room => (
-                                <div key={room.id} className="glass" style={{ padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
-                                    <h3>{room.name}</h3>
-                                    <div style={{
-                                        display: 'inline-block',
-                                        padding: '0.2rem 0.6rem',
-                                        borderRadius: '999px',
-                                        fontSize: '0.7rem',
+
+                        {(Object.entries(
+                            supportRooms.reduce((acc, room) => {
+                                const type = room.room_type || 'other';
+                                if (!acc[type]) acc[type] = [];
+                                acc[type].push(room);
+                                return acc;
+                            }, {} as Record<string, SupportRoom[]>)
+                        ) as [string, SupportRoom[]][]).sort(([a], [b]) => a.localeCompare(b)).map(([type, rooms]) => (
+                            <div key={type} style={{ marginBottom: '3rem' }}>
+                                <h2 style={{
+                                    fontSize: '1.5rem',
+                                    marginBottom: '1rem',
+                                    color: 'var(--color-text-primary)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem'
+                                }}>
+                                    {type === 'all' ? 'General' :
+                                        type === 'player' ? 'Player Support' :
+                                            type === 'agent' ? 'Agent Support' :
+                                                type.charAt(0).toUpperCase() + type.slice(1)}
+                                    <span style={{
+                                        fontSize: '0.8rem',
+                                        color: 'var(--color-text-muted)',
+                                        fontWeight: 'normal',
                                         backgroundColor: 'var(--color-bg-tertiary)',
-                                        marginBottom: '0.5rem',
-                                        marginTop: '0.2rem'
-                                    }}>
-                                        {room.room_type === 'all' ? 'General' :
-                                            room.room_type === 'player' ? 'Player Support' :
-                                                room.room_type === 'agent' ? 'Agent Support' : room.room_type}
-                                    </div>
-                                    <div style={{ margin: '1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        <div style={{
-                                            width: '10px', height: '10px', borderRadius: '50%',
-                                            backgroundColor: room.is_active ? '#ef4444' : '#22c55e'
-                                        }}></div>
-                                        <span style={{ color: 'var(--color-text-secondary)' }}>
-                                            {room.is_active ? (room.staff?.username === user.username ? 'Occupied by YOU' : `Occupied by ${room.staff?.username}`) : 'Available'}
-                                        </span>
-                                    </div>
-                                    <button
-                                        onClick={() => enterSupportRoom(room.id)}
-                                        disabled={room.is_active}
-                                        className={styles.sendButton}
-                                        style={{ width: '100%', opacity: room.is_active ? 0.5 : 1, cursor: room.is_active ? 'not-allowed' : 'pointer' }}
-                                    >
-                                        {room.is_active ? 'Occupied' : 'Enter Workstation'}
-                                    </button>
+                                        padding: '0.2rem 0.6rem',
+                                        borderRadius: '999px'
+                                    }}>{rooms.length}</span>
+                                </h2>
+                                <div className={styles.stationGrid}>
+                                    {rooms.map(room => (
+                                        <div key={room.id} className={`glass ${styles.stationCard}`}>
+                                            <h3>{room.name}</h3>
+                                            {/* Removed Type Badge since we have sections now */}
+                                            <div style={{ margin: '1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                <div style={{
+                                                    width: '10px', height: '10px', borderRadius: '50%',
+                                                    backgroundColor: room.is_active ? '#ef4444' : '#22c55e'
+                                                }}></div>
+                                                <span style={{ color: 'var(--color-text-secondary)' }}>
+                                                    {room.is_active ? (room.staff?.username === user.username ? 'Occupied by YOU' : `Occupied by ${room.staff?.username}`) : 'Available'}
+                                                </span>
+                                            </div>
+                                            <button
+                                                onClick={() => enterSupportRoom(room.id)}
+                                                disabled={room.is_active}
+                                                className={styles.sendButton}
+                                                style={{ width: '100%', borderRadius: 10, opacity: room.is_active ? 0.5 : 1, cursor: room.is_active ? 'not-allowed' : 'pointer' }}
+                                            >
+                                                {room.is_active ? 'Occupied' : 'Enter Workstation'}
+                                            </button>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
+                            </div>
+                        ))}
                     </div>
                 </main>
             </>

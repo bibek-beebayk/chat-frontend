@@ -29,6 +29,8 @@
 .container {
     max-width: 1400px;
     margin: 0 auto;
+    width: 100%;
+    /* Ensure it fills parent */
 }
 
 .chatContainer {
@@ -512,6 +514,48 @@
         max-height: 2.5rem;
         /* Reduced height for mobile */
     }
+}
+
+/* Station Grid for Staff Dashboard */
+.stationGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    /* Mobile default: 1 column */
+    gap: var(--spacing-lg);
+    width: 100%;
+    margin-top: var(--spacing-lg);
+}
+
+@media (min-width: 640px) {
+    .stationGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .stationGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1280px) {
+    .stationGrid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.stationCard {
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    display: flex;
+    flex-direction: column;
+}
+
+.stationCard:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
 }
 
 @media (min-width: 769px) {
