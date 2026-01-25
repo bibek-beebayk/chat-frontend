@@ -56,10 +56,19 @@
 
 .roomList h2 {
     margin-bottom: var(--spacing-md);
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     font-weight: 600;
     padding-left: var(--spacing-xs);
     color: var(--color-text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ... */
+
+.chatHeader h2 {
+    font-size: 1rem;
+    font-weight: 600;
 }
 
 .rooms {
@@ -184,7 +193,8 @@
 }
 
 .chatHeader h2 {
-    font-size: 1.25rem;
+    font-size: 1rem;
+    font-weight: 600;
 }
 
 .status {
@@ -218,6 +228,14 @@
     display: flex;
     flex-direction: column;
     /* Removed gap to allow custom grouping spacing */
+}
+
+.messagesList {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .message {
@@ -330,12 +348,18 @@
 }
 
 .sendButton {
-    padding: var(--spacing-sm) var(--spacing-xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-sm);
+    width: 42px;
+    height: 42px;
     background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
     color: white;
-    border-radius: var(--radius-md);
+    border-radius: 50%;
     font-weight: 600;
     transition: all var(--transition-fast);
+    flex-shrink: 0;
 }
 
 .sendButton:hover:not(:disabled) {
@@ -365,46 +389,84 @@
     }
 
     .chatContainer {
-        display: flex;
-        flex-direction: column;
         flex: 1;
-        height: 100%;
-        position: relative;
+        height: auto !important;
+        /* Allow flex to determine height */
         min-height: 0;
-        width: 100%;
+        /* Important for scrolling children */
+        border-radius: 0;
     }
 
     .roomList,
     .chatArea {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-        position: relative;
-        /* Relative for flex item */
-        border-radius: 0;
+        border-radius: 0 !important;
+        height: 100% !important;
         border: none;
-        background: var(--color-bg-primary);
     }
 
-    /* Visibility Logic */
-    .roomList {
-        display: none;
-    }
-
-    .chatArea {
-        display: none;
-    }
-
-    .hidden {
-        display: none !important;
-    }
-
-    /* When active (not hidden), display as flex */
-    .roomList:not(.hidden),
-    .chatArea:not(.hidden) {
+    /* Staff View: Mini Sidebar Layout */
+    .chatContainer:not(.singleColumn) {
         display: flex;
+        flex-direction: row;
+        gap: 0;
+        /* Remove gap between sidebar and chat */
+    }
+
+    .chatContainer:not(.singleColumn) .roomList {
+        width: 54px;
+        min-width: 54px;
+        max-width: 54px;
+        display: flex !important;
+        /* Always show */
+        padding: 8px 2px;
+        border-right: 1px solid var(--color-border);
+        /* Explicit separator since gap is gone */
+    }
+
+    .chatContainer:not(.singleColumn) .chatArea {
+        flex: 1;
+        display: flex !important;
+        /* Always show */
+        width: auto;
+    }
+
+    /* Hide text details in mini sidebar */
+    .chatContainer:not(.singleColumn) .roomInfo,
+    .chatContainer:not(.singleColumn) .roomList h2 {
+        display: none;
+    }
+
+    .chatContainer:not(.singleColumn) .roomButton {
+        justify-content: center;
+        padding: 8px 0;
+        position: relative;
+    }
+
+    .chatContainer:not(.singleColumn) .roomMeta {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+    }
+
+    .chatContainer:not(.singleColumn) .roomUnread {
+        min-width: 16px;
+        height: 16px;
+        font-size: 0.6rem;
+        border: 2px solid var(--color-bg-secondary);
+        /* visual separation */
+    }
+
+    /* Compact Messages on Mobile */
+    .messageContent {
+        font-size: 0.85rem;
+        /* Smaller text */
+        padding: 6px 10px;
+        /* Reduced padding */
+    }
+
+    .message {
+        margin-top: 4px;
+        /* Reduced spacing between messages */
     }
 
     /* Inner Layout */
@@ -413,15 +475,17 @@
         overflow-y: auto;
         overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
-        padding: var(--spacing-md);
+        padding: var(--spacing-sm);
+        /* Reduced container padding */
         width: 100%;
         box-sizing: border-box;
     }
 
     .messageForm {
         flex-shrink: 0;
-        padding: var(--spacing-md);
-        padding-bottom: calc(var(--spacing-md) + env(safe-area-inset-bottom, 20px));
+        padding: 5px;
+        /* Reduced padding for mobile */
+        padding-bottom: calc(5px + env(safe-area-inset-bottom, 20px));
         background: var(--color-bg-primary);
         border-top: 1px solid var(--color-border);
         width: 100%;
@@ -440,13 +504,13 @@
     }
 
     .backButton {
-        display: block;
-        margin-right: 1rem;
-        background: none;
-        border: none;
-        color: var(--color-text-primary);
-        font-size: 1.2rem;
-        cursor: pointer;
+        display: none;
+        /* Hide back button since sidebar is always visible */
+    }
+
+    .pinnedContent {
+        max-height: 2.5rem;
+        /* Reduced height for mobile */
     }
 }
 

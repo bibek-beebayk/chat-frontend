@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import styles from './MessageActionMenu.module.css';
 
 interface MessageActionMenuProps {
@@ -21,7 +21,10 @@ export const MessageActionMenu: React.FC<MessageActionMenuProps> = ({
     const [isOpen, setIsOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
+    const [menuPos, setMenuPos] = useState<'down' | 'up'>('down');
+
+    // Use useLayoutEffect to prevent flash of wrong position
+    useLayoutEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
@@ -30,7 +33,27 @@ export const MessageActionMenu: React.FC<MessageActionMenuProps> = ({
 
         if (isOpen) {
             document.addEventListener('mousedown', handleClickOutside);
+
+            // Calculate position
+            if (menuRef.current) {
+                const rect = menuRef.current.getBoundingClientRect();
+                const spaceBelow = window.innerHeight - rect.bottom;
+
+                // Debug log to confirm calculation
+                console.log('Menu position:', { bottom: rect.bottom, innerHeight: window.innerHeight, spaceBelow });
+
+                // If less than 220px (increased buffer) below, flip up
+                if (spaceBelow < 220) {
+                    setMenuPos('up');
+                } else {
+                    setMenuPos('down');
+                }
+            }
+        } else {
+            // Reset when closed
+            setMenuPos('down');
         }
+
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
@@ -47,7 +70,7 @@ export const MessageActionMenu: React.FC<MessageActionMenuProps> = ({
             </button>
 
             {isOpen && (
-                <div className={styles.dropdown}>
+                <div className={`${styles.dropdown} ${menuPos === 'up' ? styles.up : ''}`}>
                     {isOwner && (
                         <>
                             <button onClick={(e) => { e.stopPropagation(); setIsOpen(false); onEdit(); }}>
@@ -62,11 +85,9 @@ export const MessageActionMenu: React.FC<MessageActionMenuProps> = ({
                             </button>
                         </>
                     )}
-                    {(isStaff || isOwner) && (
-                        <button onClick={(e) => { e.stopPropagation(); setIsOpen(false); onPin(); }}>
-                            {isPinned ? '❌ Unpin' : '📌 Pin'}
-                        </button>
-                    )}
+                    <button onClick={(e) => { e.stopPropagation(); setIsOpen(false); onPin(); }}>
+                        {isPinned ? '❌ Unpin' : '📌 Pin'}
+                    </button>
                 </div>
             )}
         </div>

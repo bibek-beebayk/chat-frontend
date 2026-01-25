@@ -375,9 +375,14 @@ export default function ChatPage() {
     }, [messages, wsMessages]);
 
     // Separate effect for WS messages to scroll to bottom
+    // Separate effect for WS messages to scroll to bottom - ONLY for new messages
     useEffect(() => {
-        if (!isFetchingMore) {
-            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        if (!isFetchingMore && wsMessages.length > 0) {
+            const lastMsg = wsMessages[wsMessages.length - 1];
+            // Only scroll for new messages, not updates/pins/deletes
+            if (lastMsg.type === 'chat_message') {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }
         }
     }, [wsMessages]);
 
@@ -509,7 +514,7 @@ export default function ChatPage() {
                 <div className={styles.container}>
                     {/* Leave Room Button for Staff */}
                     {user.user_type === 'staff' && (
-                        <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
                             <div>
                                 <span style={{ color: 'var(--color-text-secondary)' }}>Current Workstation: </span>
                                 <strong style={{ color: '#fff' }}>{mySupportRoom?.name}</strong>
@@ -532,7 +537,7 @@ export default function ChatPage() {
 
                     <div className={`${styles.chatContainer} ${user.user_type !== 'staff' ? styles.singleColumn : ''}`}>
                         {user.user_type === 'staff' && (
-                            <div className={`${styles.roomList} glass ${!showRoomList ? styles.hidden : ''}`}>
+                            <div className={`${styles.roomList} glass ${!showRoomList && user.user_type !== 'staff' ? styles.hidden : ''}`}>
                                 <h2>Active Chats</h2>
                                 <div className={styles.rooms}>
                                     {rooms.length > 0 ? (
@@ -546,7 +551,7 @@ export default function ChatPage() {
                                                     className={`${styles.roomButton} ${selectedRoom === room.id ? styles.active : ''}`}
                                                     onClick={() => {
                                                         setSelectedRoom(room.id);
-                                                        setShowRoomList(false); // Hide list on mobile
+                                                        // setShowRoomList(false); // No longer needed for staff mini-sidebar
                                                     }}
                                                 >
                                                     <div className={styles.roomAvatar}>
@@ -581,27 +586,30 @@ export default function ChatPage() {
 
 
 
-                        <div className={`${styles.chatArea} glass ${user.user_type !== 'staff' ? styles.fullWidth : ''} ${showRoomList && user.user_type === 'staff' ? styles.hidden : ''}`}>
+                        <div className={`${styles.chatArea} glass ${user.user_type !== 'staff' ? styles.fullWidth : ''} ${showRoomList && user.user_type !== 'staff' ? styles.hidden : ''}`}>
                             <div className={styles.chatHeader}>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                                        {/* Back Button for Mobile */}
-                                        {user.user_type === 'staff' && (
-                                            <button
-                                                className={styles.backButton}
-                                                onClick={() => setShowRoomList(true)}
-                                            >
-                                                ←
-                                            </button>
-                                        )}
-                                        <h2>
-                                            {user.user_type === 'staff'
-                                                ? (selectedRoomData
-                                                    ? (selectedRoomData.client ? `${selectedRoomData.client.username}` : selectedRoomData.name)
-                                                    : 'Select a chat')
-                                                : 'Chat with Support'}
-                                        </h2>
-                                    </div>
+                                {/* Left Side: Title & Back Button */}
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    {/* Back Button for non-staff */}
+                                    {user.user_type !== 'staff' && (
+                                        <button
+                                            className={styles.backButton}
+                                            onClick={() => setShowRoomList(true)}
+                                        >
+                                            ←
+                                        </button>
+                                    )}
+                                    <h2>
+                                        {user.user_type === 'staff'
+                                            ? (selectedRoomData
+                                                ? (selectedRoomData.client ? `${selectedRoomData.client.username}` : selectedRoomData.name)
+                                                : 'Select a chat')
+                                            : 'Chat with Support'}
+                                    </h2>
+                                </div>
+
+                                {/* Right Side: Actions & Status */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                     {user.user_type === 'staff' && selectedRoomData && (
                                         <button
                                             onClick={closeChat}
@@ -618,10 +626,9 @@ export default function ChatPage() {
                                             Close Chat
                                         </button>
                                     )}
-                                </div>
-                                <div className={styles.status}>
-                                    <span className={isConnected ? styles.connected : styles.disconnected}></span>
-                                    {isConnected ? 'Connected' : 'Disconnected'}
+                                    <div className={styles.status}>
+                                        <span className={isConnected ? styles.connected : styles.disconnected} title={isConnected ? 'Connected' : 'Disconnected'}></span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -655,108 +662,111 @@ export default function ChatPage() {
                                 ref={messagesContainerRef}
                                 onScroll={handleScroll}
                             >
-                                {isFetchingMore && (
-                                    <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--color-text-secondary)' }}>
-                                        <div className="spinner-small" style={{ display: 'inline-block', marginRight: '0.5rem' }}></div>
-                                        Loading previous messages...
-                                    </div>
-                                )}
-                                {unifiedMessages.map((msg, index) => {
-                                    if (msg.is_deleted) {
-                                        // Render deleted placeholder? Or hide?
-                                        // Let's render a simpler deleted placeholder
-                                        return (
-                                            <div key={msg.id} className={`${styles.message} ${msg.sender.id === user.id ? styles.own : ''}`}>
-                                                <div className={styles.messageContent} style={{ fontStyle: 'italic', color: 'var(--color-text-muted)' }}>
-                                                    This message was deleted
-                                                </div>
-                                            </div>
-                                        )
-                                    }
-
-                                    const prevMsg = unifiedMessages[index - 1];
-                                    const isGrouped = prevMsg &&
-                                        prevMsg.sender.username === msg.sender.username &&
-                                        (new Date(msg.timestamp).getTime() - new Date(prevMsg.timestamp).getTime() < 5 * 60 * 1000) &&
-                                        !prevMsg.is_deleted; // Break grouping if prev was deleted
-
-                                    const isEditing = editingMessageId === msg.id;
-
-                                    return (
-                                        <div
-                                            key={msg.id}
-                                            id={`msg-${msg.id}`}
-                                            className={`${styles.message} ${msg.sender.id === user.id ? styles.own : ''} ${isGrouped ? styles.grouped : ''} ${msg.is_pinned ? styles.pinnedMessage : ''}`}
-                                        >
-                                            {!isGrouped && (
-                                                <div className={styles.messageHeader}>
-                                                    <span className={styles.sender}>{msg.sender.username}</span>
-                                                    <span className={styles.time}>
-                                                        {new Date(msg.timestamp).toLocaleTimeString()}
-                                                    </span>
-                                                </div>
-                                            )}
-
-                                            {isEditing ? (
-                                                <div className={styles.editContainer}>
-                                                    <input
-                                                        type="text"
-                                                        value={editContent}
-                                                        onChange={(e) => setEditContent(e.target.value)}
-                                                        className={styles.editInput}
-                                                        autoFocus
-                                                    />
-                                                    <div className={styles.editActions}>
-                                                        <button onClick={() => handleEditSave(msg.id)} className={styles.saveButton}>Save</button>
-                                                        <button onClick={handleEditCancel} className={styles.cancelButton}>Cancel</button>
+                                <div className={styles.messagesList}>
+                                    {isFetchingMore && (
+                                        <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--color-text-secondary)' }}>
+                                            <div className="spinner-small" style={{ display: 'inline-block', marginRight: '0.5rem' }}></div>
+                                            Loading previous messages...
+                                        </div>
+                                    )}
+                                    {unifiedMessages.map((msg, index) => {
+                                        if (msg.is_deleted) {
+                                            // Render deleted placeholder? Or hide?
+                                            // Let's render a simpler deleted placeholder
+                                            return (
+                                                <div key={msg.id} className={`${styles.message} ${msg.sender.id === user.id ? styles.own : ''}`}>
+                                                    <div className={styles.messageContent} style={{ fontStyle: 'italic', color: 'var(--color-text-muted)' }}>
+                                                        This message was deleted
                                                     </div>
                                                 </div>
-                                            ) : (
-                                                <>
-                                                    {msg.attachment && (
-                                                        <div className={styles.mediaContent} style={{ marginBottom: (!msg.attachment || !msg.content.startsWith('Sent a file:')) && msg.content ? '0.5rem' : '0' }}>
-                                                            {msg.attachment.match(/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i) ? (
-                                                                <a href={msg.attachment} target="_blank" rel="noopener noreferrer">
-                                                                    <img src={msg.attachment} alt="Attachment" style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '8px', cursor: 'pointer', display: 'block' }} />
-                                                                </a>
-                                                            ) : msg.attachment.match(/\.(mp4|webm|ogg)(\?.*)?$/i) ? (
-                                                                <video src={msg.attachment} controls style={{ maxWidth: '100%', borderRadius: '8px', display: 'block' }} />
-                                                            ) : (
-                                                                <a href={msg.attachment} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-primary)', textDecoration: 'none', padding: '0.5rem', background: 'rgba(0,0,0,0.05)', borderRadius: '6px' }}>
-                                                                    <span style={{ fontSize: '1.2rem' }}>📄</span>
-                                                                    <span>Download File</span>
-                                                                </a>
-                                                            )}
+                                            )
+                                        }
+
+                                        const prevMsg = unifiedMessages[index - 1];
+                                        const isGrouped = prevMsg &&
+                                            prevMsg.sender.username === msg.sender.username &&
+                                            (new Date(msg.timestamp).getTime() - new Date(prevMsg.timestamp).getTime() < 5 * 60 * 1000) &&
+                                            !prevMsg.is_deleted; // Don't group if prev is deleted/placeholder
+
+                                        const isEditing = editingMessageId === msg.id;
+
+                                        return (
+                                            <div
+                                                key={msg.id}
+                                                id={`msg-${msg.id}`}
+                                                className={`${styles.message} ${msg.sender.id === user.id ? styles.own : ''} ${isGrouped ? styles.grouped : ''} ${msg.is_pinned ? styles.pinnedMessage : ''}`}
+                                            >
+                                                {!isGrouped && (
+                                                    <div className={styles.messageHeader}>
+                                                        <span className={styles.sender}>{msg.sender.username}</span>
+                                                        <span className={styles.time}>
+                                                            {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            {msg.is_pinned && <span style={{ marginLeft: '6px' }}>📌</span>}
+                                                        </span>
+                                                    </div>
+                                                )}
+
+                                                {isEditing ? (
+                                                    <div className={styles.editContainer}>
+                                                        <input
+                                                            type="text"
+                                                            value={editContent}
+                                                            onChange={(e) => setEditContent(e.target.value)}
+                                                            className={styles.editInput}
+                                                            autoFocus
+                                                        />
+                                                        <div className={styles.editActions}>
+                                                            <button onClick={() => handleEditSave(msg.id)} className={styles.saveButton}>Save</button>
+                                                            <button onClick={handleEditCancel} className={styles.cancelButton}>Cancel</button>
                                                         </div>
-                                                    )}
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        {msg.attachment && (
+                                                            <div className={styles.mediaContent} style={{ marginBottom: (!msg.attachment || !msg.content.startsWith('Sent a file:')) && msg.content ? '0.5rem' : '0' }}>
+                                                                {msg.attachment.match(/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i) ? (
+                                                                    <a href={msg.attachment} target="_blank" rel="noopener noreferrer">
+                                                                        <img src={msg.attachment} alt="Attachment" style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '8px', cursor: 'pointer', display: 'block' }} />
+                                                                    </a>
+                                                                ) : msg.attachment.match(/\.(mp4|webm|ogg)(\?.*)?$/i) ? (
+                                                                    <video src={msg.attachment} controls style={{ maxWidth: '100%', borderRadius: '8px', display: 'block' }} />
+                                                                ) : (
+                                                                    <a href={msg.attachment} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-primary)', textDecoration: 'none', padding: '0.5rem', background: 'rgba(0,0,0,0.05)', borderRadius: '6px' }}>
+                                                                        <span style={{ fontSize: '1.2rem' }}>📄</span>
+                                                                        <span>Download File</span>
+                                                                    </a>
+                                                                )}
+                                                            </div>
+                                                        )}
 
-                                                    {(!msg.attachment || !msg.content.startsWith('Sent a file:')) && msg.content && (
-                                                        <div className={styles.messageContent}>
-                                                            {msg.content}
-                                                            {msg.is_edited && <span className={styles.editedLabel}>(edited)</span>}
-                                                        </div>
-                                                    )}
-                                                </>
-                                            )}
+                                                        {(!msg.attachment || !msg.content.startsWith('Sent a file:')) && msg.content && (
+                                                            <div className={styles.messageContent}>
+                                                                {msg.content}
+                                                                {msg.is_edited && <span className={styles.editedLabel}>(edited)</span>}
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                )}
 
-                                            {/* Action Menu - Only show if not editing, and is owner relative to action permissions */}
-                                            {!isEditing && !msg.is_deleted && (msg.sender.id === user.id || user.user_type === 'staff') && (
-                                                <div className={styles.actionMenuWrapper}>
-                                                    <MessageActionMenu
-                                                        isOwner={msg.sender.id === user.id}
-                                                        isStaff={user.user_type === 'staff'}
-                                                        isPinned={!!msg.is_pinned}
-                                                        onEdit={() => handleEditStart(msg)}
-                                                        onDelete={() => handleDelete(msg.id)}
-                                                        onPin={() => handlePin(msg.id)}
-                                                    />
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
+                                                {/* Action Menu - Show for all messages to allow pinning, but specific actions are protected inside the component */}
+                                                {!isEditing && !msg.is_deleted && (
+                                                    <div className={styles.actionMenuWrapper}>
+                                                        <MessageActionMenu
+                                                            isOwner={msg.sender.id === user.id}
+                                                            isStaff={user.user_type === 'staff'}
+                                                            isPinned={!!msg.is_pinned}
+                                                            onEdit={() => handleEditStart(msg)}
+                                                            onDelete={() => handleDelete(msg.id)}
+                                                            onPin={() => handlePin(msg.id)}
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
 
-                                <div ref={messagesEndRef} />
+                                    <div ref={messagesEndRef} />
+                                </div>
                             </div>
 
                             {typingUser && (
@@ -813,7 +823,10 @@ export default function ChatPage() {
                                     className={styles.sendButton}
                                     disabled={!isConnected || !messageInput.trim()}
                                 >
-                                    Send
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                    </svg>
                                 </button>
                             </form>
                         </div>
