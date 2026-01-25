@@ -52,13 +52,7 @@ export const Header: React.FC = () => {
                         >
                             Home
                         </Link>
-                        <Link
-                            href="/chat"
-                            className={isActive('/chat') ? styles.active : ''}
-                            onClick={closeMenu}
-                        >
-                            Chat
-                        </Link>
+
                         <Link
                             href="/payments"
                             className={isActive('/payments') ? styles.active : ''}

@@ -22,8 +22,12 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            await login({ username, password });
-            router.push('/');
+            const userData = await login({ username, password });
+            if (userData?.user_type === 'staff') {
+                router.push('/staff-dashboard');
+            } else {
+                router.push('/');
+            }
         } catch (err: any) {
             setError(err.message || 'Login failed. Please check your credentials.');
         } finally {

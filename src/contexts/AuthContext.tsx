@@ -7,7 +7,7 @@ import { User, LoginData, RegisterData } from '@/types';
 interface AuthContextType {
     user: User | null;
     loading: boolean;
-    login: (data: LoginData) => Promise<void>;
+    login: (data: LoginData) => Promise<User>;
     register: (data: RegisterData) => Promise<void>;
     logout: () => Promise<void>;
     checkAuth: () => Promise<void>;
@@ -63,6 +63,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         );
         setUser(response.user);
         localStorage.setItem('user', JSON.stringify(response.user));
+        return response.user;
     };
 
     const register = async (data: RegisterData) => {

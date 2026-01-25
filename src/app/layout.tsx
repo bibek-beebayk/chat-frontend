@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { AuthProvider } from '@/contexts/AuthContext';
 import '@/styles/globals.css';
+import { ChatBubble } from '@/components/chat/ChatBubble';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -20,6 +21,7 @@ export default function RootLayout({
             <body className={inter.className}>
                 <AuthProvider>
                     {children}
+                    <ChatBubble />
                 </AuthProvider>
             </body>
         </html>
