@@ -217,7 +217,7 @@
     padding: var(--spacing-lg);
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    /* Removed gap to allow custom grouping spacing */
 }
 
 .message {
@@ -225,6 +225,14 @@
     flex-direction: column;
     max-width: 70%;
     animation: fadeIn 0.3s ease;
+    margin-top: var(--spacing-md);
+    position: relative;
+    /* For Action Menu positioning */
+}
+
+.message.grouped {
+    margin-top: 4px;
+    /* Tighter spacing for grouped messages */
 }
 
 .message.own {
@@ -457,13 +465,157 @@
         height: auto;
     }
 }
+
 .awayMessageBanner {
-  background-color: #fff3cd;
-  color: #856404;
-  padding: 0.75rem 1rem;
-  text-align: center;
-  border-bottom: 1px solid #ffeeba;
-  width: 100%;
-  font-size: 0.9rem;
-  box-sizing: border-box;
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 0.75rem 1rem;
+    text-align: center;
+    border-bottom: 1px solid #ffeeba;
+    width: 100%;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+
+/* Pinned Messages Bar */
+.pinnedMessagesBar {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.pinnedIcon {
+    font-size: 1.2rem;
+}
+
+.pinnedContent {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    overflow: hidden;
+    max-height: 4.5rem;
+    overflow-y: auto;
+}
+
+.pinnedItem {
+    background: var(--color-bg-tertiary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border: 1px solid var(--color-border);
+}
+
+.pinnedSender {
+    font-weight: 600;
+    margin-right: 0.25rem;
+    color: var(--color-primary);
+}
+
+/* Pinned Message Highlight in List */
+.pinnedMessage {
+    border-left: 3px solid var(--color-primary);
+    padding-left: 8px;
+    /* Offset the border */
+    /* Optional: background highlight */
+}
+
+/* Editing UI */
+.editContainer {
+    width: 100%;
+    margin-top: 0.25rem;
+}
+
+.editInput {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--color-primary);
+    border-radius: 4px;
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    font-family: inherit;
+}
+
+.editActions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.saveButton,
+.cancelButton {
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    border: none;
+    font-weight: 600;
+}
+
+.saveButton {
+    background: var(--color-primary);
+    color: white;
+}
+
+.cancelButton {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+}
+
+.editedLabel {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+    margin-left: 0.5rem;
+    user-select: none;
+}
+
+/* Action Menu Positioning */
+.actionMenuWrapper {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    /* Hidden by default */
+    transition: opacity 0.2s ease;
+    z-index: 10;
+}
+
+.message:hover .actionMenuWrapper {
+    opacity: 1;
+    /* Show on hover */
+}
+
+/* Not own message (received) -> menu on right */
+.message:not(.own) .actionMenuWrapper {
+    left: 100%;
+    margin-left: 8px;
+}
+
+/* Own message -> menu on left */
+.message.own .actionMenuWrapper {
+    right: 100%;
+    margin-right: 8px;
+}
+
+/* Mobile override: show menu button on tap/always? or keep hover (works on tap often) */
+@media (max-width: 768px) {
+    .actionMenuWrapper {
+        opacity: 1;
+        /* Always visible on mobile to allow interaction */
+    }
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Header } from '@/components/layout/Header';
@@ -8,6 +8,8 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import { useTypingThrottle } from '@/hooks/useTypingThrottle';
 import { apiClient } from '@/lib/api';
 import { Room, Message } from '@/types';
+import { MessageActionMenu } from '@/components/chat/MessageActionMenu';
+import { Modal } from '@/components/ui/Modal';
 import styles from './page.module.css';
 
 export default function ChatPage() {
@@ -75,6 +77,67 @@ export default function ChatPage() {
             if (fileInputRef.current) {
                 fileInputRef.current.value = '';
             }
+        }
+    };
+
+    // Message Actions State
+    const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
+    const [editContent, setEditContent] = useState('');
+
+    // Delete Modal State
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [messageToDelete, setMessageToDelete] = useState<number | null>(null);
+
+    // Action Handlers
+    const handleEditStart = (msg: Message) => {
+        setEditingMessageId(msg.id);
+        setEditContent(msg.content);
+    };
+
+    const handleEditCancel = () => {
+        setEditingMessageId(null);
+        setEditContent('');
+    };
+
+    const handleEditSave = async (messageId: number) => {
+        if (!editContent.trim()) return;
+        try {
+            await apiClient.patch(`/api/messages/${messageId}/edit/`, { content: editContent });
+            setEditingMessageId(null);
+            setEditContent('');
+        } catch (error) {
+            console.error('Failed to edit message:', error);
+            alert('Failed to edit message');
+        }
+    };
+
+    const handleDelete = (messageId: number) => {
+        setMessageToDelete(messageId);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!messageToDelete) return;
+
+        try {
+            await apiClient.delete(`/api/messages/${messageToDelete}/delete/`);
+            setIsDeleteModalOpen(false);
+            setMessageToDelete(null);
+        } catch (error) {
+            console.error('Failed to delete message:', error);
+            alert('Failed to delete message');
+        }
+    };
+
+
+
+
+
+    const handlePin = async (messageId: number) => {
+        try {
+            await apiClient.post(`/api/messages/${messageId}/pin/`, {});
+        } catch (error) {
+            console.error('Failed to pin message:', error);
         }
     };
 
@@ -222,9 +285,77 @@ export default function ChatPage() {
         }
     };
 
-    // Auto-scroll to bottom on NEW messages (real-time), but not when loading old ones
+    // Unified Message List Logic
+    const unifiedMessages = useMemo(() => {
+        // 1. Start with historical messages
+        let allMessages = [...messages];
+
+        // 2. Add NEW WS messages (chat_message type)
+        const newWsMessages = wsMessages
+            .filter(msg => msg.type === 'chat_message')
+            .map(msg => ({
+                id: msg.message_id || Date.now() + Math.random(),
+                room: selectedRoom || 0,
+                sender: {
+                    id: msg.user_id || 0,
+                    username: msg.username || 'Unknown',
+                    user_type: 'player' as const
+                },
+                content: msg.message || '',
+                attachment: msg.attachment,
+                timestamp: msg.timestamp || new Date().toISOString(),
+                is_read: false,
+                is_edited: false,
+                is_pinned: false,
+                is_deleted: false,
+            } as Message));
+
+        // Deduplicate and Append
+        newWsMessages.forEach(wsMsg => {
+            if (!allMessages.some(m => m.id === wsMsg.id)) {
+                allMessages.push(wsMsg);
+            }
+        });
+
+        // 3. Apply Update/Delete/Pin events to the FULL list
+        wsMessages.forEach(wsMsg => {
+            if (wsMsg.type === 'chat_message_update' && wsMsg.message_id) {
+                const index = allMessages.findIndex(m => m.id === wsMsg.message_id);
+                if (index !== -1) {
+                    allMessages[index] = {
+                        ...allMessages[index],
+                        content: wsMsg.message || allMessages[index].content,
+                        is_edited: true,
+                        edited_at: wsMsg.edited_at,
+                    };
+                }
+            } else if (wsMsg.type === 'chat_message_delete' && wsMsg.message_id) {
+                const index = allMessages.findIndex(m => m.id === wsMsg.message_id);
+                if (index !== -1) {
+                    allMessages[index] = {
+                        ...allMessages[index],
+                        is_deleted: true,
+                        content: 'This message was deleted.',
+                        attachment: undefined // Remove attachment reference
+                    } as any;
+                }
+            } else if (wsMsg.type === 'chat_message_pin' && wsMsg.message_id) {
+                const index = allMessages.findIndex(m => m.id === wsMsg.message_id);
+                if (index !== -1) {
+                    allMessages[index] = {
+                        ...allMessages[index],
+                        is_pinned: wsMsg.is_pinned
+                    } as any;
+                }
+            }
+        });
+
+        return allMessages;
+    }, [messages, wsMessages, selectedRoom]);
+
     useEffect(() => {
         // Simple logic: if we are near bottom, or it's a new message just added
+
         // For now, let's auto scroll if we are not fetching more
         if (!isFetchingMore && messages.length > 0) {
             // Only if last message is recent?
@@ -365,7 +496,7 @@ export default function ChatPage() {
                     </div>
                 </main>
             </>
-        )
+        );
     }
 
     const selectedRoomData = rooms.find(r => r.id === selectedRoom);
@@ -501,6 +632,24 @@ export default function ChatPage() {
                                 </div>
                             )}
 
+                            {/* Pinned Messages Header - Show if any pinned messages exists in current room */}
+                            {unifiedMessages.some(m => m.is_pinned && !m.is_deleted) && (
+                                <div className={styles.pinnedMessagesBar}>
+                                    <div className={styles.pinnedIcon}>📌</div>
+                                    <div className={styles.pinnedContent}>
+                                        {unifiedMessages.filter(m => m.is_pinned && !m.is_deleted).map(m => (
+                                            <div key={m.id} className={styles.pinnedItem} onClick={() => {
+                                                // Scroll to message
+                                                document.getElementById(`msg-${m.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            }}>
+                                                <span className={styles.pinnedSender}>{m.sender.username}: </span>
+                                                {m.content.substring(0, 50)}{m.content.length > 50 ? '...' : ''}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                             <div
                                 className={styles.messagesContainer}
                                 ref={messagesContainerRef}
@@ -512,80 +661,100 @@ export default function ChatPage() {
                                         Loading previous messages...
                                     </div>
                                 )}
-                                {messages.map((msg) => (
-                                    <div
-                                        key={msg.id}
-                                        className={`${styles.message} ${msg.sender.id === user.id ? styles.own : ''
-                                            }`}
-                                    >
-                                        <div className={styles.messageHeader}>
-                                            <span className={styles.sender}>{msg.sender.username}</span>
-                                            <span className={styles.time}>
-                                                {new Date(msg.timestamp).toLocaleTimeString()}
-                                            </span>
-                                        </div>
-                                        <div className={styles.messageContent}>
-                                            {msg.attachment && (
-                                                <div className={styles.attachment}>
-                                                    {msg.attachment.match(/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i) ? (
-                                                        <a href={msg.attachment} target="_blank" rel="noopener noreferrer">
-                                                            <img src={msg.attachment} alt="Attachment" style={{ maxWidth: '200px', maxHeight: '200px', borderRadius: '8px', cursor: 'pointer' }} />
-                                                        </a>
-                                                    ) : msg.attachment.match(/\.(mp4|webm|ogg)(\?.*)?$/i) ? (
-                                                        <video src={msg.attachment} controls style={{ maxWidth: '300px', borderRadius: '8px' }} />
-                                                    ) : (
-                                                        <a href={msg.attachment} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-primary)' }}>
-                                                            📄 Download File
-                                                        </a>
-                                                    )}
+                                {unifiedMessages.map((msg, index) => {
+                                    if (msg.is_deleted) {
+                                        // Render deleted placeholder? Or hide?
+                                        // Let's render a simpler deleted placeholder
+                                        return (
+                                            <div key={msg.id} className={`${styles.message} ${msg.sender.id === user.id ? styles.own : ''}`}>
+                                                <div className={styles.messageContent} style={{ fontStyle: 'italic', color: 'var(--color-text-muted)' }}>
+                                                    This message was deleted
+                                                </div>
+                                            </div>
+                                        )
+                                    }
+
+                                    const prevMsg = unifiedMessages[index - 1];
+                                    const isGrouped = prevMsg &&
+                                        prevMsg.sender.username === msg.sender.username &&
+                                        (new Date(msg.timestamp).getTime() - new Date(prevMsg.timestamp).getTime() < 5 * 60 * 1000) &&
+                                        !prevMsg.is_deleted; // Break grouping if prev was deleted
+
+                                    const isEditing = editingMessageId === msg.id;
+
+                                    return (
+                                        <div
+                                            key={msg.id}
+                                            id={`msg-${msg.id}`}
+                                            className={`${styles.message} ${msg.sender.id === user.id ? styles.own : ''} ${isGrouped ? styles.grouped : ''} ${msg.is_pinned ? styles.pinnedMessage : ''}`}
+                                        >
+                                            {!isGrouped && (
+                                                <div className={styles.messageHeader}>
+                                                    <span className={styles.sender}>{msg.sender.username}</span>
+                                                    <span className={styles.time}>
+                                                        {new Date(msg.timestamp).toLocaleTimeString()}
+                                                    </span>
                                                 </div>
                                             )}
-                                            {msg.content}
-                                        </div>
-                                    </div>
-                                ))}
 
-                                {wsMessages
-                                    .filter(msg => {
-                                        if (msg.type !== 'chat_message') return false;
-                                        // Deduplicate against historical messages
-                                        if (msg.message_id && messages.some(m => m.id === msg.message_id)) {
-                                            return false;
-                                        }
-                                        return true;
-                                    })
-                                    .map((msg, idx) => (
-                                        <div
-                                            key={`ws-${idx}`}
-                                            className={`${styles.message} ${msg.user_id === user.id ? styles.own : ''
-                                                }`}
-                                        >
-                                            <div className={styles.messageHeader}>
-                                                <span className={styles.sender}>{msg.username}</span>
-                                                <span className={styles.time}>
-                                                    {msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString() : 'Just now'}
-                                                </span>
-                                            </div>
-                                            <div className={styles.messageContent}>
-                                                {msg.attachment && (
-                                                    <div className={styles.attachment}>
-                                                        {msg.attachment.match(/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i) ? (
-                                                            <a href={msg.attachment} target="_blank" rel="noopener noreferrer">
-                                                                <img src={msg.attachment} alt="Attachment" style={{ maxWidth: '200px', maxHeight: '200px', borderRadius: '8px', cursor: 'pointer' }} />
-                                                            </a>
-                                                        ) : msg.attachment.match(/\.(mp4|webm|ogg)(\?.*)?$/i) ? (
-                                                            <video src={msg.attachment} controls style={{ maxWidth: '300px', borderRadius: '8px' }} />
-                                                        ) : (
-                                                            <a href={msg.attachment} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-primary)' }}>
-                                                                📄 Download File
-                                                            </a>
-                                                        )}
+                                            {isEditing ? (
+                                                <div className={styles.editContainer}>
+                                                    <input
+                                                        type="text"
+                                                        value={editContent}
+                                                        onChange={(e) => setEditContent(e.target.value)}
+                                                        className={styles.editInput}
+                                                        autoFocus
+                                                    />
+                                                    <div className={styles.editActions}>
+                                                        <button onClick={() => handleEditSave(msg.id)} className={styles.saveButton}>Save</button>
+                                                        <button onClick={handleEditCancel} className={styles.cancelButton}>Cancel</button>
                                                     </div>
-                                                )}
-                                                {msg.message}
-                                            </div>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    {msg.attachment && (
+                                                        <div className={styles.mediaContent} style={{ marginBottom: (!msg.attachment || !msg.content.startsWith('Sent a file:')) && msg.content ? '0.5rem' : '0' }}>
+                                                            {msg.attachment.match(/\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i) ? (
+                                                                <a href={msg.attachment} target="_blank" rel="noopener noreferrer">
+                                                                    <img src={msg.attachment} alt="Attachment" style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '8px', cursor: 'pointer', display: 'block' }} />
+                                                                </a>
+                                                            ) : msg.attachment.match(/\.(mp4|webm|ogg)(\?.*)?$/i) ? (
+                                                                <video src={msg.attachment} controls style={{ maxWidth: '100%', borderRadius: '8px', display: 'block' }} />
+                                                            ) : (
+                                                                <a href={msg.attachment} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-primary)', textDecoration: 'none', padding: '0.5rem', background: 'rgba(0,0,0,0.05)', borderRadius: '6px' }}>
+                                                                    <span style={{ fontSize: '1.2rem' }}>📄</span>
+                                                                    <span>Download File</span>
+                                                                </a>
+                                                            )}
+                                                        </div>
+                                                    )}
+
+                                                    {(!msg.attachment || !msg.content.startsWith('Sent a file:')) && msg.content && (
+                                                        <div className={styles.messageContent}>
+                                                            {msg.content}
+                                                            {msg.is_edited && <span className={styles.editedLabel}>(edited)</span>}
+                                                        </div>
+                                                    )}
+                                                </>
+                                            )}
+
+                                            {/* Action Menu - Only show if not editing, and is owner relative to action permissions */}
+                                            {!isEditing && !msg.is_deleted && (msg.sender.id === user.id || user.user_type === 'staff') && (
+                                                <div className={styles.actionMenuWrapper}>
+                                                    <MessageActionMenu
+                                                        isOwner={msg.sender.id === user.id}
+                                                        isStaff={user.user_type === 'staff'}
+                                                        isPinned={!!msg.is_pinned}
+                                                        onEdit={() => handleEditStart(msg)}
+                                                        onDelete={() => handleDelete(msg.id)}
+                                                        onPin={() => handlePin(msg.id)}
+                                                    />
+                                                </div>
+                                            )}
                                         </div>
-                                    ))}
+                                    );
+                                })}
 
                                 <div ref={messagesEndRef} />
                             </div>
@@ -651,6 +820,44 @@ export default function ChatPage() {
                     </div>
                 </div>
             </main>
+
+            <Modal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                title="Delete Message"
+                footer={
+                    <>
+                        <button
+                            onClick={() => setIsDeleteModalOpen(false)}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                background: 'transparent',
+                                border: '1px solid var(--glass-border)',
+                                color: 'var(--color-text-primary)',
+                                borderRadius: '6px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={confirmDelete}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                background: '#ef4444',
+                                border: 'none',
+                                color: 'white',
+                                borderRadius: '6px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Delete
+                        </button>
+                    </>
+                }
+            >
+                <p>Are you sure you want to delete this message? This action cannot be undone.</p>
+            </Modal>
         </div>
     );
 }

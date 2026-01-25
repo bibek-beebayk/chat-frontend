@@ -45,6 +45,10 @@ export interface Message {
     attachment?: string;
     timestamp: string;
     is_read: boolean;
+    is_edited?: boolean;
+    edited_at?: string;
+    is_pinned?: boolean;
+    is_deleted?: boolean;
 }
 
 // Participant types
@@ -58,13 +62,17 @@ export interface RoomParticipant {
 
 // WebSocket message types
 export interface WSMessage {
-    type: 'chat_message' | 'user_join' | 'user_leave' | 'typing';
+    type: 'chat_message' | 'user_join' | 'user_leave' | 'typing' | 'chat_message_update' | 'chat_message_delete' | 'chat_message_pin';
     message?: string;
     username?: string;
     user_id?: number;
     message_id?: number;
     timestamp?: string;
     attachment?: string;
+    is_edited?: boolean;
+    edited_at?: string;
+    is_pinned?: boolean;
+    is_deleted?: boolean;
 }
 
 // Auth types

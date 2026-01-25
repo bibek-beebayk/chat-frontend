@@ -1,0 +1,68 @@
+.menuContainer {
+    position: relative;
+    display: inline-block;
+    /* Opacity controlled by parent .actionMenuWrapper in page.module.css */
+    margin-left: 0.5rem;
+}
+
+/* Show menu when hovering over the parent message container 
+   (Note: parent selector needs to be handled in page.module.css via .message:hover .menuContainer) 
+   But for now we just handle it here if possible, otherwise rely on parent.
+   Actually, we will make it always visible on mobile or handle hover in parent. 
+*/
+
+.menuButton {
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0 0.5rem;
+    border-radius: 4px;
+}
+
+.menuButton:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--color-text-primary);
+}
+
+.dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    min-width: 120px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.dropdown button {
+    background: none;
+    border: none;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--color-text-primary);
+    transition: background 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dropdown button:hover {
+    background: var(--color-bg-secondary);
+}
+
+.dropdown button.delete {
+    color: var(--color-error);
+}
+
+.dropdown button.delete:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
