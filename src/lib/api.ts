@@ -41,7 +41,7 @@ class ApiClient {
 
     private async request<T>(
         endpoint: string,
-        options: RequestInit = {}
+        options: RequestInit & { skipAuth?: boolean } = {}
     ): Promise<T> {
         const url = `${this.baseURL}${endpoint}`;
 
@@ -59,7 +59,7 @@ class ApiClient {
             headers['X-CSRFToken'] = csrfToken;
         }
 
-        if (this.sessionToken) {
+        if (this.sessionToken && !options.skipAuth) {
             headers['Authorization'] = `Session ${this.sessionToken}`;
         }
 
@@ -93,45 +93,49 @@ class ApiClient {
     }
 
     // GET request
-    async get<T>(endpoint: string): Promise<T> {
-        return this.request<T>(endpoint, { method: 'GET' });
+    async get<T>(endpoint: string, options: RequestInit & { skipAuth?: boolean } = {}): Promise<T> {
+        return this.request<T>(endpoint, { ...options, method: 'GET' });
     }
 
     // POST request
-    async post<T>(endpoint: string, data?: any): Promise<T> {
+    async post<T>(endpoint: string, data?: any, options: RequestInit & { skipAuth?: boolean } = {}): Promise<T> {
         return this.request<T>(endpoint, {
+            ...options,
             method: 'POST',
             body: JSON.stringify(data),
         });
     }
 
     // POST FormData request
-    async postFormData<T>(endpoint: string, formData: FormData): Promise<T> {
+    async postFormData<T>(endpoint: string, formData: FormData, options: RequestInit & { skipAuth?: boolean } = {}): Promise<T> {
         return this.request<T>(endpoint, {
+            ...options,
             method: 'POST',
             body: formData,
         });
     }
 
     // PUT request
-    async put<T>(endpoint: string, data?: any): Promise<T> {
+    async put<T>(endpoint: string, data?: any, options: RequestInit & { skipAuth?: boolean } = {}): Promise<T> {
         return this.request<T>(endpoint, {
+            ...options,
             method: 'PUT',
             body: JSON.stringify(data),
         });
     }
 
     // PATCH request
-    async patch<T>(endpoint: string, data?: any): Promise<T> {
+    async patch<T>(endpoint: string, data?: any, options: RequestInit & { skipAuth?: boolean } = {}): Promise<T> {
         return this.request<T>(endpoint, {
+            ...options,
             method: 'PATCH',
             body: JSON.stringify(data),
         });
     }
 
     // DELETE request
-    async delete<T>(endpoint: string): Promise<T> {
-        return this.request<T>(endpoint, { method: 'DELETE' });
+    async delete<T>(endpoint: string, options: RequestInit & { skipAuth?: boolean } = {}): Promise<T> {
+        return this.request<T>(endpoint, { ...options, method: 'DELETE' });
     }
 }
 

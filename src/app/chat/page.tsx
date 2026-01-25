@@ -516,7 +516,6 @@ export default function ChatPage() {
                     {user.user_type === 'staff' && (
                         <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
                             <div>
-                                <span style={{ color: 'var(--color-text-secondary)' }}>Current Workstation: </span>
                                 <strong style={{ color: '#fff' }}>{mySupportRoom?.name}</strong>
                             </div>
                             <button

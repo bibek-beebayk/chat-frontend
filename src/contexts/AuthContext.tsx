@@ -78,7 +78,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const login = async (data: LoginData) => {
         const response = await apiClient.post<{ user: User; message: string; csrfToken: string; sessionKey: string }>(
             '/api/auth/login/',
-            data
+            data,
+            { skipAuth: true }
         );
 
         if (response.csrfToken) {
@@ -98,7 +99,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const register = async (data: RegisterData) => {
         await apiClient.post<{ user: User; message: string }>(
             '/api/auth/register/',
-            data
+            data,
+            { skipAuth: true }
         );
         // After registration, redirect to login
     };
