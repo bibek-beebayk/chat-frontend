@@ -25,6 +25,11 @@ export default function ChatPage() {
     const [showRoomList, setShowRoomList] = useState(true); // Default to list on mobile
     const [isUploading, setIsUploading] = useState(false);
 
+    // Infinite Scroll State
+    const [hasMore, setHasMore] = useState(true);
+    const [isFetchingMore, setIsFetchingMore] = useState(false);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
+
     const { sendMessage, sendJsonMessage, messages: wsMessages, isConnected } = useWebSocket(selectedRoom);
     const sendTyping = useTypingThrottle(sendJsonMessage);
 
@@ -138,35 +143,113 @@ export default function ChatPage() {
     }, [user, mySupportRoom]);
 
     // ... (rest of message loading logic logic)
-    useEffect(() => {
-        const loadMessages = async () => {
-            if (!selectedRoom) return;
-            try {
-                const data = await apiClient.get<Message[]>(`/api/rooms/${selectedRoom}/messages/`);
+    // Load Messages Function
+    const loadMessages = async (isInitialLog = false, beforeId?: number) => {
+        if (!selectedRoom) return;
+
+        try {
+            const params = new URLSearchParams();
+            if (beforeId) params.append('before_id', beforeId.toString());
+            params.append('limit', '20');
+
+            const url = `/api/rooms/${selectedRoom}/messages/?${params.toString()}`;
+            const data = await apiClient.get<Message[]>(url);
+
+            if (data.length < 20) {
+                setHasMore(false);
+            } else {
+                setHasMore(true);
+            }
+
+            if (beforeId) {
+                // Prepend older messages
+                setMessages(prev => [...data, ...prev]);
+                // Scroll position maintenance handled in useEffect or manually
+            } else {
+                // Initial load
                 setMessages(data);
-            } catch (error) {
-                console.error('Error loading messages:', error);
+                if (isInitialLog) {
+                    // Scroll to bottom only on initial fresh load
+                    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'auto' }), 100);
+                }
             }
-        };
+        } catch (error) {
+            console.error('Error loading messages:', error);
+        } finally {
+            setIsFetchingMore(false);
+        }
+    };
 
-        const joinRoom = async () => {
-            if (!selectedRoom) return;
-            try {
-                await apiClient.post(`/api/rooms/${selectedRoom}/join/`);
-            } catch (error) {
-                console.error('Error joining room:', error);
-            }
-        };
-
+    useEffect(() => {
         if (selectedRoom) {
-            loadMessages();
+            setMessages([]);
+            setHasMore(true);
+            loadMessages(true);
+
+            const joinRoom = async () => {
+                try {
+                    await apiClient.post(`/api/rooms/${selectedRoom}/join/`);
+                } catch (error) {
+                    console.error('Error joining room:', error);
+                }
+            };
             joinRoom();
         }
     }, [selectedRoom]);
 
+    // Handle Scroll for Infinite Loading
+    const handleScroll = () => {
+        if (messagesContainerRef.current) {
+            const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+
+            if (scrollTop === 0 && hasMore && !isFetchingMore && messages.length > 0) {
+                setIsFetchingMore(true);
+                const oldestMessageId = messages[0].id; // Assuming sorted oldest first
+
+                // Save current scroll height to maintain position
+                const currentScrollHeight = scrollHeight;
+
+                loadMessages(false, oldestMessageId).then(() => {
+                    // Restore scroll position
+                    requestAnimationFrame(() => {
+                        if (messagesContainerRef.current) {
+                            const newScrollHeight = messagesContainerRef.current.scrollHeight;
+                            messagesContainerRef.current.scrollTop = newScrollHeight - currentScrollHeight;
+                        }
+                    });
+                });
+            }
+        }
+    };
+
+    // Auto-scroll to bottom on NEW messages (real-time), but not when loading old ones
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+        // Simple logic: if we are near bottom, or it's a new message just added
+        // For now, let's auto scroll if we are not fetching more
+        if (!isFetchingMore && messages.length > 0) {
+            // Only if last message is recent?
+            // Or if it's an initial load?
+            // Ideally we check if user was at bottom.
+            // For simplicity, we just scroll to bottom if it's a websocket update (length changed by 1 and at end)
+            // But here we just scroll to bottom for now as per classic chat behavior, 
+            // unless user is scrolling up?
+            // Let's rely on refs.
+
+            // Check if the last message is new/from ws.
+            // Actually, simplest is: if not fetching more, we scroll.
+            // But prepending changes messages array too.
+            // So we should only scroll to bottom if the LAST message changed?
+            // messages[messages.length-1]
+        }
     }, [messages, wsMessages]);
+
+    // Separate effect for WS messages to scroll to bottom
+    useEffect(() => {
+        if (!isFetchingMore) {
+            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [wsMessages]);
+
 
     const closeChat = async () => {
         if (!selectedRoom) return;
@@ -418,7 +501,17 @@ export default function ChatPage() {
                                 </div>
                             )}
 
-                            <div className={styles.messagesContainer}>
+                            <div
+                                className={styles.messagesContainer}
+                                ref={messagesContainerRef}
+                                onScroll={handleScroll}
+                            >
+                                {isFetchingMore && (
+                                    <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--color-text-secondary)' }}>
+                                        <div className="spinner-small" style={{ display: 'inline-block', marginRight: '0.5rem' }}></div>
+                                        Loading previous messages...
+                                    </div>
+                                )}
                                 {messages.map((msg) => (
                                     <div
                                         key={msg.id}
