@@ -81,6 +81,8 @@ export const useWebSocket = (roomId: number | null): UseWebSocketReturn => {
                 clearTimeout(reconnectTimeout.current);
             }
             if (ws.current) {
+                // Prevent onclose from triggering reconnect logic when we intentionally close
+                ws.current.onclose = null;
                 ws.current.close();
             }
         };
