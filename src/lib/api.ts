@@ -1,6 +1,24 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
+// Custom API Error class
+export class ApiError extends Error {
+    public status?: number;
+    public code?: string;
+    public errors?: Record<string, any>;
+
+    constructor(message: string, status?: number, code?: string, errors?: Record<string, any>) {
+        super(message);
+        this.name = 'ApiError';
+        this.status = status;
+        this.code = code;
+        this.errors = errors;
+    }
+}
+
 class ApiClient {
+    // ... (previous members)
+
+    // ... (constructor and auth methods)
     private baseURL: string;
     private csrfToken: string | null = null;
     private sessionToken: string | null = null;
@@ -19,7 +37,6 @@ class ApiClient {
 
     private getCookie(name: string): string | null {
         if (typeof document === 'undefined') return null;
-        if (typeof document === 'undefined') return null;
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
             const cookies = document.cookie.split(';');
@@ -34,7 +51,6 @@ class ApiClient {
         return cookieValue;
     }
 
-    // Check if body is FormData
     private isFormData(body: any): boolean {
         return typeof FormData !== 'undefined' && body instanceof FormData;
     }
@@ -49,7 +65,6 @@ class ApiClient {
             ...(options.headers as Record<string, string>),
         };
 
-        // Only set Content-Type to application/json if it's NOT FormData
         if (options.body && !this.isFormData(options.body)) {
             headers['Content-Type'] = 'application/json';
         }
@@ -66,7 +81,7 @@ class ApiClient {
         const config: RequestInit = {
             ...options,
             headers,
-            credentials: 'include', // Important for session cookies
+            credentials: 'include',
         };
 
         try {
@@ -75,20 +90,35 @@ class ApiClient {
 
             if (!response.ok) {
                 if (response.status === 401 || response.status === 403) {
-                    // Dispatch event for AuthContext to handle
                     if (typeof window !== 'undefined') {
                         window.dispatchEvent(new Event('auth:unauthorized'));
                     }
                 }
-                throw new Error(data.error || data.detail || 'An error occurred');
+
+                // Parse standard error format: { message, code, errors, ... }
+                // Fallback to legacy format if needed
+                const message = data.message || data.detail || data.error || 'An error occurred';
+                const code = data.code || 'unknown_error';
+                const errors = data.errors || null;
+
+                throw new ApiError(message, response.status, code, errors);
+            }
+
+            // Standard Response Unwrapping
+            // If the backend sends { status: 'success', data: ... }, unwrap it
+            if (data && data.status === 'success' && data.data !== undefined) {
+                return data.data;
             }
 
             return data;
         } catch (error) {
-            if (error instanceof Error) {
+            if (error instanceof ApiError) {
                 throw error;
             }
-            throw new Error('An unexpected error occurred');
+            if (error instanceof Error) {
+                throw new ApiError(error.message);
+            }
+            throw new ApiError('An unexpected error occurred');
         }
     }
 

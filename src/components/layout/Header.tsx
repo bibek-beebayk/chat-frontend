@@ -19,6 +19,7 @@ export const Header: React.FC = () => {
     const isActive = (path: string) => pathname === path;
 
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+    const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
     const closeMenu = () => setIsMenuOpen(false);
@@ -81,48 +82,156 @@ export const Header: React.FC = () => {
                     </nav>
 
                     <div className={styles.userSection}>
-                        <span className={styles.username}>
-                            {user.username}
-                            {(user.user_type === 'player' || user.user_type === 'agent') && (
-                                user.is_verified ? (
-                                    <span
+                        {/* Mobile View: Expanded List */}
+                        <div className={styles.mobileUserMenu}>
+                            <div className={styles.mobileUserInfo}>
+                                {user.username}
+                                {(user.user_type === 'player' || user.user_type === 'agent') && (
+                                    user.is_verified ? (
+                                        <span style={{ color: '#3b82f6', display: 'inline-flex', alignItems: 'center' }} title="Verified Account">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                                                <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-7l2 2 4-4" stroke="none" fill="currentColor" fillOpacity="0.2" />
+                                            </svg>
+                                        </span>
+                                    ) : (
+                                        <span style={{ color: '#9ca3af', display: 'inline-flex', alignItems: 'center' }} title="Unverified Account">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                            </svg>
+                                        </span>
+                                    )
+                                )}
+                            </div>
+                            <Link href="/settings" className={styles.mobileMenuItem} onClick={closeMenu}>
+                                Settings
+                            </Link>
+                            <button onClick={() => { closeMenu(); handleLogout(); }} className={styles.mobileMenuItem} style={{ color: '#ef4444' }}>
+                                Logout
+                            </button>
+                        </div>
+
+                        {/* Desktop View: Dropdown */}
+                        <div className={styles.desktopUserMenu}>
+                            <button
+                                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                                className={styles.username}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    color: 'white',
+                                    fontSize: '1rem',
+                                    padding: 0
+                                }}
+                            >
+                                {user.username}
+                                {(user.user_type === 'player' || user.user_type === 'agent') && (
+                                    user.is_verified ? (
+                                        <span
+                                            style={{
+                                                marginLeft: '6px',
+                                                color: '#3b82f6',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                verticalAlign: 'middle'
+                                            }}
+                                            title="Verified Account"
+                                        >
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                                                <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-7l2 2 4-4" stroke="none" fill="currentColor" fillOpacity="0.2" />
+                                            </svg>
+                                        </span>
+                                    ) : (
+                                        <span
+                                            style={{
+                                                marginLeft: '6px',
+                                                color: '#9ca3af',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                verticalAlign: 'middle'
+                                            }}
+                                            title="Unverified Account"
+                                        >
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                            </svg>
+                                        </span>
+                                    )
+                                )}
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '4px', opacity: 0.7 }}>
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+
+                            {isUserMenuOpen && (
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '100%',
+                                    right: 0,
+                                    marginTop: '0.5rem',
+                                    backgroundColor: '#1a1a1a',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    borderRadius: '8px',
+                                    padding: '0.5rem',
+                                    minWidth: '160px',
+                                    boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+                                    zIndex: 100,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '0.25rem'
+                                }}>
+                                    <Link
+                                        href="/settings"
+                                        onClick={() => setIsUserMenuOpen(false)}
                                         style={{
-                                            marginLeft: '6px',
-                                            color: '#3b82f6',
-                                            display: 'inline-flex',
-                                            alignItems: 'center',
-                                            verticalAlign: 'middle'
+                                            color: 'white',
+                                            textDecoration: 'none',
+                                            padding: '0.5rem 1rem',
+                                            borderRadius: '4px',
+                                            fontSize: '0.9rem',
+                                            display: 'block',
+                                            transition: 'background 0.2s',
+                                            textAlign: 'left'
                                         }}
-                                        title="Verified Account"
+                                        onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                                        onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
                                     >
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                                            <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-7l2 2 4-4" stroke="none" fill="currentColor" fillOpacity="0.2" />
-                                        </svg>
-                                    </span>
-                                ) : (
-                                    <span
+                                        Settings
+                                    </Link>
+                                    <button
+                                        onClick={() => {
+                                            setIsUserMenuOpen(false);
+                                            handleLogout();
+                                        }}
                                         style={{
-                                            marginLeft: '6px',
-                                            color: '#9ca3af',
-                                            display: 'inline-flex',
-                                            alignItems: 'center',
-                                            verticalAlign: 'middle'
+                                            background: 'transparent',
+                                            border: 'none',
+                                            color: '#ef4444',
+                                            textAlign: 'left',
+                                            padding: '0.5rem 1rem',
+                                            borderRadius: '4px',
+                                            fontSize: '0.9rem',
+                                            cursor: 'pointer',
+                                            width: '100%',
+                                            transition: 'background 0.2s'
                                         }}
-                                        title="Unverified Account"
+                                        onMouseOver={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'}
+                                        onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
                                     >
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <circle cx="12" cy="12" r="10"></circle>
-                                            <line x1="12" y1="8" x2="12" y2="12"></line>
-                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                                        </svg>
-                                    </span>
-                                )
+                                        Logout
+                                    </button>
+                                </div>
                             )}
-                        </span>
-                        <button onClick={handleLogout} className={styles.logoutBtn}>
-                            Logout
-                        </button>
+                        </div>
                     </div>
                 </div>
             </div>
