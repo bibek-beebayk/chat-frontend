@@ -10,6 +10,7 @@ import { apiClient } from '@/lib/api';
 import { Room, Message, SupportRoom } from '@/types';
 import { MessageActionMenu } from '@/components/chat/MessageActionMenu';
 import { Modal } from '@/components/ui/Modal';
+import EmojiPicker, { Theme } from 'emoji-picker-react';
 import styles from './page.module.css';
 
 export default function ChatPage() {
@@ -26,6 +27,32 @@ export default function ChatPage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [showRoomList, setShowRoomList] = useState(true); // Default to list on mobile
     const [isUploading, setIsUploading] = useState(false);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const emojiPickerRef = useRef<HTMLDivElement>(null);
+    const emojiButtonRef = useRef<HTMLButtonElement>(null);
+
+    const onEmojiClick = (emojiObject: any) => {
+        setMessageInput(prev => prev + emojiObject.emoji);
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                showEmojiPicker &&
+                emojiPickerRef.current &&
+                !emojiPickerRef.current.contains(event.target as Node) &&
+                emojiButtonRef.current &&
+                !emojiButtonRef.current.contains(event.target as Node)
+            ) {
+                setShowEmojiPicker(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showEmojiPicker]);
 
     // Infinite Scroll State
     const [hasMore, setHasMore] = useState(true);
@@ -800,7 +827,20 @@ export default function ChatPage() {
                                 </div>
                             )}
 
+
+
                             <form className={styles.messageForm} onSubmit={handleSendMessage}>
+                                {showEmojiPicker && (
+                                    <div ref={emojiPickerRef} style={{ position: 'absolute', bottom: '80px', left: '1rem', zIndex: 10 }}>
+                                        <EmojiPicker
+                                            onEmojiClick={onEmojiClick}
+                                            theme={Theme.DARK}
+                                            width={300}
+                                            height={400}
+                                            autoFocusSearch={false}
+                                        />
+                                    </div>
+                                )}
                                 {isUploading && (
                                     <div className={styles.uploadingIndicator}>
                                         <div className="spinner-small"></div>
@@ -829,6 +869,23 @@ export default function ChatPage() {
                                     title="Attach file"
                                 >
                                     📎
+                                </button>
+                                <button
+                                    type="button"
+                                    ref={emojiButtonRef}
+                                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                                    className={styles.emojiButton}
+                                    style={{
+                                        marginRight: '0.5rem',
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        fontSize: '1.2rem',
+                                        color: 'var(--color-text-secondary)'
+                                    }}
+                                    title="Add emoji"
+                                >
+                                    😊
                                 </button>
                                 <input
                                     type="text"
