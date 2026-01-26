@@ -22,6 +22,9 @@ export interface Room {
     participant_count?: number;
     unread_count?: number;
     is_staff_online?: boolean;
+    queue?: number;
+    queue_name?: string;
+    can_switch_station?: boolean;
 }
 
 export interface SupportRoom {

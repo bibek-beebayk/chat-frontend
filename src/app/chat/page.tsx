@@ -10,6 +10,7 @@ import { apiClient } from '@/lib/api';
 import { Room, Message, SupportRoom } from '@/types';
 import { MessageActionMenu } from '@/components/chat/MessageActionMenu';
 import { Modal } from '@/components/ui/Modal';
+import { Toast } from '@/components/ui/Toast';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
 import styles from './page.module.css';
 // import activeStyles from './active-queues.module.css'; // Just merging into page.module.css for simplicity or using multi-file?
@@ -35,6 +36,21 @@ export default function ChatPage() {
     const [rooms, setRooms] = useState<Room[]>([]);
     const [selectedRoom, setSelectedRoom] = useState<number | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
+
+    // Switch Station Modal
+    const [switchModalOpen, setSwitchModalOpen] = useState(false);
+
+    // Toast State
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error'; isVisible: boolean }>({
+        message: '',
+        type: 'success',
+        isVisible: false
+    });
+
+    const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+        setToast({ message, type, isVisible: true });
+    };
+
     const [pinnedMessages, setPinnedMessages] = useState<Message[]>([]); // New State
     const [messageInput, setMessageInput] = useState('');
     const [loading, setLoading] = useState(true);
@@ -114,12 +130,12 @@ export default function ChatPage() {
             // Success - message will come via WebSocket
         } catch (error) {
             console.error('Error uploading file:', error);
-            alert('Failed to upload file');
         } finally {
             setIsUploading(false);
             if (fileInputRef.current) {
                 fileInputRef.current.value = '';
             }
+            showToast('Failed to upload file', 'error');
         }
     };
 
@@ -161,7 +177,7 @@ export default function ChatPage() {
             setEditContent('');
         } catch (error) {
             console.error('Failed to edit message:', error);
-            alert('Failed to edit message');
+            showToast('Failed to edit message', 'error');
         }
     };
 
@@ -188,7 +204,7 @@ export default function ChatPage() {
             setMessageToDelete(null);
         } catch (error) {
             console.error('Failed to delete message:', error);
-            alert('Failed to delete message');
+            showToast('Failed to delete message', 'error');
         }
     };
 
@@ -508,8 +524,31 @@ export default function ChatPage() {
             const data = await apiClient.get<Room[]>('/api/rooms/');
             setRooms(data);
             setSelectedRoom(null);
+            showToast('Chat closed successfully');
         } catch (err: any) {
-            alert(err.message || 'Failed to close chat');
+            showToast(err.message || 'Failed to close chat', 'error');
+        }
+    };
+
+    const handleSwitchStation = () => {
+        setSwitchModalOpen(true);
+    };
+
+    const confirmSwitchStation = async () => {
+        try {
+            const res = await apiClient.post<any>('/api/rooms/switch-station/');
+            showToast(res.message || 'Switched station successfully', 'success');
+
+            // Refresh rooms/chat
+            const data = await apiClient.get<Room[]>('/api/rooms/');
+            setRooms(data);
+            // Ensure valid room is selected
+            if (data.length > 0) setSelectedRoom(data[0].id);
+            setSwitchModalOpen(false);
+        } catch (error: any) {
+            console.error('Error switching station:', error);
+            showToast(error.response?.data?.error || 'Failed to switch station', 'error');
+            setSwitchModalOpen(false);
         }
     };
 
@@ -550,7 +589,7 @@ export default function ChatPage() {
             await fetchRooms();
         } catch (error: any) {
             console.error('Error entering room:', error);
-            alert(error.response?.data?.error || 'Failed to enter room');
+            showToast(error.response?.data?.error || 'Failed to enter room', 'error');
         }
     };
 
@@ -581,7 +620,7 @@ export default function ChatPage() {
             setRoomToLeave(null);
         } catch (error) {
             console.error('Error leaving room:', error);
-            alert('Failed to leave room. Please check console.');
+            showToast('Failed to leave room. Please check console.', 'error');
         }
     };
 
@@ -606,7 +645,7 @@ export default function ChatPage() {
             setLeaveAllModalOpen(false);
         } catch (error) {
             console.error('Error leaving all rooms:', error);
-            alert('Failed to leave some rooms. Please check console.');
+            showToast('Failed to leave some rooms. Please check console.', 'error');
         }
     };
     if (authLoading || loading) {
@@ -870,7 +909,7 @@ export default function ChatPage() {
                                             ? (selectedRoomData
                                                 ? (selectedRoomData.client ? `${selectedRoomData.client.username}` : selectedRoomData.name)
                                                 : 'Select a chat')
-                                            : 'Chat with Support'}
+                                            : (selectedRoomData?.queue_name || 'Support')}
                                     </h2>
                                 </div>
 
@@ -894,6 +933,27 @@ export default function ChatPage() {
                                         </button>
                                     )}
                                     */}
+
+                                    {/* Switch Station for Clients */}
+                                    {user.user_type !== 'staff' && selectedRoomData?.can_switch_station && (
+                                        <button
+                                            onClick={handleSwitchStation}
+                                            style={{
+                                                padding: '0.3rem 0.8rem',
+                                                fontSize: '0.8rem',
+                                                backgroundColor: 'var(--color-bg-tertiary)',
+                                                color: 'var(--color-text-primary)',
+                                                border: '1px solid var(--color-border)',
+                                                borderRadius: '20px',
+                                                cursor: 'pointer',
+                                                fontWeight: 500,
+                                                whiteSpace: 'nowrap'
+                                            }}
+                                            title="Switch to another support agent"
+                                        >
+                                            Switch Station ⇄
+                                        </button>
+                                    )}
                                     <div className={styles.status}>
                                         <span className={isConnected ? styles.connected : styles.disconnected} title={isConnected ? 'Connected' : 'Disconnected'}></span>
                                     </div>
@@ -1307,6 +1367,55 @@ export default function ChatPage() {
             >
                 <p>Are you sure you want to delete this message? This action cannot be undone.</p>
             </Modal>
+
+            {/* Switch Station Modal */}
+            <Modal
+                isOpen={switchModalOpen}
+                onClose={() => setSwitchModalOpen(false)}
+                title="Switch Support Station"
+                footer={
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                        <button
+                            onClick={() => setSwitchModalOpen(false)}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                borderRadius: '5px',
+                                background: 'transparent',
+                                border: '1px solid var(--color-border)',
+                                color: 'var(--color-text-primary)',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={confirmSwitchStation}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                borderRadius: '5px',
+                                border: 'none',
+                                background: 'var(--color-primary)',
+                                color: 'white',
+                                fontWeight: 'bold',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Switch Station
+                        </button>
+                    </div>
+                }
+            >
+                <p>Are you sure you want to switch to a different support station? You will be moved to the next available queue.</p>
+            </Modal>
+
+            {/* Toast Notification */}
+            {toast.isVisible && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(prev => ({ ...prev, isVisible: false }))}
+                />
+            )}
         </div>
     );
 }
