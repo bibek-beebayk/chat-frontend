@@ -82,7 +82,43 @@ export const Header: React.FC = () => {
 
                     <div className={styles.userSection}>
                         <span className={styles.username}>
-                            {user.username} ({user.user_type})
+                            {user.username}
+                            {(user.user_type === 'player' || user.user_type === 'agent') && (
+                                user.is_verified ? (
+                                    <span
+                                        style={{
+                                            marginLeft: '6px',
+                                            color: '#3b82f6',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            verticalAlign: 'middle'
+                                        }}
+                                        title="Verified Account"
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                                            <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-7l2 2 4-4" stroke="none" fill="currentColor" fillOpacity="0.2" />
+                                        </svg>
+                                    </span>
+                                ) : (
+                                    <span
+                                        style={{
+                                            marginLeft: '6px',
+                                            color: '#9ca3af',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            verticalAlign: 'middle'
+                                        }}
+                                        title="Unverified Account"
+                                    >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        </svg>
+                                    </span>
+                                )
+                            )}
                         </span>
                         <button onClick={handleLogout} className={styles.logoutBtn}>
                             Logout
