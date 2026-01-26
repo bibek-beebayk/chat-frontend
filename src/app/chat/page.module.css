@@ -727,3 +727,267 @@
         /* Always visible on mobile to allow interaction */
     }
 }
+
+/* Active Queues Dashboard */
+.activeRoomIndicator {
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.activeRoomHeader {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-primary-light);
+    margin-bottom: var(--spacing-md);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.activeRoomList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+.activeRoomItem {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-primary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--color-text-primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.leaveRoomBtn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-error);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.1rem;
+    line-height: 1;
+    transition: all 0.2s;
+}
+
+.leaveRoomBtn:hover {
+    background: var(--color-error);
+    color: white;
+}
+
+/* Updated support room card styles */
+/* Updated support room card styles */
+.supportRoomCard {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 140px;
+}
+
+.supportRoomCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at top right, rgba(139, 92, 246, 0.1), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.supportRoomCard:hover:not(.occupied):not(.active) {
+    border-color: rgba(139, 92, 246, 0.5);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.supportRoomCard:hover:not(.occupied):not(.active)::before {
+    opacity: 1;
+}
+
+.supportRoomCard.active {
+    border-color: var(--color-primary);
+    background: rgba(139, 92, 246, 0.1);
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+}
+
+.supportRoomCard.occupied {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: rgba(0, 0, 0, 0.2);
+    border-color: transparent;
+}
+
+.roomName {
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+    color: var(--color-text-primary);
+    position: relative;
+    z-index: 1;
+}
+
+.roomStatus {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.2s;
+}
+
+.supportRoomCard:hover .roomStatus {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-text-primary);
+}
+
+.active .roomStatus {
+    color: var(--color-primary-light);
+    background: rgba(139, 92, 246, 0.2);
+    font-weight: 600;
+}
+
+/* Queue Menu Dropdown */
+.queueMenuWrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.queueMenuBtn {
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.queueMenuBtn:hover {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-primary);
+}
+
+.queueMenuDropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    /* Align to right since it's on the right side usually */
+    margin-top: 0.5rem;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    width: 280px;
+    z-index: 100;
+    overflow: hidden;
+    animation: fadeIn 0.2s ease-out;
+    display: flex;
+    flex-direction: column;
+}
+
+.queueMenuHeader {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.queueMenuList {
+    display: flex;
+    flex-direction: column;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.queueMenuItem {
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+    transition: background 0.2s;
+}
+
+.queueMenuItem:hover {
+    background: var(--color-bg-tertiary);
+}
+
+.queueMenuItemName {
+    font-weight: 500;
+    color: var(--color-text-primary);
+    font-size: 0.95rem;
+}
+
+.queueLeaveBtn {
+    background: transparent;
+    border: none;
+    color: var(--color-error);
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    opacity: 0.7;
+    transition: all 0.2s;
+    font-weight: 600;
+}
+
+.queueLeaveBtn:hover {
+    background: rgba(239, 68, 68, 0.1);
+    opacity: 1;
+}
+
+.queueAddItem {
+    padding: 0.75rem 1rem;
+    background: rgba(139, 92, 246, 0.05);
+    color: var(--color-primary);
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    border-top: 1px solid var(--color-border);
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.queueAddItem:hover {
+    background: rgba(139, 92, 246, 0.1);
+}

@@ -12,12 +12,26 @@ import { MessageActionMenu } from '@/components/chat/MessageActionMenu';
 import { Modal } from '@/components/ui/Modal';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
 import styles from './page.module.css';
+// import activeStyles from './active-queues.module.css'; // Just merging into page.module.css for simplicity or using multi-file?
+// Let's merge into page.module.css actually, easier than maintaining two files or refactoring imports everywhere.
+
 
 export default function ChatPage() {
     const { user, loading: authLoading } = useAuth();
     const router = useRouter();
     const [supportRooms, setSupportRooms] = useState<any[]>([]);
-    const [mySupportRoom, setMySupportRoom] = useState<any | null>(null);
+    // Multi-room support
+    const [mySupportRooms, setMySupportRooms] = useState<any[]>([]);
+    // const [mySupportRoom, setMySupportRoom] = useState<any>(null); // Legacy
+
+    // Station Browser & Menu State
+    const [showStationBrowser, setShowStationBrowser] = useState(false);
+    const [showQueueMenu, setShowQueueMenu] = useState(false);
+
+    // Modal State
+    const [leaveModalOpen, setLeaveModalOpen] = useState(false);
+    const [leaveAllModalOpen, setLeaveAllModalOpen] = useState(false);
+    const [roomToLeave, setRoomToLeave] = useState<number | null>(null);
     const [rooms, setRooms] = useState<Room[]>([]);
     const [selectedRoom, setSelectedRoom] = useState<number | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -132,6 +146,17 @@ export default function ChatPage() {
         if (!editContent.trim()) return;
         try {
             await apiClient.patch(`/api/messages/${messageId}/edit/`, { content: editContent });
+
+            // Update messages
+            setMessages(prev => prev.map(m =>
+                m.id === messageId ? { ...m, content: editContent, is_edited: true } : m
+            ));
+
+            // Update pinned messages if applicable
+            setPinnedMessages(prev => prev.map(m =>
+                m.id === messageId ? { ...m, content: editContent, is_edited: true } : m
+            ));
+
             setEditingMessageId(null);
             setEditContent('');
         } catch (error) {
@@ -150,6 +175,15 @@ export default function ChatPage() {
 
         try {
             await apiClient.delete(`/api/messages/${messageToDelete}/delete/`);
+
+            // Update messages
+            setMessages(prev => prev.map(m =>
+                m.id === messageToDelete ? { ...m, is_deleted: true, content: '', attachment: undefined } : m
+            ));
+
+            // Remove from pinned if deleted
+            setPinnedMessages(prev => prev.filter(m => m.id !== messageToDelete));
+
             setIsDeleteModalOpen(false);
             setMessageToDelete(null);
         } catch (error) {
@@ -164,9 +198,30 @@ export default function ChatPage() {
 
     const handlePin = async (messageId: number) => {
         try {
-            await apiClient.post(`/api/messages/${messageId}/pin/`, {});
+            const response = await apiClient.post(`/api/messages/${messageId}/pin/`, {});
+            // Assume API returns updated message or status. Logic usually toggles.
+
+            // Optimistically toggle for now, or fetch updated message logic
+            // Let's find current status
+            const msg = messages.find(m => m.id === messageId);
+            if (!msg) return;
+
+            const newIsPinned = !msg.is_pinned; // Toggle
+
+            setMessages(prev => prev.map(m =>
+                m.id === messageId ? { ...m, is_pinned: newIsPinned } : m
+            ));
+
+            if (newIsPinned) {
+                // Add to pinned list (need to fetch latest or reuse msg? Reuse for now)
+                setPinnedMessages(prev => [...prev, { ...msg, is_pinned: true }]);
+            } else {
+                setPinnedMessages(prev => prev.filter(m => m.id !== messageId));
+            }
+
         } catch (error) {
             console.error('Failed to pin message:', error);
+            // Revert if needed, but for now just log
         }
     };
 
@@ -176,18 +231,33 @@ export default function ChatPage() {
         }
     }, [user, authLoading, router]);
 
+    const fetchRooms = async () => {
+        try {
+            const data = await apiClient.get<Room[]>('/api/rooms/');
+            setRooms(data);
+            // Auto-select first room if none selected
+            if (data.length > 0 && !selectedRoom) {
+                if (user?.user_type !== 'staff') {
+                    setSelectedRoom(data[0].id);
+                }
+            }
+        } catch (error) {
+            console.error('Error loading rooms:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Looad Support Rooms (for Staff)
     useEffect(() => {
-        if (user && user.user_type === 'staff' && !mySupportRoom) {
+        if (user && user.user_type === 'staff') {
             const loadSupportRooms = async () => {
                 try {
                     const data = await apiClient.get<any[]>('/api/support-rooms/');
                     setSupportRooms(data);
-                    // Check if I am already in a room
-                    const myRoom = data.find(r => r.staff?.id === user.id);
-                    if (myRoom) {
-                        setMySupportRoom(myRoom);
-                    }
+                    // Check if I am already in any rooms
+                    const myRooms = data.filter(r => r.staff?.id === user.id);
+                    setMySupportRooms(myRooms);
                 } catch (error) {
                     console.error('Error loading support rooms:', error);
                 }
@@ -197,42 +267,21 @@ export default function ChatPage() {
             const interval = setInterval(loadSupportRooms, 5000); // Polling for status updates
             return () => clearInterval(interval);
         }
-    }, [user, mySupportRoom]);
+    }, [user]);
 
     // Load Chats (If Player or Staff in Support Room)
     useEffect(() => {
-        const loadRooms = async () => {
-            try {
-                const data = await apiClient.get<Room[]>('/api/rooms/');
-                setRooms(data);
-                // Auto-select first room if none selected
-                if (data.length > 0 && !selectedRoom) {
-                    // For player, always select their room. For staff, maybe not?
-                    // Staff might want to see list first.
-                    // But old logic selected first room.
-                    // Let's keep it but be careful.
-                    if (user?.user_type !== 'staff') {
-                        setSelectedRoom(data[0].id);
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading rooms:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         if (user) {
-            if (user.user_type !== 'staff' || mySupportRoom) {
-                loadRooms();
+            if (user.user_type !== 'staff' || mySupportRooms.length > 0) {
+                fetchRooms();
                 // set interval to refresh rooms list (new requests)
-                const interval = setInterval(loadRooms, 5000);
+                const interval = setInterval(fetchRooms, 5000);
                 return () => clearInterval(interval);
             } else {
                 setLoading(false);
             }
         }
-    }, [user, mySupportRoom]);
+    }, [user, mySupportRooms.length]);
 
     // ... (rest of message loading logic logic)
     // Load Messages Function
@@ -485,27 +534,81 @@ export default function ChatPage() {
 
 
 
-    const enterSupportRoom = async (roomId: number) => {
+    const handleEnterSupportRoom = async (roomId: number) => {
         try {
-            const response = await apiClient.post<any>(`/api/support-rooms/${roomId}/enter/`);
-            setMySupportRoom(response.room); // Backend should return room
-        } catch (err: any) {
-            alert(err.message || 'Failed to enter room');
+            const res = await apiClient.post<any>(`/api/support-rooms/${roomId}/enter/`);
+            // Add to our list
+            setMySupportRooms(prev => [...prev, res.room]);
+
+            // Refresh rooms list
+            const updatedRooms = supportRooms.map(r =>
+                r.id === roomId ? res.room : r
+            );
+            setSupportRooms(updatedRooms);
+
+            // Refresh chats
+            await fetchRooms();
+        } catch (error: any) {
+            console.error('Error entering room:', error);
+            alert(error.response?.data?.error || 'Failed to enter room');
         }
     };
 
-    const leaveSupportRoom = async () => {
-        if (!mySupportRoom) return;
+    const handleLeaveSupportRoom = (roomId: number) => {
+        setRoomToLeave(roomId);
+        setLeaveModalOpen(true);
+    };
+
+    const confirmLeaveRoom = async () => {
+        if (!roomToLeave) return;
+
         try {
-            await apiClient.post(`/api/support-rooms/${mySupportRoom.id}/leave/`);
-            setMySupportRoom(null);
-            setRooms([]); // Clear chats
-            setSelectedRoom(null);
-        } catch (err: any) {
-            alert(err.message);
+            console.log('Sending leave request for room:', roomToLeave);
+            await apiClient.post(`/api/support-rooms/${roomToLeave}/leave/`);
+
+            // Remove from our list
+            setMySupportRooms(prev => prev.filter(r => r.id !== roomToLeave));
+
+            // Update master list
+            const updatedRooms = supportRooms.map(r =>
+                r.id === roomToLeave ? { ...r, staff: null, is_active: false } : r
+            );
+            setSupportRooms(updatedRooms);
+
+            // Refresh chats
+            await fetchRooms();
+            setLeaveModalOpen(false);
+            setRoomToLeave(null);
+        } catch (error) {
+            console.error('Error leaving room:', error);
+            alert('Failed to leave room. Please check console.');
         }
     };
 
+    const confirmLeaveAllRooms = async () => {
+        try {
+            await Promise.all(mySupportRooms.map(r => apiClient.post(`/api/support-rooms/${r.id}/leave/`)));
+
+            setMySupportRooms([]);
+
+            // Update master list to clear all occupations by self
+            // Note: This matches simple optimistic update, real sync happens on fetchRooms
+            setSupportRooms(prev => prev.map(r => {
+                // if it was my room, clear it
+                if (mySupportRooms.some(mr => mr.id === r.id)) {
+                    return { ...r, staff: null, is_active: false };
+                }
+                return r;
+            }));
+
+            // Refresh chats
+            await fetchRooms();
+            setLeaveAllModalOpen(false);
+        } catch (error) {
+            console.error('Error leaving all rooms:', error);
+            alert('Failed to leave some rooms. Please check console.');
+        }
+    };
     if (authLoading || loading) {
         return (
             <div className={styles.loading}>
@@ -517,7 +620,7 @@ export default function ChatPage() {
     if (!user) return null;
 
     // STAFF VIEW: Selection Mode
-    if (user.user_type === 'staff' && !mySupportRoom) {
+    if (user.user_type === 'staff' && mySupportRooms.length === 0) {
         return (
             <>
                 <Header />
@@ -525,65 +628,86 @@ export default function ChatPage() {
                     <div className={styles.container}>
                         <h1 className="gradient-text" style={{ marginBottom: '2rem' }}>Support Workstations</h1>
 
-                        {(Object.entries(
-                            supportRooms.reduce((acc, room) => {
-                                const type = room.room_type || 'other';
-                                if (!acc[type]) acc[type] = [];
-                                acc[type].push(room);
-                                return acc;
-                            }, {} as Record<string, SupportRoom[]>)
-                        ) as [string, SupportRoom[]][]).sort(([a], [b]) => a.localeCompare(b)).map(([type, rooms]) => (
-                            <div key={type} style={{ marginBottom: '3rem' }}>
-                                <h2 style={{
-                                    fontSize: '1.5rem',
-                                    marginBottom: '1rem',
-                                    color: 'var(--color-text-primary)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.5rem'
-                                }}>
-                                    {type === 'all' ? 'General' :
-                                        type === 'player' ? 'Player Support' :
-                                            type === 'agent' ? 'Agent Support' :
-                                                type.charAt(0).toUpperCase() + type.slice(1)}
-                                    <span style={{
-                                        fontSize: '0.8rem',
-                                        color: 'var(--color-text-muted)',
-                                        fontWeight: 'normal',
-                                        backgroundColor: 'var(--color-bg-tertiary)',
-                                        padding: '0.2rem 0.6rem',
-                                        borderRadius: '999px'
-                                    }}>{rooms.length}</span>
-                                </h2>
-                                <div className={styles.stationGrid}>
-                                    {rooms.map(room => (
-                                        <div key={room.id} className={`glass ${styles.stationCard}`}>
-                                            <h3>{room.name}</h3>
-                                            {/* Removed Type Badge since we have sections now */}
-                                            <div style={{ margin: '1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                <div style={{
-                                                    width: '10px', height: '10px', borderRadius: '50%',
-                                                    backgroundColor: room.is_active ? '#ef4444' : '#22c55e'
-                                                }}></div>
-                                                <span style={{ color: 'var(--color-text-secondary)' }}>
-                                                    {room.is_active ? (room.staff?.username === user.username ? 'Occupied by YOU' : `Occupied by ${room.staff?.username}`) : 'Available'}
-                                                </span>
-                                            </div>
+                        {mySupportRooms.length > 0 && (
+                            <div className={styles.activeRoomIndicator}>
+                                <div className={styles.activeRoomHeader}>Active Queues ({mySupportRooms.length})</div>
+                                <div className={styles.activeRoomList}>
+                                    {mySupportRooms.map(room => (
+                                        <div key={room.id} className={styles.activeRoomItem}>
+                                            <span>{room.name}</span>
                                             <button
-                                                onClick={() => enterSupportRoom(room.id)}
-                                                disabled={room.is_active}
-                                                className={styles.sendButton}
-                                                style={{ width: '100%', borderRadius: 10, opacity: room.is_active ? 0.5 : 1, cursor: room.is_active ? 'not-allowed' : 'pointer' }}
+                                                onClick={(e) => { e.stopPropagation(); handleLeaveSupportRoom(room.id); }}
+                                                className={styles.leaveRoomBtn}
+                                                title="Leave Queue"
                                             >
-                                                {room.is_active ? 'Occupied' : 'Enter Workstation'}
+                                                ×
                                             </button>
                                         </div>
                                     ))}
                                 </div>
                             </div>
-                        ))}
+                        )}
+
+                        <div className={styles.supportRoomGrid}>
+                            {supportRooms.map(room => {
+                                const isMyRoom = mySupportRooms.some(r => r.id === room.id);
+                                const isOccupied = room.staff && !isMyRoom;
+
+                                return (
+                                    <div
+                                        key={room.id}
+                                        className={`${styles.supportRoomCard} ${isMyRoom ? styles.active : ''} ${isOccupied ? styles.occupied : ''}`}
+                                        onClick={() => !isOccupied && !isMyRoom ? handleEnterSupportRoom(room.id) : null}
+                                    >
+                                        <div className={styles.roomName}>{room.name}</div>
+                                        <div className={styles.roomStatus}>
+                                            {isMyRoom ? 'Active' : isOccupied ? `Occupied by ${room.staff.username}` : 'Available'}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 </main>
+
+                <Modal
+                    isOpen={leaveModalOpen}
+                    onClose={() => setLeaveModalOpen(false)}
+                    title="Leave Queue"
+                    footer={
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                            <button
+                                onClick={() => setLeaveModalOpen(false)}
+                                style={{
+                                    padding: '0.5rem 1rem',
+                                    borderRadius: '5px',
+                                    border: '1px solid var(--color-border)',
+                                    background: 'var(--color-bg-tertiary)',
+                                    color: 'var(--color-text-primary)',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmLeaveRoom}
+                                style={{
+                                    padding: '0.5rem 1rem',
+                                    borderRadius: '5px',
+                                    border: 'none',
+                                    background: '#ef4444',
+                                    color: 'white',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Leave Queue
+                            </button>
+                        </div>
+                    }
+                >
+                    <p>Are you sure you want to stop monitoring this queue? You will stop receiving new chats from it.</p>
+                </Modal>
             </>
         );
     }
@@ -593,28 +717,88 @@ export default function ChatPage() {
     return (
         <div className={styles.pageWrapper}>
             {/* Hide Header for Staff in Workstation */}
-            {!(user.user_type === 'staff' && mySupportRoom) && <Header />}
+            {!(user.user_type === 'staff' && mySupportRooms.length > 0) && <Header />}
             <main className={styles.main}>
                 <div className={styles.container}>
-                    {/* Leave Room Button for Staff */}
+                    {/* Queue Management Menu for Staff */}
                     {user.user_type === 'staff' && (
-                        <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
-                            <div>
-                                <strong style={{ color: '#fff' }}>{mySupportRoom?.name}</strong>
+                        <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'flex-end', position: 'relative', zIndex: 50 }}>
+                            <div className={styles.queueMenuWrapper}>
+                                <button
+                                    className={styles.queueMenuBtn}
+                                    onClick={() => setShowQueueMenu(!showQueueMenu)}
+                                >
+                                    <span>Stations</span>
+                                    <span style={{
+                                        background: 'var(--color-primary)',
+                                        color: 'white',
+                                        borderRadius: '10px',
+                                        padding: '0 6px',
+                                        fontSize: '0.75rem',
+                                        height: '18px',
+                                        display: 'flex',
+                                        alignItems: 'center'
+                                    }}>
+                                        {mySupportRooms.length}
+                                    </span>
+                                    <span style={{ fontSize: '0.8rem', transform: showQueueMenu ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▼</span>
+                                </button>
+
+                                {showQueueMenu && (
+                                    <div className={styles.queueMenuDropdown}>
+                                        <div className={styles.queueMenuHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span>Active Stations</span>
+                                            {mySupportRooms.length > 0 && (
+                                                <button
+                                                    onClick={() => setLeaveAllModalOpen(true)}
+                                                    style={{
+                                                        background: 'none',
+                                                        border: 'none',
+                                                        color: '#ef4444',
+                                                        fontSize: '0.75rem',
+                                                        cursor: 'pointer',
+                                                        textDecoration: 'underline'
+                                                    }}
+                                                >
+                                                    Leave All
+                                                </button>
+                                            )}
+                                        </div>
+                                        <div className={styles.queueMenuList}>
+                                            {mySupportRooms.length === 0 && (
+                                                <div style={{ padding: '1rem', color: 'var(--color-text-secondary)', fontSize: '0.9rem', textAlign: 'center' }}>
+                                                    Not monitoring any stations.
+                                                </div>
+                                            )}
+                                            {mySupportRooms.map(room => (
+                                                <div key={room.id} className={styles.queueMenuItem}>
+                                                    <span className={styles.queueMenuItemName}>{room.name}</span>
+                                                    <button
+                                                        className={styles.queueLeaveBtn}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleLeaveSupportRoom(room.id);
+                                                            // Optional: close menu or keep open? Keep open for quick management
+                                                        }}
+                                                        title="Leave Queue"
+                                                    >
+                                                        Leave
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div
+                                            className={styles.queueAddItem}
+                                            onClick={() => {
+                                                setShowStationBrowser(true);
+                                                setShowQueueMenu(false);
+                                            }}
+                                        >
+                                            <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>+</span> Add Queue
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                            <button
-                                onClick={leaveSupportRoom}
-                                style={{
-                                    padding: '0.5rem 1rem',
-                                    backgroundColor: '#ef4444',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '6px',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                Leave Station
-                            </button>
                         </div>
                     )}
 
@@ -653,7 +837,6 @@ export default function ChatPage() {
                                                     <div className={styles.roomMeta}>
                                                         {room.unread_count && room.unread_count > 0 ? (
                                                             <div className={styles.roomUnread}>
-                                                                {room.unread_count}
                                                             </div>
                                                         ) : null}
                                                     </div>
@@ -693,6 +876,7 @@ export default function ChatPage() {
 
                                 {/* Right Side: Actions & Status */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                    {/* Close Chat button disabled for now 
                                     {user.user_type === 'staff' && selectedRoomData && (
                                         <button
                                             onClick={closeChat}
@@ -709,6 +893,7 @@ export default function ChatPage() {
                                             Close Chat
                                         </button>
                                     )}
+                                    */}
                                     <div className={styles.status}>
                                         <span className={isConnected ? styles.connected : styles.disconnected} title={isConnected ? 'Connected' : 'Disconnected'}></span>
                                     </div>
@@ -971,6 +1156,119 @@ export default function ChatPage() {
                     </div>
                 </div>
             </main>
+
+            <Modal
+                isOpen={leaveModalOpen}
+                onClose={() => setLeaveModalOpen(false)}
+                title="Leave Queue"
+                footer={
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                        <button
+                            onClick={() => setLeaveModalOpen(false)}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                borderRadius: '5px',
+                                border: '1px solid var(--color-border)',
+                                background: 'var(--color-bg-tertiary)',
+                                color: 'var(--color-text-primary)',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={confirmLeaveRoom}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                borderRadius: '5px',
+                                border: 'none',
+                                background: '#ef4444',
+                                color: 'white',
+                                fontWeight: 'bold',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Leave Queue
+                        </button>
+                    </div>
+                }
+            >
+                <p>Are you sure you want to stop monitoring this queue? You will stop receiving new chats from it.</p>
+            </Modal>
+
+            <Modal
+                isOpen={leaveAllModalOpen}
+                onClose={() => setLeaveAllModalOpen(false)}
+                title="Leave All Stations"
+                footer={
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                        <button
+                            onClick={() => setLeaveAllModalOpen(false)}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                borderRadius: '5px',
+                                border: '1px solid var(--color-border)',
+                                background: 'var(--color-bg-tertiary)',
+                                color: 'var(--color-text-primary)',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={confirmLeaveAllRooms}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                borderRadius: '5px',
+                                border: 'none',
+                                background: '#ef4444',
+                                color: 'white',
+                                fontWeight: 'bold',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Leave All
+                        </button>
+                    </div>
+                }
+            >
+                <p>Are you sure you want to stop monitoring <strong>ALL</strong> stations? You will stop receiving chats from all queues.</p>
+            </Modal>
+
+            <Modal
+                isOpen={showStationBrowser}
+                onClose={() => setShowStationBrowser(false)}
+                title="Select a Station to Join"
+            >
+                <div style={{ display: 'grid', gap: '1rem', maxHeight: '60vh', overflowY: 'auto' }}>
+                    {supportRooms.filter(room => {
+                        const isMyRoom = mySupportRooms.some(r => r.id === room.id);
+                        const isOccupied = room.staff && !isMyRoom;
+                        return !isOccupied && !isMyRoom; // Show only if free and not already joined
+                    }).map(room => {
+                        const isMyRoom = mySupportRooms.some(r => r.id === room.id);
+                        const isOccupied = room.staff && !isMyRoom;
+
+                        return (
+                            <div
+                                key={room.id}
+                                className={`${styles.supportRoomCard} ${isMyRoom ? styles.active : ''} ${isOccupied ? styles.occupied : ''}`}
+                                onClick={() => {
+                                    if (!isOccupied && !isMyRoom) {
+                                        handleEnterSupportRoom(room.id);
+                                        setShowStationBrowser(false);
+                                    }
+                                }}
+                            >
+                                <div className={styles.roomName}>{room.name}</div>
+                                <div className={styles.roomStatus}>
+                                    {isMyRoom ? 'Active' : isOccupied ? `Occupied by ${room.staff.username}` : 'Available'}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </Modal>
 
             <Modal
                 isOpen={isDeleteModalOpen}
