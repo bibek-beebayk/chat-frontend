@@ -36,6 +36,18 @@ export interface RoomDetail extends Room {
     recent_messages: Message[];
 }
 
+// Feed types
+export interface Post {
+    id: number;
+    title: string;
+    content: string;
+    image?: string;
+    video?: string;
+    author: User;
+    created_at: string;
+    is_active: boolean;
+}
+
 // Message types
 export interface Message {
     id: number;

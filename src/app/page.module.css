@@ -17,51 +17,62 @@
 }
 
 .hero {
-    text-align: center;
+    text-align: left;
     animation: fadeIn 0.6s ease;
 }
 
-.title {
-    font-size: 3rem;
-    font-weight: 700;
-    margin-bottom: var(--spacing-md);
-    line-height: 1.2;
-}
-
-.subtitle {
-    font-size: 1.25rem;
-    color: var(--color-text-secondary);
-    margin-bottom: var(--spacing-2xl);
-}
-
-.features {
+.twoColumnLayout {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: var(--spacing-xl);
-    margin-top: var(--spacing-2xl);
-    margin-bottom: var(--spacing-2xl);
+    grid-template-columns: 1fr 400px;
+    gap: var(--spacing-2xl);
+    align-items: start;
+}
+
+/* ... existing styles ... */
+
+.newsWidget {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: calc(80px + var(--spacing-lg));
+    /* Header height + spacing */
 }
 
 .card {
     padding: var(--spacing-xl);
     border-radius: var(--radius-lg);
     text-align: center;
-    transition: transform var(--transition-normal);
+    transition: all var(--transition-normal);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .card:hover {
     transform: translateY(-8px);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
 .cardIcon {
-    font-size: 3rem;
+    font-size: 3.5rem;
     margin-bottom: var(--spacing-md);
+    background: linear-gradient(135deg, var(--color-primary-light), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
 }
 
 .card h3 {
     font-size: 1.5rem;
     margin-bottom: var(--spacing-sm);
     color: var(--color-text-primary);
+    font-weight: 700;
 }
 
 .card p {
@@ -77,22 +88,29 @@
     border-radius: var(--radius-md);
     font-weight: 600;
     transition: all var(--transition-fast);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .cardButton:hover {
     transform: scale(1.05);
-    box-shadow: var(--shadow-md);
-}
-
-.stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--spacing-lg);
-    margin-top: var(--spacing-2xl);
+    box-shadow: 0 6px 15px rgba(var(--color-primary-rgb), 0.4);
 }
 
 .statCard {
     text-align: center;
+    padding: var(--spacing-lg);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+    transition: transform var(--transition-normal);
+}
+
+.statCard:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 .statValue {
@@ -105,11 +123,75 @@
     margin-bottom: var(--spacing-xs);
 }
 
+.newsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.newsList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+/* Ensure features grid is responsive within the left column */
+.features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-2xl);
+    margin-bottom: var(--spacing-2xl);
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-2xl);
+}
+
+@media (max-width: 1024px) {
+    .twoColumnLayout {
+        grid-template-columns: 1fr;
+    }
+
+    .hero {
+        text-align: center;
+    }
+
+    .newsWidget {
+        position: static;
+        margin-top: var(--spacing-2xl);
+    }
+}
+
 .statLabel {
     color: var(--color-text-secondary);
     font-size: 0.875rem;
     text-transform: uppercase;
     letter-spacing: 1px;
+}
+
+.viewAllBtn {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.viewAllBtn:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
 }
 
 @media (max-width: 768px) {
@@ -122,6 +204,10 @@
     }
 
     .features {
+        grid-template-columns: 1fr;
+    }
+
+    .stats {
         grid-template-columns: 1fr;
     }
 }
