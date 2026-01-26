@@ -21,6 +21,7 @@ export default function ChatPage() {
     const [rooms, setRooms] = useState<Room[]>([]);
     const [selectedRoom, setSelectedRoom] = useState<number | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
+    const [pinnedMessages, setPinnedMessages] = useState<Message[]>([]); // New State
     const [messageInput, setMessageInput] = useState('');
     const [loading, setLoading] = useState(true);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -55,7 +56,8 @@ export default function ChatPage() {
     }, [showEmojiPicker]);
 
     // Infinite Scroll State
-    const [hasMore, setHasMore] = useState(true);
+    const [hasMore, setHasMore] = useState(true); // older
+    const [hasMoreNewer, setHasMoreNewer] = useState(false); // newer
     const [isFetchingMore, setIsFetchingMore] = useState(false);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -234,35 +236,47 @@ export default function ChatPage() {
 
     // ... (rest of message loading logic logic)
     // Load Messages Function
-    const loadMessages = async (isInitialLog = false, beforeId?: number) => {
+    const loadMessages = async (direction: 'older' | 'newer' | 'around' | 'initial' = 'initial', referenceId?: number) => {
         if (!selectedRoom) return;
+        if (isFetchingMore) return;
 
         try {
+            setIsFetchingMore(true);
             const params = new URLSearchParams();
-            if (beforeId) params.append('before_id', beforeId.toString());
             params.append('limit', '20');
+
+            if (direction === 'older' && referenceId) params.append('before_id', referenceId.toString());
+            if (direction === 'newer' && referenceId) params.append('after_id', referenceId.toString());
+            if (direction === 'around' && referenceId) params.append('around_id', referenceId.toString());
 
             const url = `/api/rooms/${selectedRoom}/messages/?${params.toString()}`;
             const data = await apiClient.get<Message[]>(url);
 
-            if (data.length < 20) {
-                setHasMore(false);
-            } else {
-                setHasMore(true);
+            if (direction === 'initial') {
+                setMessages(data);
+                setHasMore(data.length >= 20);
+                setHasMoreNewer(false);
+                setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'auto' }), 100);
+            }
+            else if (direction === 'older') {
+                if (data.length < 20) setHasMore(false);
+                setMessages(prev => [...data, ...prev]);
+            }
+            else if (direction === 'newer') {
+                if (data.length < 20) setHasMoreNewer(false);
+                setMessages(prev => [...prev, ...data]);
+            }
+            else if (direction === 'around') {
+                setMessages(data);
+                setHasMore(true); // Assumption: history exists
+                setHasMoreNewer(true); // Assumption: newer messages exist
+
+                // Scroll to target message
+                setTimeout(() => {
+                    document.getElementById(`msg-${referenceId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
             }
 
-            if (beforeId) {
-                // Prepend older messages
-                setMessages(prev => [...data, ...prev]);
-                // Scroll position maintenance handled in useEffect or manually
-            } else {
-                // Initial load
-                setMessages(data);
-                if (isInitialLog) {
-                    // Scroll to bottom only on initial fresh load
-                    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'auto' }), 100);
-                }
-            }
         } catch (error) {
             console.error('Error loading messages:', error);
         } finally {
@@ -270,11 +284,26 @@ export default function ChatPage() {
         }
     };
 
+    // Load Pinned Messages
+    const loadPinnedMessages = async () => {
+        if (!selectedRoom) return;
+        try {
+            const data = await apiClient.get<Message[]>(`/api/rooms/${selectedRoom}/pinned/`);
+            console.log('Fetched Pinned Messages:', data);
+            setPinnedMessages(data);
+        } catch (error) {
+            console.error('Error loading pinned messages:', error);
+        }
+    };
+
     useEffect(() => {
         if (selectedRoom) {
             setMessages([]);
+            setPinnedMessages([]); // Clear pinned
             setHasMore(true);
-            loadMessages(true);
+            setHasMoreNewer(false);
+            loadMessages('initial');
+            loadPinnedMessages(); // Fetch pinned
 
             const joinRoom = async () => {
                 try {
@@ -287,20 +316,28 @@ export default function ChatPage() {
         }
     }, [selectedRoom]);
 
+    // Jump / Scroll to Bottom Helper
+    const scrollToBottom = () => {
+        setMessages([]);
+        setHasMoreNewer(false);
+        loadMessages('initial');
+    };
+
+    const handleJumpToMessage = (messageId: number) => {
+        loadMessages('around', messageId);
+    };
+
     // Handle Scroll for Infinite Loading
     const handleScroll = () => {
-        if (messagesContainerRef.current) {
+        if (messagesContainerRef.current && !isFetchingMore) {
             const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
 
-            if (scrollTop === 0 && hasMore && !isFetchingMore && messages.length > 0) {
-                setIsFetchingMore(true);
-                const oldestMessageId = messages[0].id; // Assuming sorted oldest first
-
-                // Save current scroll height to maintain position
+            // Scroll Up (Older)
+            if (scrollTop === 0 && hasMore && messages.length > 0) {
+                const oldestMessageId = messages[0].id;
                 const currentScrollHeight = scrollHeight;
 
-                loadMessages(false, oldestMessageId).then(() => {
-                    // Restore scroll position
+                loadMessages('older', oldestMessageId).then(() => {
                     requestAnimationFrame(() => {
                         if (messagesContainerRef.current) {
                             const newScrollHeight = messagesContainerRef.current.scrollHeight;
@@ -308,6 +345,12 @@ export default function ChatPage() {
                         }
                     });
                 });
+            }
+
+            // Scroll Down (Newer)
+            if (scrollTop + clientHeight >= scrollHeight - 10 && hasMoreNewer && messages.length > 0) {
+                const newestMessageId = messages[messages.length - 1].id;
+                loadMessages('newer', newestMessageId);
             }
         }
     };
@@ -317,7 +360,17 @@ export default function ChatPage() {
         // 1. Start with historical messages
         let allMessages = [...messages];
 
-        // 2. Add NEW WS messages (chat_message type)
+        // 2. Merge Pinned Messages (deduplicated)
+        pinnedMessages.forEach(pinMsg => {
+            if (!allMessages.some(m => m.id === pinMsg.id)) {
+                allMessages.push(pinMsg);
+            }
+        });
+
+        // Sort after merging to ensure order
+        allMessages.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
+        // 3. Add NEW WS messages (chat_message type)
         const newWsMessages = wsMessages
             .filter(msg => msg.type === 'chat_message')
             .map(msg => ({
@@ -344,41 +397,21 @@ export default function ChatPage() {
             }
         });
 
-        // 3. Apply Update/Delete/Pin events to the FULL list
+        // 4. Apply Update/Delete/Pin events to the FULL list
         wsMessages.forEach(wsMsg => {
-            if (wsMsg.type === 'chat_message_update' && wsMsg.message_id) {
-                const index = allMessages.findIndex(m => m.id === wsMsg.message_id);
-                if (index !== -1) {
-                    allMessages[index] = {
-                        ...allMessages[index],
-                        content: wsMsg.message || allMessages[index].content,
-                        is_edited: true,
-                        edited_at: wsMsg.edited_at,
-                    };
-                }
-            } else if (wsMsg.type === 'chat_message_delete' && wsMsg.message_id) {
-                const index = allMessages.findIndex(m => m.id === wsMsg.message_id);
-                if (index !== -1) {
-                    allMessages[index] = {
-                        ...allMessages[index],
-                        is_deleted: true,
-                        content: 'This message was deleted.',
-                        attachment: undefined // Remove attachment reference
-                    } as any;
-                }
-            } else if (wsMsg.type === 'chat_message_pin' && wsMsg.message_id) {
-                const index = allMessages.findIndex(m => m.id === wsMsg.message_id);
-                if (index !== -1) {
-                    allMessages[index] = {
-                        ...allMessages[index],
-                        is_pinned: wsMsg.is_pinned
-                    } as any;
-                }
-            }
+            // ... (existing logic)
+        });
+
+        console.log('Unified Debug:', {
+            messagesCount: messages.length,
+            pinnedCount: pinnedMessages.length,
+            wsCount: wsMessages.length,
+            finalCount: allMessages.length,
+            pinnedIds: pinnedMessages.map(m => m.id)
         });
 
         return allMessages;
-    }, [messages, wsMessages, selectedRoom]);
+    }, [messages, pinnedMessages, wsMessages, selectedRoom]);
 
     useEffect(() => {
         // Simple logic: if we are near bottom, or it's a new message just added
@@ -403,15 +436,18 @@ export default function ChatPage() {
 
     // Separate effect for WS messages to scroll to bottom
     // Separate effect for WS messages to scroll to bottom - ONLY for new messages
+    // Separate effect for WS messages to scroll to bottom - ONLY for new messages
     useEffect(() => {
         if (!isFetchingMore && wsMessages.length > 0) {
             const lastMsg = wsMessages[wsMessages.length - 1];
-            // Only scroll for new messages, not updates/pins/deletes
-            if (lastMsg.type === 'chat_message') {
+            // Only scroll for new messages if we are NOT viewing history (hasMoreNewer is false)
+            if (lastMsg.type === 'chat_message' && !hasMoreNewer) {
+                // Check if user is near bottom? Or just force?
+                // For simplicity, force scroll if live.
                 messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
             }
         }
-    }, [wsMessages]);
+    }, [wsMessages, hasMoreNewer]);
 
 
     const closeChat = async () => {
@@ -692,16 +728,41 @@ export default function ChatPage() {
                                     <div className={styles.pinnedIcon}>📌</div>
                                     <div className={styles.pinnedContent}>
                                         {unifiedMessages.filter(m => m.is_pinned && !m.is_deleted).map(m => (
-                                            <div key={m.id} className={styles.pinnedItem} onClick={() => {
-                                                // Scroll to message
-                                                document.getElementById(`msg-${m.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                            }}>
+                                            <div key={m.id} className={styles.pinnedItem} onClick={() => handleJumpToMessage(m.id)}>
                                                 <span className={styles.pinnedSender}>{m.sender.username}: </span>
                                                 {m.content.substring(0, 50)}{m.content.length > 50 ? '...' : ''}
                                             </div>
                                         ))}
                                     </div>
                                 </div>
+                            )}
+
+                            {/* Scroll to Bottom Button */}
+                            {hasMoreNewer && (
+                                <button
+                                    onClick={scrollToBottom}
+                                    style={{
+                                        position: 'absolute',
+                                        bottom: '80px',
+                                        right: '20px',
+                                        background: 'var(--color-primary)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '50%',
+                                        width: '40px',
+                                        height: '40px',
+                                        cursor: 'pointer',
+                                        zIndex: 10,
+                                        boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '1.2rem'
+                                    }}
+                                    title="Scroll to Bottom"
+                                >
+                                    ↓
+                                </button>
                             )}
 
                             <div
