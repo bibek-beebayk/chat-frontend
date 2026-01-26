@@ -7,10 +7,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/forms/Input';
 import { Button } from '@/components/forms/Button';
 import { UserType } from '@/types';
-import styles from '../login/page.module.css';
+import styles from './page.module.css';
 
 export default function RegisterPage() {
     const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [userType, setUserType] = useState<UserType>('player');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -36,7 +37,7 @@ export default function RegisterPage() {
         setLoading(true);
 
         try {
-            await register({ username, user_type: userType, password, confirm_password: confirmPassword });
+            await register({ username, email, user_type: userType, password, confirm_password: confirmPassword });
             router.push('/login');
         } catch (err: any) {
             setError(err.message || 'Registration failed. Please try again.');
@@ -59,25 +60,29 @@ export default function RegisterPage() {
                 </div>
 
                 <form onSubmit={handleSubmit} className={styles.form}>
-                    {error && <div className={styles.error}>{error}</div>}
+                    {error && (
+                        <div className={styles.error}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                            {error}
+                        </div>
+                    )}
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)', marginBottom: 'var(--spacing-md)' }}>
-                        <label style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--color-text-secondary)', marginBottom: '0.25rem' }}>Who are you?</label>
-                        <div style={{ display: 'flex', gap: '2rem' }}>
+                    <div className={styles.userTypeSection}>
+                        <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.5rem', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>I am a...</label>
+                        <div className={styles.radioGroup}>
                             {userTypeOptions.map((option) => (
-                                <label key={option.value} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', color: 'var(--color-text-primary)' }}>
+                                <label
+                                    key={option.value}
+                                    className={styles.radioLabel}
+                                    data-checked={userType === option.value}
+                                >
                                     <input
                                         type="radio"
                                         name="userType"
                                         value={option.value}
                                         checked={userType === option.value}
                                         onChange={(e) => setUserType(e.target.value as UserType)}
-                                        style={{
-                                            marginRight: '0.5rem',
-                                            width: '1.2rem',
-                                            height: '1.2rem',
-                                            accentColor: '#8b5cf6'
-                                        }}
+                                        className={styles.radioInput}
                                     />
                                     {option.label}
                                 </label>
@@ -95,11 +100,20 @@ export default function RegisterPage() {
                     />
 
                     <Input
+                        label="Email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Enter your email"
+                        required
+                    />
+
+                    <Input
                         label="Password"
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Choose a password"
+                        placeholder="Password"
                         required
                     />
 
@@ -108,7 +122,7 @@ export default function RegisterPage() {
                         type="password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        placeholder="Confirm your password"
+                        placeholder="Confirm Password"
                         required
                     />
 
@@ -117,17 +131,16 @@ export default function RegisterPage() {
                         variant="primary"
                         fullWidth
                         loading={loading}
+                        style={{ marginTop: '1rem', height: '3.2rem', fontSize: '1rem' }}
                     >
-                        Register
+                        Create Account
                     </Button>
 
                     <div className={styles.footer}>
-                        <p>
-                            Already have an account?{' '}
-                            <Link href="/login" className={styles.link}>
-                                Login here
-                            </Link>
-                        </p>
+                        <span>Already have an account?</span>
+                        <Link href="/login" className={styles.link}>
+                            Sign In
+                        </Link>
                     </div>
                 </form>
             </div>

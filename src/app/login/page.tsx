@@ -74,12 +74,10 @@ export default function LoginPage() {
                     </Button>
 
                     <div className={styles.footer}>
-                        <p>
-                            Don't have an account?{' '}
-                            <Link href="/register" className={styles.link}>
-                                Register here
-                            </Link>
-                        </p>
+                        <span>Don't have an account?</span>
+                        <Link href="/register" className={styles.link}>
+                            Register here
+                        </Link>
                     </div>
                 </form>
             </div>
