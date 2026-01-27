@@ -4,10 +4,11 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import VerifyUserIDModal from '@/components/settings/VerifyUserIDModal';
 import styles from './Header.module.css';
 
 export const Header: React.FC = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, verifyUserID, initiateVerificationRequest } = useAuth();
     const pathname = usePathname();
     const router = useRouter();
 
@@ -20,6 +21,7 @@ export const Header: React.FC = () => {
 
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false);
+    const [showVerifyModal, setShowVerifyModal] = React.useState(false);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
     const closeMenu = () => setIsMenuOpen(false);
@@ -94,14 +96,36 @@ export const Header: React.FC = () => {
                                                 <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-7l2 2 4-4" stroke="none" fill="currentColor" fillOpacity="0.2" />
                                             </svg>
                                         </span>
+                                    ) : user.verification_status === 'pending' ? (
+                                        <span style={{ color: '#fbbf24', display: 'inline-flex', alignItems: 'center' }} title="Verification Pending">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <polyline points="12 6 12 12 16 14"></polyline>
+                                            </svg>
+                                        </span>
                                     ) : (
-                                        <span style={{ color: '#9ca3af', display: 'inline-flex', alignItems: 'center' }} title="Unverified Account">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setShowVerifyModal(true);
+                                            }}
+                                            style={{
+                                                background: 'none',
+                                                border: 'none',
+                                                padding: 0,
+                                                cursor: 'pointer',
+                                                color: '#9ca3af',
+                                                display: 'inline-flex',
+                                                alignItems: 'center'
+                                            }}
+                                            title="Click to verify your account"
+                                        >
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                 <circle cx="12" cy="12" r="10"></circle>
                                                 <line x1="12" y1="8" x2="12" y2="12"></line>
                                                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
                                             </svg>
-                                        </span>
+                                        </button>
                                     )
                                 )}
                             </div>
@@ -148,16 +172,38 @@ export const Header: React.FC = () => {
                                                 <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-7l2 2 4-4" stroke="none" fill="currentColor" fillOpacity="0.2" />
                                             </svg>
                                         </span>
-                                    ) : (
+                                    ) : user.verification_status === 'pending' ? (
                                         <span
                                             style={{
                                                 marginLeft: '6px',
+                                                color: '#fbbf24',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                verticalAlign: 'middle'
+                                            }}
+                                            title="Verification Pending"
+                                        >
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <polyline points="12 6 12 12 16 14"></polyline>
+                                            </svg>
+                                        </span>
+                                    ) : (
+                                        <span
+                                            role="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setShowVerifyModal(true);
+                                            }}
+                                            style={{
+                                                marginLeft: '6px',
+                                                cursor: 'pointer',
                                                 color: '#9ca3af',
                                                 display: 'inline-flex',
                                                 alignItems: 'center',
                                                 verticalAlign: 'middle'
                                             }}
-                                            title="Unverified Account"
+                                            title="Click to verify your account"
                                         >
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                 <circle cx="12" cy="12" r="10"></circle>
@@ -235,6 +281,13 @@ export const Header: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            <VerifyUserIDModal
+                isOpen={showVerifyModal}
+                onClose={() => setShowVerifyModal(false)}
+                onVerify={verifyUserID}
+                onInitiate={initiateVerificationRequest}
+            />
         </header>
     );
 };

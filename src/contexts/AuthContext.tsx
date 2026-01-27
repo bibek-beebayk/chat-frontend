@@ -13,6 +13,8 @@ interface AuthContextType {
     checkAuth: () => Promise<void>;
     verifyOTP: (email: string, otpCode: string) => Promise<User>;
     resendOTP: (email: string) => Promise<void>;
+    verifyUserID: (userId: string, otp: string) => Promise<User>;
+    initiateVerificationRequest: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -136,19 +138,59 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         );
     };
 
+    const initiateVerificationRequest = async () => {
+        await apiClient.post('/api/auth/initiate-verification-request/');
+        if (user) {
+            const updatedUser: User = { ...user, verification_status: 'pending' };
+            setUser(updatedUser);
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+        }
+    };
+
+    const verifyUserID = async (userId: string, otp: string) => {
+        const response = await apiClient.post<{ message: string; user: any; status: string }>(
+            '/api/auth/verify-user-id/',
+            { user_id: userId, otp }
+        );
+
+        if (user) {
+            const updatedUser: User = {
+                ...user,
+                verification_status: response.status as User['verification_status']
+            };
+            setUser(updatedUser);
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            return updatedUser;
+        }
+
+        throw new Error('User not found in state');
+    };
+
     const logout = async () => {
         try {
             await apiClient.post('/api/auth/logout/');
         } catch (error) {
-            console.error('Logout error:', error);
+            console.error('Logout failed:', error);
         } finally {
             setUser(null);
             localStorage.removeItem('user');
+            localStorage.removeItem('sessionKey');
         }
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, register, logout, checkAuth, verifyOTP, resendOTP }}>
+        <AuthContext.Provider value={{
+            user,
+            loading,
+            login,
+            register,
+            logout,
+            checkAuth,
+            verifyOTP,
+            resendOTP,
+            verifyUserID,
+            initiateVerificationRequest
+        }}>
             {children}
         </AuthContext.Provider>
     );

@@ -6,6 +6,7 @@ export interface User {
     username: string;
     user_type: UserType;
     is_verified?: boolean;
+    verification_status?: 'pending' | 'approved' | 'rejected' | 'none';
     email?: string;
     first_name?: string;
     last_name?: string;
