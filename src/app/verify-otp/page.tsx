@@ -5,7 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import styles from './verify-otp.module.css';
 
-export default function VerifyOTPPage() {
+import { Suspense } from 'react';
+
+function VerifyOTPContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { verifyOTP, resendOTP } = useAuth();
@@ -232,5 +234,13 @@ export default function VerifyOTPPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function VerifyOTPPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <VerifyOTPContent />
+        </Suspense>
     );
 }
