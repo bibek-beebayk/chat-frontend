@@ -8,9 +8,11 @@ interface AuthContextType {
     user: User | null;
     loading: boolean;
     login: (data: LoginData) => Promise<User>;
-    register: (data: RegisterData) => Promise<void>;
+    register: (data: RegisterData) => Promise<{ email: string; email_sent: boolean }>;
     logout: () => Promise<void>;
     checkAuth: () => Promise<void>;
+    verifyOTP: (email: string, otpCode: string) => Promise<User>;
+    resendOTP: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -97,12 +99,41 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     const register = async (data: RegisterData) => {
-        await apiClient.post<{ user: User; message: string }>(
+        const response = await apiClient.post<{ message: string; email: string; email_sent: boolean }>(
             '/api/auth/register/',
             data,
             { skipAuth: true }
         );
-        // After registration, redirect to login
+        return { email: response.email, email_sent: response.email_sent };
+    };
+
+    const verifyOTP = async (email: string, otpCode: string) => {
+        const response = await apiClient.post<{ user: User; message: string; csrfToken: string; sessionKey: string }>(
+            '/api/auth/verify-otp/',
+            { email, otp_code: otpCode },
+            { skipAuth: true }
+        );
+
+        if (response.csrfToken) {
+            apiClient.setCsrfToken(response.csrfToken);
+        }
+
+        if (response.sessionKey) {
+            apiClient.setSessionToken(response.sessionKey);
+            localStorage.setItem('sessionKey', response.sessionKey);
+        }
+
+        setUser(response.user);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        return response.user;
+    };
+
+    const resendOTP = async (email: string) => {
+        await apiClient.post<{ message: string }>(
+            '/api/auth/resend-otp/',
+            { email },
+            { skipAuth: true }
+        );
     };
 
     const logout = async () => {
@@ -117,7 +148,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, register, logout, checkAuth }}>
+        <AuthContext.Provider value={{ user, loading, login, register, logout, checkAuth, verifyOTP, resendOTP }}>
             {children}
         </AuthContext.Provider>
     );

@@ -37,8 +37,13 @@ export default function RegisterPage() {
         setLoading(true);
 
         try {
-            await register({ username, email, user_type: userType, password, confirm_password: confirmPassword });
-            router.push('/login');
+            const response = await register({ username, email, user_type: userType, password, confirm_password: confirmPassword });
+
+            // Store email for OTP verification page
+            localStorage.setItem('pendingVerificationEmail', response.email);
+
+            // Redirect to OTP verification page
+            router.push(`/verify-otp?email=${encodeURIComponent(response.email)}`);
         } catch (err: any) {
             setError(err.message || 'Registration failed. Please try again.');
         } finally {
