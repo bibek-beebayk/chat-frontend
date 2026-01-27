@@ -19,6 +19,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// ... imports
+// (Note: interface LoginData/RegisterData likely needs no change if inputs are same)
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
@@ -27,7 +30,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         try {
             const data = await apiClient.get<User>('/api/auth/me/');
             setUser(data);
-            // Store in localStorage to persist across page refreshes
             localStorage.setItem('user', JSON.stringify(data));
         } catch (error) {
             setUser(null);
@@ -42,34 +44,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
             setUser(JSON.parse(storedUser));
-            setLoading(false);
         }
 
-        // Restore session token
-        const storedSessionKey = localStorage.getItem('sessionKey');
-        if (storedSessionKey) {
-            apiClient.setSessionToken(storedSessionKey);
-        }
-
-        // Initialize Auth (CSRF + Me)
-        const initAuth = async () => {
-            try {
-                // Ensure CSRF cookie is set and get token string
-                const response = await apiClient.get<{ csrfToken: string }>('/api/auth/csrf/');
-                if (response.csrfToken) {
-                    apiClient.setCsrfToken(response.csrfToken);
-                }
-            } catch (err) {
-                console.warn('Failed to fetch CSRF token', err);
-            }
-            // Then verify with backend
-            checkAuth();
-        };
-        initAuth();
+        // Initialize Auth
+        // ApiClient constructor already loads tokens from localStorage.
+        // We just verify validity by fetching user.
+        checkAuth();
 
         const handleUnauthorized = () => {
             setUser(null);
             localStorage.removeItem('user');
+            // apiClient clears tokens internally on final failure, but we can ensure it here if we want
             setLoading(false);
         };
 
@@ -80,20 +65,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, []);
 
     const login = async (data: LoginData) => {
-        const response = await apiClient.post<{ user: User; message: string; csrfToken: string; sessionKey: string }>(
+        const response = await apiClient.post<{ user: User; access: string; refresh: string }>(
             '/api/auth/login/',
             data,
             { skipAuth: true }
         );
 
-        if (response.csrfToken) {
-            apiClient.setCsrfToken(response.csrfToken);
-        }
-
-        if (response.sessionKey) {
-            apiClient.setSessionToken(response.sessionKey);
-            localStorage.setItem('sessionKey', response.sessionKey);
-        }
+        apiClient.setTokens(response.access, response.refresh);
 
         setUser(response.user);
         localStorage.setItem('user', JSON.stringify(response.user));
@@ -110,20 +88,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     const verifyOTP = async (email: string, otpCode: string) => {
-        const response = await apiClient.post<{ user: User; message: string; csrfToken: string; sessionKey: string }>(
+        const response = await apiClient.post<{ user: User; access: string; refresh: string }>(
             '/api/auth/verify-otp/',
             { email, otp_code: otpCode },
             { skipAuth: true }
         );
 
-        if (response.csrfToken) {
-            apiClient.setCsrfToken(response.csrfToken);
-        }
-
-        if (response.sessionKey) {
-            apiClient.setSessionToken(response.sessionKey);
-            localStorage.setItem('sessionKey', response.sessionKey);
-        }
+        apiClient.setTokens(response.access, response.refresh);
 
         setUser(response.user);
         localStorage.setItem('user', JSON.stringify(response.user));
@@ -168,13 +139,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const logout = async () => {
         try {
-            await apiClient.post('/api/auth/logout/');
+            const refreshToken = localStorage.getItem('refreshToken');
+            if (refreshToken) {
+                await apiClient.post('/api/auth/logout/', { refresh: refreshToken });
+            }
         } catch (error) {
             console.error('Logout failed:', error);
         } finally {
+            apiClient.clearTokens();
             setUser(null);
             localStorage.removeItem('user');
-            localStorage.removeItem('sessionKey');
         }
     };
 

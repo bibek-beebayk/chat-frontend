@@ -16,39 +16,49 @@ export class ApiError extends Error {
 }
 
 class ApiClient {
-    // ... (previous members)
-
-    // ... (constructor and auth methods)
     private baseURL: string;
-    private csrfToken: string | null = null;
-    private sessionToken: string | null = null;
+    private accessToken: string | null = null;
+    private refreshToken: string | null = null;
+    private isRefreshing = false;
+    private failedQueue: any[] = [];
 
     constructor() {
         this.baseURL = API_URL;
-    }
-
-    public setCsrfToken(token: string) {
-        this.csrfToken = token;
-    }
-
-    public setSessionToken(token: string) {
-        this.sessionToken = token;
-    }
-
-    private getCookie(name: string): string | null {
-        if (typeof document === 'undefined') return null;
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
+        // Try to load from localStorage on init (optional, but helpful if static)
+        if (typeof window !== 'undefined') {
+            this.accessToken = localStorage.getItem('accessToken');
+            this.refreshToken = localStorage.getItem('refreshToken');
         }
-        return cookieValue;
+    }
+
+    public setTokens(access: string, refresh: string) {
+        this.accessToken = access;
+        this.refreshToken = refresh;
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('accessToken', access);
+            localStorage.setItem('refreshToken', refresh);
+        }
+    }
+
+    public clearTokens() {
+        this.accessToken = null;
+        this.refreshToken = null;
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user'); // Clean up user as well
+        }
+    }
+
+    private processQueue(error: any, token: string | null = null) {
+        this.failedQueue.forEach(prom => {
+            if (error) {
+                prom.reject(error);
+            } else {
+                prom.resolve(token);
+            }
+        });
+        this.failedQueue = [];
     }
 
     private isFormData(body: any): boolean {
@@ -57,7 +67,7 @@ class ApiClient {
 
     private async request<T>(
         endpoint: string,
-        options: RequestInit & { skipAuth?: boolean } = {}
+        options: RequestInit & { skipAuth?: boolean; _retry?: boolean } = {}
     ): Promise<T> {
         const url = `${this.baseURL}${endpoint}`;
 
@@ -69,32 +79,74 @@ class ApiClient {
             headers['Content-Type'] = 'application/json';
         }
 
-        const csrfToken = this.csrfToken || this.getCookie('csrftoken');
-        if (csrfToken) {
-            headers['X-CSRFToken'] = csrfToken;
-        }
-
-        if (this.sessionToken && !options.skipAuth) {
-            headers['Authorization'] = `Session ${this.sessionToken}`;
+        if (this.accessToken && !options.skipAuth) {
+            headers['Authorization'] = `Bearer ${this.accessToken}`;
         }
 
         const config: RequestInit = {
             ...options,
             headers,
-            credentials: 'include',
         };
 
         try {
             const response = await fetch(url, config);
-            const data = await response.json();
 
-            if (!response.ok) {
-                if (response.status === 401 || response.status === 403) {
-                    if (typeof window !== 'undefined') {
-                        window.dispatchEvent(new Event('auth:unauthorized'));
-                    }
+            // Handle 401 for Token Refresh
+            if (response.status === 401 && !options._retry && !options.skipAuth) {
+                if (this.isRefreshing) {
+                    return new Promise((resolve, reject) => {
+                        this.failedQueue.push({ resolve, reject });
+                    }).then(token => {
+                        // Retry with new token
+                        headers['Authorization'] = `Bearer ${token}`;
+                        return this.request<T>(endpoint, { ...options, headers });
+                    });
                 }
 
+                if (this.refreshToken) {
+                    options._retry = true;
+                    this.isRefreshing = true;
+
+                    try {
+                        const refreshResponse = await fetch(`${this.baseURL}/api/auth/token/refresh/`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ refresh: this.refreshToken }),
+                        });
+
+                        if (refreshResponse.ok) {
+                            const data = await refreshResponse.json();
+                            // Depending on backend, might return 'access' and/or 'refresh'
+                            const newAccess = data.access;
+                            const newRefresh = data.refresh || this.refreshToken; // Use old if not rotated, but settings say rotate
+
+                            this.setTokens(newAccess, newRefresh);
+                            this.isRefreshing = false;
+                            this.processQueue(null, newAccess);
+
+                            // Retry original
+                            return this.request<T>(endpoint, options);
+                        } else {
+                            // Refresh failed
+                            throw new Error('Refresh failed');
+                        }
+                    } catch (err) {
+                        this.isRefreshing = false;
+                        this.processQueue(err, null);
+                        this.clearTokens();
+                        if (typeof window !== 'undefined') {
+                            // Dispatch event for UI to redirect to login
+                            window.dispatchEvent(new Event('auth:unauthorized'));
+                        }
+                        throw new ApiError('Session expired', 401, 'session_expired');
+                    }
+                }
+            }
+
+
+            const data = await response.json().catch(() => ({})); // Handle empty responses
+
+            if (!response.ok) {
                 // Parse standard error format: { message, code, errors, ... }
                 // Fallback to legacy format if needed
                 const message = data.message || data.detail || data.error || 'An error occurred';
@@ -105,7 +157,6 @@ class ApiClient {
             }
 
             // Standard Response Unwrapping
-            // If the backend sends { status: 'success', data: ... }, unwrap it
             if (data && data.status === 'success' && data.data !== undefined) {
                 return data.data;
             }
