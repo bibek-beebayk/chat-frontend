@@ -2,11 +2,19 @@
 
 import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
-// Helper component to wrap SearchParams logic
+// High Rollin Theme Colors
+const THEME = {
+    primary: '#ffd700', // Gold
+    secondary: '#a371f7', // Purple Accent
+    bg: '#1a0b2e', // Deep Purple
+    text: '#ffffff',
+    glass: 'rgba(255, 255, 255, 0.1)',
+    glassBorder: 'rgba(255, 255, 255, 0.2)',
+};
+
 function SetPasswordForm() {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -22,6 +30,12 @@ function SetPasswordForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (password.length < 6) {
+            setErrorMsg("Password must be at least 6 characters.");
+            setStatus('error');
+            return;
+        }
 
         if (password !== confirmPassword) {
             setErrorMsg("Passwords do not match");
@@ -46,7 +60,6 @@ function SetPasswordForm() {
             if (data.access && data.refresh) {
                 localStorage.setItem('accessToken', data.access);
                 localStorage.setItem('refreshToken', data.refresh);
-                // Also setting cookie if your app uses it, but localStorage is common for JWT
             }
 
             setStatus('success');
@@ -65,58 +78,177 @@ function SetPasswordForm() {
 
     if (!uid || !token) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-                <p className="text-red-500">Invalid Link. Missing parameters.</p>
+            <div style={{
+                minHeight: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: THEME.bg,
+                color: THEME.text
+            }}>
+                <div style={{
+                    padding: '2rem',
+                    background: THEME.glass,
+                    border: `1px solid ${THEME.glassBorder}`,
+                    borderRadius: '1rem',
+                    backdropFilter: 'blur(10px)',
+                    textAlign: 'center'
+                }}>
+                    <p style={{ color: '#ff6b6b' }}>Invalid Link. Missing parameters.</p>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-[#1a0b2e] text-white p-4">
-            <div className="w-full max-w-md p-8 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 shadow-xl">
-                <h1 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-[#ffd700] to-[#fffacD] bg-clip-text text-transparent">
-                    Complete Setup
-                </h1>
+        <div style={{
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: `linear-gradient(135deg, ${THEME.bg} 0%, #000000 100%)`,
+            color: THEME.text,
+            padding: '1rem'
+        }}>
+            <div style={{
+                width: '100%',
+                maxWidth: '450px',
+                padding: '2.5rem',
+                background: THEME.glass,
+                backdropFilter: 'blur(16px)',
+                borderRadius: '1.5rem',
+                border: `1px solid ${THEME.glassBorder}`,
+                boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+            }}>
+                <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+                    <h1 style={{
+                        fontSize: '2rem',
+                        fontWeight: 'bold',
+                        marginBottom: '0.5rem',
+                        background: `linear-gradient(to right, ${THEME.primary}, #fffacD)`,
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text'
+                    }}>
+                        Complete Setup
+                    </h1>
+                    <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.95rem' }}>
+                        Set your secure password to verify your account.
+                    </p>
+                </div>
 
                 {status === 'success' ? (
-                    <div className="text-center">
-                        <h2 className="text-xl text-green-400 mb-2">Password Set!</h2>
-                        <p className="text-gray-300">Redirecting you to the event...</p>
+                    <div style={{ textAlign: 'center', padding: '2rem 0' }}>
+                        <div style={{
+                            fontSize: '4rem',
+                            marginBottom: '1rem',
+                            animation: 'fadeIn 0.5s ease-out'
+                        }}>🎉</div>
+                        <h2 style={{ color: '#4ade80', marginBottom: '0.5rem', fontSize: '1.5rem' }}>Success!</h2>
+                        <p style={{ color: 'rgba(255,255,255,0.8)' }}>Redirecting you to the event...</p>
                     </div>
                 ) : (
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                         <div>
-                            <label className="block text-sm font-medium text-[#ffd700] mb-1">New Password</label>
+                            <label style={{
+                                display: 'block',
+                                marginBottom: '0.5rem',
+                                color: THEME.primary,
+                                fontSize: '0.9rem',
+                                fontWeight: '600',
+                                letterSpacing: '0.5px'
+                            }}>
+                                NEW PASSWORD
+                            </label>
                             <input
                                 type="password"
                                 required
+                                minLength={6}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full p-3 rounded-lg bg-black/30 border border-[#ffd700]/30 text-white focus:outline-none focus:border-[#ffd700]"
+                                placeholder="Min. 6 characters"
+                                style={{
+                                    width: '100%',
+                                    padding: '1rem',
+                                    borderRadius: '0.75rem',
+                                    background: 'rgba(0, 0, 0, 0.4)',
+                                    border: `1px solid ${THEME.glassBorder}`,
+                                    color: 'white',
+                                    fontSize: '1rem',
+                                    outline: 'none',
+                                    transition: 'border-color 0.2s'
+                                }}
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-[#ffd700] mb-1">Confirm Password</label>
+                            <label style={{
+                                display: 'block',
+                                marginBottom: '0.5rem',
+                                color: THEME.primary,
+                                fontSize: '0.9rem',
+                                fontWeight: '600',
+                                letterSpacing: '0.5px'
+                            }}>
+                                CONFIRM PASSWORD
+                            </label>
                             <input
                                 type="password"
                                 required
+                                minLength={6}
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full p-3 rounded-lg bg-black/30 border border-[#ffd700]/30 text-white focus:outline-none focus:border-[#ffd700]"
+                                placeholder="Re-enter password"
+                                style={{
+                                    width: '100%',
+                                    padding: '1rem',
+                                    borderRadius: '0.75rem',
+                                    background: 'rgba(0, 0, 0, 0.4)',
+                                    border: `1px solid ${THEME.glassBorder}`,
+                                    color: 'white',
+                                    fontSize: '1rem',
+                                    outline: 'none',
+                                    transition: 'border-color 0.2s'
+                                }}
                             />
                         </div>
 
                         {status === 'error' && (
-                            <p className="text-red-400 text-sm text-center bg-red-500/10 p-2 rounded">{errorMsg}</p>
+                            <div style={{
+                                padding: '1rem',
+                                borderRadius: '0.75rem',
+                                background: 'rgba(239, 68, 68, 0.2)',
+                                border: '1px solid rgba(239, 68, 68, 0.3)',
+                                color: '#fca5a5',
+                                textAlign: 'center',
+                                fontSize: '0.9rem'
+                            }}>
+                                {errorMsg}
+                            </div>
                         )}
 
                         <button
                             type="submit"
                             disabled={status === 'loading'}
-                            className="w-full py-3 px-6 rounded-full bg-gradient-to-r from-[#ffd700] to-[#ffb900] text-[#1a0b2e] font-bold uppercase transition hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={{
+                                width: '100%',
+                                padding: '1rem',
+                                borderRadius: '0.75rem',
+                                background: `linear-gradient(to right, ${THEME.primary}, #ffa500)`,
+                                color: '#1a0b2e',
+                                fontWeight: 'bold',
+                                fontSize: '1rem',
+                                textTransform: 'uppercase',
+                                border: 'none',
+                                cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+                                opacity: status === 'loading' ? 0.7 : 1,
+                                marginTop: '0.5rem',
+                                boxShadow: '0 4px 12px rgba(255, 215, 0, 0.3)',
+                                transition: 'transform 0.1s'
+                            }}
                         >
-                            {status === 'loading' ? 'Setting Password...' : 'Set Password & Enter'}
+                            {status === 'loading' ? 'Processing...' : 'Set Password'}
                         </button>
                     </form>
                 )}
@@ -127,7 +259,7 @@ function SetPasswordForm() {
 
 export default function SetPasswordPage() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div style={{ color: 'white', textAlign: 'center', paddingTop: '100px' }}>Loading...</div>}>
             <SetPasswordForm />
         </Suspense>
     );
