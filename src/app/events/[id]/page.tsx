@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL;
+
 interface EventData {
     id: number;
     title: string;
@@ -28,7 +30,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
 
             try {
                 // Use the ID from params
-                const res = await fetch(`https://betunnel.worldstories.net/api/events/latest/`, { // Ideally fetching specific ID, but for now latest works/is exposed
+                const res = await fetch(`${API_BASE}/api/events/latest/`, { // Ideally fetching specific ID, but for now latest works/is exposed
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -85,7 +87,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
                             {event.poster && (
                                 <div className="rounded-xl overflow-hidden border border-[#ffd700]/30 shadow-2xl">
                                     <img
-                                        src={event.poster.startsWith('http') ? event.poster : `https://betunnel.worldstories.net${event.poster}`}
+                                        src={event.poster.startsWith('http') ? event.poster : `${API_BASE}${event.poster}`}
                                         alt={event.title}
                                         className="w-full h-auto object-cover"
                                     />

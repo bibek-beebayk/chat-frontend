@@ -4,6 +4,8 @@ import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL;
+
 // Helper component to wrap SearchParams logic
 function SetPasswordForm() {
     const searchParams = useSearchParams();
@@ -31,7 +33,7 @@ function SetPasswordForm() {
         setErrorMsg('');
 
         try {
-            const res = await fetch('https://betunnel.worldstories.net/api/events/set-password/', {
+            const res = await fetch(`${API_BASE}/api/events/set-password/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ uid, token, password, confirm_password: confirmPassword }),
