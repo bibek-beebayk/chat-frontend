@@ -25,6 +25,7 @@ export interface Room {
     is_staff_online?: boolean;
     queue?: number;
     queue_name?: string;
+    queue_type?: string;
     can_switch_station?: boolean;
 }
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Header } from '@/components/layout/Header';
 import { useWebSocket } from '@/hooks/useWebSocket';
@@ -247,9 +247,16 @@ export default function ChatPage() {
         }
     }, [user, authLoading, router]);
 
+    const searchParams = useSearchParams();
+
+    // ... (existing code)
+
     const fetchRooms = async () => {
         try {
-            const data = await apiClient.get<Room[]>('/api/rooms/');
+            const roomType = searchParams.get('room_type');
+            const url = roomType ? `/api/rooms/?room_type=${roomType}` : '/api/rooms/';
+
+            const data = await apiClient.get<Room[]>(url);
             setRooms(data);
             // Auto-select first room if none selected
             if (data.length > 0 && !selectedRoom) {

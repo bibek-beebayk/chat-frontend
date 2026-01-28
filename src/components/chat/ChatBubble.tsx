@@ -19,9 +19,11 @@ export const ChatBubble: React.FC = () => {
         return null;
     }
 
+    const isEventPage = pathname?.startsWith('/events/');
+
     return (
         <button
-            onClick={() => router.push('/chat')}
+            onClick={() => router.push(isEventPage ? '/chat?room_type=event' : '/chat')}
             style={{
                 position: 'fixed',
                 bottom: '2rem',
