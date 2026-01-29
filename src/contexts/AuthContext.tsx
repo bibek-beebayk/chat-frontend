@@ -15,6 +15,9 @@ interface AuthContextType {
     resendOTP: (email: string) => Promise<void>;
     verifyUserID: (userId: string, otp: string) => Promise<User>;
     initiateVerificationRequest: () => Promise<void>;
+    forgotPasswordInit: (email: string) => Promise<void>;
+    forgotPasswordVerify: (email: string, otpCode: string) => Promise<string>;
+    forgotPasswordConfirm: (resetToken: string, newPassword: string, confirmNewPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -137,6 +140,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         throw new Error('User not found in state');
     };
 
+    const forgotPasswordInit = async (email: string) => {
+        await apiClient.post('/api/auth/forgot-password/initiate/', { email }, { skipAuth: true });
+    };
+
+    const forgotPasswordVerify = async (email: string, otpCode: string) => {
+        const response = await apiClient.post<{ reset_token: string }>(
+            '/api/auth/forgot-password/verify-otp/',
+            { email, otp_code: otpCode },
+            { skipAuth: true }
+        );
+        return response.reset_token;
+    };
+
+    const forgotPasswordConfirm = async (resetToken: string, newPassword: string, confirmNewPassword: string) => {
+        await apiClient.post(
+            '/api/auth/forgot-password/complete/',
+            { reset_token: resetToken, new_password: newPassword, confirm_new_password: confirmNewPassword },
+            { skipAuth: true }
+        );
+    };
+
     const logout = async () => {
         try {
             const refreshToken = localStorage.getItem('refreshToken');
@@ -163,7 +187,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             verifyOTP,
             resendOTP,
             verifyUserID,
-            initiateVerificationRequest
+            initiateVerificationRequest,
+            forgotPasswordInit,
+            forgotPasswordVerify,
+            forgotPasswordConfirm
         }}>
             {children}
         </AuthContext.Provider>

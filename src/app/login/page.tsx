@@ -8,11 +8,14 @@ import { Input } from '@/components/forms/Input';
 import { Button } from '@/components/forms/Button';
 import styles from './page.module.css';
 
+import ForgotPasswordModal from '@/components/auth/ForgotPasswordModal';
+
 function LoginPageContent() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
     const { login } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -73,6 +76,17 @@ function LoginPageContent() {
                         required
                     />
 
+                    <div style={{ textAlign: 'right', marginBottom: '1rem' }}>
+                        <button
+                            type="button"
+                            onClick={() => setIsForgotModalOpen(true)}
+                            className={styles.link}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}
+                        >
+                            Forgot Password?
+                        </button>
+                    </div>
+
                     <Button
                         type="submit"
                         variant="primary"
@@ -90,6 +104,11 @@ function LoginPageContent() {
                     </div>
                 </form>
             </div>
+
+            <ForgotPasswordModal
+                isOpen={isForgotModalOpen}
+                onClose={() => setIsForgotModalOpen(false)}
+            />
         </div>
     );
 }
