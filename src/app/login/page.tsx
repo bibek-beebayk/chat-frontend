@@ -1,20 +1,21 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/forms/Input';
 import { Button } from '@/components/forms/Button';
 import styles from './page.module.css';
 
-export default function LoginPage() {
+function LoginPageContent() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -23,6 +24,14 @@ export default function LoginPage() {
 
         try {
             const userData = await login({ username, password });
+
+            // Check for redirect param
+            const nextUrl = searchParams.get('next');
+            if (nextUrl) {
+                router.push(nextUrl);
+                return;
+            }
+
             if (userData?.user_type === 'staff') {
                 router.push('/staff-dashboard');
             } else {
@@ -82,5 +91,13 @@ export default function LoginPage() {
                 </form>
             </div>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <LoginPageContent />
+        </Suspense>
     );
 }
