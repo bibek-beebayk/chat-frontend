@@ -3,6 +3,7 @@
 import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { apiClient } from '@/lib/api';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
@@ -58,10 +59,9 @@ function SetPasswordForm() {
 
             if (!res.ok) throw new Error(data.error || 'Failed to set password');
 
-            // Auto Login - Store Tokens
+            // Auto Login - Store Tokens via apiClient to ensure it knows about them
             if (data.access && data.refresh) {
-                localStorage.setItem('accessToken', data.access);
-                localStorage.setItem('refreshToken', data.refresh);
+                apiClient.setTokens(data.access, data.refresh);
 
                 // FORCE AUTH STATE UPDATE
                 await checkAuth();
