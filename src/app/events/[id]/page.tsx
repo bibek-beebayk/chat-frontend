@@ -163,7 +163,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
         // Re-fetch user to update verification status visually if needed
         await checkAuth();
 
-        showMessage("Verification Successful", "You have been successfully verified! You can now check your eligibility."); // Use Modal
+        showMessage("Verification Request Submitted", "Your Verification request has been submitted. Please check back later to proceed further."); // Use Modal
     };
 
     // Render Logic for Button
