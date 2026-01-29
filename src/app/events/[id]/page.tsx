@@ -20,6 +20,8 @@ interface EventData {
     eligibility_status?: 'pending' | 'approved' | 'rejected' | null;
 }
 
+import { Modal } from '@/components/ui/Modal'; // Import Modal
+
 export default function EventPage({ params }: { params: { id: string } }) {
     const router = useRouter();
     const { user, checkAuth } = useAuth(); // Use global auth state
@@ -28,8 +30,19 @@ export default function EventPage({ params }: { params: { id: string } }) {
     const [error, setError] = useState('');
     const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
 
+    // Message Modal State
+    const [msgModal, setMsgModal] = useState({ isOpen: false, title: '', message: '' });
+
     const [registerStatus, setRegisterStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [registerError, setRegisterError] = useState('');
+
+    const showMessage = (title: string, message: string) => {
+        setMsgModal({ isOpen: true, title, message });
+    };
+
+    const closeMessage = () => {
+        setMsgModal(prev => ({ ...prev, isOpen: false }));
+    };
 
     useEffect(() => {
         const fetchEvent = async () => {
@@ -71,7 +84,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
 
             if (data.status === 'pending') {
                 setEvent(prev => prev ? { ...prev, eligibility_status: 'pending' } : null);
-                alert(data.message);
+                showMessage("Eligibility Check", data.message); // Use Modal
                 setRegisterStatus('idle');
                 return;
             }
@@ -150,7 +163,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
         // Re-fetch user to update verification status visually if needed
         await checkAuth();
 
-        alert("Verification successful! You can now check eligibility.");
+        showMessage("Verification Successful", "You have been successfully verified! You can now check your eligibility."); // Use Modal
     };
 
     // Render Logic for Button
@@ -324,6 +337,14 @@ export default function EventPage({ params }: { params: { id: string } }) {
                     onInitiate={handleVerifyInitiate}
                     onVerify={handleVerifySubmit}
                 />
+
+                <Modal
+                    isOpen={msgModal.isOpen}
+                    onClose={closeMessage}
+                    title={msgModal.title}
+                >
+                    <p style={{ color: '#e0e0e0' }}>{msgModal.message}</p>
+                </Modal>
             </div>
         </div>
     );
