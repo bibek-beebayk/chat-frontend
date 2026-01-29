@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
@@ -18,6 +19,7 @@ const THEME = {
 function SetPasswordForm() {
     const searchParams = useSearchParams();
     const router = useRouter();
+    const { checkAuth } = useAuth();
 
     const uid = searchParams.get('uid');
     const token = searchParams.get('token');
@@ -60,6 +62,9 @@ function SetPasswordForm() {
             if (data.access && data.refresh) {
                 localStorage.setItem('accessToken', data.access);
                 localStorage.setItem('refreshToken', data.refresh);
+
+                // FORCE AUTH STATE UPDATE
+                await checkAuth();
             }
 
             setStatus('success');
