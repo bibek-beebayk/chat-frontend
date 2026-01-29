@@ -3,18 +3,9 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import VerifyUserIDModal from '@/components/settings/VerifyUserIDModal';
+import styles from './page.module.css';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL;
-
-// High Rollin Theme Colors
-const THEME = {
-    primary: '#ffd700', // Gold
-    secondary: '#a371f7', // Purple Accent
-    bg: '#1a0b2e', // Deep Purple
-    text: '#ffffff',
-    glass: 'rgba(255, 255, 255, 0.1)',
-    glassBorder: 'rgba(255, 255, 255, 0.2)',
-};
 
 interface EventData {
     id: number;
@@ -56,7 +47,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
 
             try {
                 // Use the ID from params
-                const res = await fetch(`${API_BASE}/api/events/latest/`, { // Ideally fetching specific ID, but for now latest works/is exposed
+                const res = await fetch(`${API_BASE}/api/events/latest/`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -72,11 +63,10 @@ export default function EventPage({ params }: { params: { id: string } }) {
                 }
 
                 const data = await res.json();
-                // API might return wrapped response { status: 'success', data: { ... } }
                 const eventData = data.data || data;
                 setEvent(eventData);
 
-                // 2. Fetch User Profile
+                // Fetch User Profile
                 const userRes = await fetch(`${API_BASE}/api/auth/me/`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -113,7 +103,6 @@ export default function EventPage({ params }: { params: { id: string } }) {
             });
 
             if (!eligibilityRes.ok) {
-                // If the endpoint fails (e.g. 500 or 400), handle it gracefully
                 const data = await eligibilityRes.json();
                 throw new Error(data.error || 'Failed to check eligibility');
             }
@@ -123,7 +112,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
 
             if (!eligibilityData.eligible) {
                 setRegisterStatus('error');
-                setRegisterError("You are not eligible to participate in this event. Please check the eligibility criteria in the details. You can come here again after fulfilling the criteria.");
+                setRegisterError("You are not eligible to participate in this event (Verification Required).");
                 return;
             }
 
@@ -141,9 +130,8 @@ export default function EventPage({ params }: { params: { id: string } }) {
 
             if (!res.ok) {
                 const msg = data.error || data.message || 'Registration failed';
-
                 if (msg.toLowerCase().includes('verified')) {
-                    setRegisterError('Verification required');
+                    setRegisterError('Verification required to participate.');
                 } else {
                     setRegisterError(msg);
                 }
@@ -182,10 +170,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                user_id: userId,
-                otp: otp
-            })
+            body: JSON.stringify({ user_id: userId, otp: otp })
         });
         if (!res.ok) {
             const data = await res.json();
@@ -195,284 +180,136 @@ export default function EventPage({ params }: { params: { id: string } }) {
         setIsVerifyModalOpen(false);
         setRegisterStatus('idle');
         setRegisterError('');
-        alert("Verification successful! You can now register for the event.");
+
+        // Re-fetch user to update verification status visually if needed
+        const userRes = await fetch(`${API_BASE}/api/auth/me/`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (userRes.ok) {
+            const userData = await userRes.json();
+            setUser(userData);
+        }
+
+        alert("Verification successful! You can now check eligibility.");
     };
 
     if (loading) return (
-        <div style={{
-            minHeight: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: `linear-gradient(135deg, ${THEME.bg} 0%, #000000 100%)`,
-            color: 'white',
-            fontFamily: 'sans-serif'
-        }}>
+        <div className={styles.container} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <p>Loading Event...</p>
         </div>
     );
 
     if (error) return (
-        <div style={{
-            minHeight: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: `linear-gradient(135deg, ${THEME.bg} 0%, #000000 100%)`,
-            color: '#ef4444'
-        }}>
-            <div style={{
-                padding: '2rem',
-                background: 'rgba(239, 68, 68, 0.1)',
-                border: '1px solid rgba(239, 68, 68, 0.2)',
-                borderRadius: '1rem',
-                backdropFilter: 'blur(10px)'
-            }}>
-                {error}
-            </div>
+        <div className={styles.container} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <div className={styles.errorBox}>{error}</div>
         </div>
     );
 
     return (
-        <div style={{
-            minHeight: '100vh',
-            background: `linear-gradient(135deg, ${THEME.bg} 0%, #000000 100%)`,
-            color: THEME.text,
-            padding: '2rem',
-            fontFamily: 'sans-serif'
-        }}>
-            <div style={{
-                maxWidth: '1200px',
-                margin: '0 auto',
-            }}>
-                <header style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    paddingBottom: '2rem',
-                    marginBottom: '2rem',
-                    borderBottom: `1px solid ${THEME.glassBorder}`
-                }}>
-                    <h1 style={{
-                        fontSize: '1.5rem',
-                        fontWeight: 'bold',
-                        color: THEME.primary,
-                        letterSpacing: '2px',
-                        textTransform: 'uppercase'
-                    }}>
-                        HIGH ROLLIN
-                    </h1>
-                    <button
-                        onClick={() => {
-                            localStorage.removeItem('accessToken');
-                            localStorage.removeItem('refreshToken');
-                            router.push('/login');
-                        }}
-                        style={{
-                            background: 'transparent',
-                            color: 'rgba(255,255,255,0.6)',
-                            border: `1px solid ${THEME.glassBorder}`,
-                            padding: '0.5rem 1rem',
-                            borderRadius: '0.5rem',
-                            cursor: 'pointer',
-                            fontSize: '0.9rem',
-                            transition: 'all 0.2s',
-                        }}
-                        onMouseOver={(e) => {
-                            e.currentTarget.style.color = 'white';
-                            e.currentTarget.style.borderColor = 'white';
-                        }}
-                        onMouseOut={(e) => {
-                            e.currentTarget.style.color = 'rgba(255,255,255,0.6)';
-                            e.currentTarget.style.borderColor = THEME.glassBorder;
-                        }}
-                    >
-                        Sign Out
-                    </button>
+        <div className={styles.container}>
+            <div className={styles.contentWrapper}>
+                <header className={styles.header}>
+                    <div className={styles.logoContainer}>
+                        <div style={{ fontSize: '3rem' }}>🌸</div> {/* Placeholder Logo Icon */}
+                        <div className={styles.logoText}>Serving the Community</div>
+
+                        <div className={styles.rewardBadge}>
+                            🎁 Community Reward Pool
+                        </div>
+                    </div>
+
+                    <h1 className={styles.title}>Valentine Giveaway</h1>
+                    <div className={styles.subtitle}>A Community Appreciation Event</div>
+
+                    {event && (
+                        <div className={styles.period}>
+                            Participation Period: {new Date(event.start_date).toLocaleDateString()} – {new Date(event.end_date).toLocaleDateString()}
+                        </div>
+                    )}
+
+                    <p className={styles.description}>
+                        This Valentine's season, Rollin Community is hosting a limited-time appreciation
+                        event created to celebrate and reward active community members.
+                    </p>
                 </header>
 
-                {event && (
-                    <main style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                        gap: '3rem',
-                        alignItems: 'start'
-                    }}>
-                        {/* Poster Section */}
-                        <div style={{
-                            position: 'relative',
-                            borderRadius: '1.5rem',
-                            overflow: 'hidden',
-                            boxShadow: `0 20px 40px -10px rgba(0,0,0,0.5)`,
-                            border: `1px solid ${THEME.primary}`,
-                        }}>
-                            {event.poster && (
-                                <img
-                                    src={event.poster.startsWith('http') ? event.poster : `${API_BASE}${event.poster}`}
-                                    alt={event.title}
-                                    style={{
-                                        width: '100%',
-                                        height: 'auto',
-                                        display: 'block',
-                                        objectFit: 'cover'
-                                    }}
-                                />
-                            )}
+                <main>
+                    {/* Card 1: How Participation Works */}
+                    <div className={styles.card}>
+                        <h2 className={styles.cardTitle}>How Participation Works</h2>
+                        <ul className={styles.list}>
+                            <li>Participation is open to community members</li>
+                            <li>Entry requires verification of your game UserID</li>
+                            <li>Participation is based on overall activity during the event period</li>
+                            <li>Rewards increase progressively with higher activity</li>
+                        </ul>
+                    </div>
+
+                    {/* Card 2: Reward Progression */}
+                    <div className={styles.card}>
+                        <h2 className={styles.cardTitle}>Reward Progression</h2>
+
+                        <div className={styles.progressionContainer}>
+                            <div className={styles.progressionLine}></div>
+
+                            <div className={styles.step}>
+                                <div className={`${styles.heart} ${styles.starter}`}>♥</div>
+                                <span className={styles.stepLabel}>Starter</span>
+                            </div>
+
+                            <div className={styles.step}>
+                                <div className={`${styles.heart} ${styles.active}`}>♥</div>
+                                <span className={styles.stepLabel}>Active</span>
+                            </div>
+
+                            <div className={styles.step}>
+                                <div className={`${styles.heart} ${styles.high}`}>♥</div>
+                                <span className={styles.stepLabel}>High Activity</span>
+                            </div>
+
+                            <div className={styles.step}>
+                                <div className={`${styles.heart} ${styles.premium}`}>♥</div>
+                                <span className={styles.stepLabel}>Premium</span>
+                            </div>
                         </div>
+                    </div>
 
-                        {/* Details Section */}
-                        <div style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'center',
-                            height: '100%'
-                        }}>
-                            <h2 style={{
-                                fontSize: '4rem',
-                                fontWeight: '800',
-                                lineHeight: '1',
-                                marginBottom: '1.5rem',
-                                background: `linear-gradient(to right, ${THEME.primary}, #fffacD)`,
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent',
-                                backgroundClip: 'text',
-                                textShadow: '0 4px 12px rgba(255, 215, 0, 0.2)'
-                            }}>
-                                {event.title}
-                            </h2>
-
-                            <div style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '1rem',
-                                color: THEME.primary,
-                                fontSize: '1.1rem',
-                                fontWeight: '600',
-                                marginBottom: '2rem',
-                                padding: '1rem 0',
-                                borderTop: `1px solid ${THEME.glassBorder}`,
-                                borderBottom: `1px solid ${THEME.glassBorder}`
-                            }}>
-                                <span>📅 {new Date(event.start_date).toDateString()}</span>
-                                <span style={{ opacity: 0.5 }}>|</span>
-                                <span>🏁 {new Date(event.end_date).toDateString()}</span>
-                            </div>
-
-                            <div style={{
-                                padding: '2rem',
-                                background: THEME.glass,
-                                backdropFilter: 'blur(12px)',
-                                borderRadius: '1.5rem',
-                                border: `1px solid ${THEME.glassBorder}`,
-                                marginBottom: '2rem'
-                            }}>
-                                <p style={{
-                                    color: 'rgba(255,255,255,0.85)',
-                                    lineHeight: '1.8',
-                                    fontSize: '1.1rem',
-                                    whiteSpace: 'pre-wrap' // Preserve line breaks
-                                }}>
-                                    {event.description}
-                                </p>
-                            </div>
-
-                            {/* REGISTRATION ACTIONS */}
-                            {event.is_registered ? (
-                                <div style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '0.75rem',
-                                    background: 'rgba(74, 222, 128, 0.1)',
-                                    border: '1px solid rgba(74, 222, 128, 0.3)',
-                                    padding: '1.25rem',
-                                    borderRadius: '1rem',
-                                    color: '#4ade80',
-                                    fontWeight: '500',
-                                    fontSize: '1rem',
-                                    boxShadow: '0 4px 12px rgba(74, 222, 128, 0.1)'
-                                }}>
-                                    <span style={{ fontSize: '1.25rem' }}>✓</span>
-                                    Since you are already registered, you are all set!
-                                </div>
-                            ) : (
-                                <div style={{ textAlign: 'center' }}>
-                                    {registerStatus === 'error' && (
-                                        <div style={{
-                                            background: 'rgba(255, 107, 107, 0.1)',
-                                            border: '1px solid rgba(255, 107, 107, 0.3)',
-                                            padding: '1rem',
-                                            borderRadius: '0.75rem',
-                                            color: '#ff8787',
-                                            marginBottom: '1rem',
-                                            fontSize: '0.95rem'
-                                        }}>
-                                            {registerError === 'Verification required' ? (
-                                                <>
-                                                    <p style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>Verification Required</p>
-                                                    {user?.verification_status === 'pending' ? (
-                                                        <div style={{
-                                                            marginTop: '0.5rem',
-                                                            background: 'rgba(255, 215, 0, 0.1)',
-                                                            border: '1px solid rgba(255, 215, 0, 0.3)',
-                                                            color: '#ffd700',
-                                                            padding: '0.5rem 1rem',
-                                                            borderRadius: '0.5rem',
-                                                            fontSize: '0.9rem'
-                                                        }}>
-                                                            Verification Pending. Please wait for admin approval.
-                                                        </div>
-                                                    ) : (
-                                                        <>
-                                                            <p>You need to verify your account to register.</p>
-                                                            <button
-                                                                onClick={() => setIsVerifyModalOpen(true)}
-                                                                style={{
-                                                                    marginTop: '0.5rem',
-                                                                    background: 'transparent',
-                                                                    border: '1px solid #ff8787',
-                                                                    color: '#ff8787',
-                                                                    padding: '0.25rem 0.75rem',
-                                                                    borderRadius: '0.5rem',
-                                                                    cursor: 'pointer',
-                                                                    fontSize: '0.85rem'
-                                                                }}
-                                                            >
-                                                                Verify Now
-                                                            </button>
-                                                        </>
-                                                    )}
-                                                </>
-                                            ) : (
-                                                registerError
-                                            )}
-                                        </div>
-                                    )}
-
+                    {/* Feedback / Error Area */}
+                    {registerError && (
+                        <div className={styles.errorBox}>
+                            {registerError}
+                            {registerError.includes('Verification') && (
+                                <div style={{ marginTop: '0.5rem' }}>
                                     <button
-                                        onClick={handleRegister}
-                                        disabled={registerStatus === 'loading'}
-                                        style={{
-                                            padding: '1rem 3rem',
-                                            borderRadius: '0.75rem',
-                                            background: `linear-gradient(to right, ${THEME.primary}, #ffa500)`,
-                                            color: '#1a0b2e',
-                                            fontWeight: '800',
-                                            fontSize: '1.2rem',
-                                            border: 'none',
-                                            cursor: registerStatus === 'loading' ? 'not-allowed' : 'pointer',
-                                            boxShadow: '0 4px 15px rgba(255, 215, 0, 0.3)',
-                                            transition: 'transform 0.1s',
-                                            opacity: registerStatus === 'loading' ? 0.7 : 1
-                                        }}
+                                        onClick={() => setIsVerifyModalOpen(true)}
+                                        style={{ background: 'transparent', border: '1px solid currentColor', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', color: 'inherit' }}
                                     >
-                                        {registerStatus === 'loading' ? 'Registering...' : 'REGISTER FOR EVENT'}
+                                        Verify Now
                                     </button>
                                 </div>
                             )}
                         </div>
-                    </main>
-                )}
+                    )}
+
+                    {/* Action Button */}
+                    {event?.is_registered ? (
+                        <button className={styles.checkBtn} style={{ background: '#4ade80', cursor: 'default' }} disabled>
+                            ✓ You are Registered!
+                        </button>
+                    ) : (
+                        <button
+                            className={styles.checkBtn}
+                            onClick={handleRegister}
+                            disabled={registerStatus === 'loading'}
+                        >
+                            {registerStatus === 'loading' ? 'Checking...' : 'Check Eligibility'}
+                        </button>
+                    )}
+
+                    <div className={styles.footer}>
+                        Sponsored by Hi-Rollin
+                    </div>
+                </main>
 
                 <VerifyUserIDModal
                     isOpen={isVerifyModalOpen}

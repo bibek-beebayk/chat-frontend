@@ -1,0 +1,262 @@
+/* Valentine Theme Variables */
+.container {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #ffeef2 0%, #fff0f3 100%);
+    color: #4a4a4a;
+    font-family: 'Inter', sans-serif;
+    padding: 2rem 1rem;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Background Shapes (Optional, for soft feel) */
+.container::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255, 182, 193, 0.4) 0%, rgba(255, 255, 255, 0) 70%);
+    border-radius: 50%;
+    z-index: 0;
+}
+
+.contentWrapper {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+/* Header */
+.header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.logoContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.logoText {
+    font-size: 0.9rem;
+    color: #888;
+    margin-top: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Floating Gift Box Badge */
+.rewardBadge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.8rem;
+    color: #a85d5d;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(4px);
+    padding: 0.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #d15d5d;
+    /* Darker soft red */
+    margin: 0.5rem 0;
+    line-height: 1.2;
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: #333;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.period {
+    font-size: 0.95rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.description {
+    text-align: center;
+    color: #555;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+/* Cards */
+.card {
+    background: white;
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 10px 30px rgba(209, 93, 93, 0.1);
+    /* Soft red shadow */
+}
+
+.cardTitle {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 1rem;
+}
+
+.list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.list li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: #4a4a4a;
+    line-height: 1.5;
+}
+
+.list li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #d15d5d;
+    font-weight: bold;
+}
+
+/* Progress Section */
+.progressionContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    position: relative;
+    padding: 0 1rem;
+}
+
+/* Connecting Line */
+.progressionLine {
+    position: absolute;
+    top: 35%;
+    /* Adjust based on heart height */
+    left: 2rem;
+    right: 2rem;
+    height: 6px;
+    background: #fbd5d5;
+    border-radius: 3px;
+    z-index: 0;
+}
+
+.step {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.heart {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transition: transform 0.2s;
+    /* Create heart shape via CSS or use Emoji/SVG. Using simple style for now */
+    background: white;
+    border-radius: 50%;
+    /* Circle for now, can perform CSS heart */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 0.5rem;
+}
+
+/* Heart Colors */
+.heart.starter {
+    color: #fecaca;
+}
+
+/* Light Pink */
+.heart.active {
+    color: #fca5a5;
+}
+
+/* Pink */
+.heart.high {
+    color: #ef4444;
+    transform: scale(1.2);
+}
+
+/* Red and Larger */
+.heart.premium {
+    color: #b91c1c;
+}
+
+/* Dark Red */
+
+.stepLabel {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Action Button */
+.checkBtn {
+    width: 100%;
+    padding: 1rem;
+    background: #d66d6d;
+    /* Salmon/Red */
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(214, 109, 109, 0.3);
+    transition: transform 0.2s, background 0.2s;
+    margin-top: 1rem;
+}
+
+.checkBtn:hover {
+    background: #c55a5a;
+    transform: translateY(-2px);
+}
+
+.checkBtn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    margin-top: 2rem;
+    color: #999;
+    font-size: 0.9rem;
+}
+
+.errorBox {
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #ef4444;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+/* Verify Modal styling needs to be compatible or extracted? 
+   Existing modal likely uses fixed positioning so it's fine. 
+*/
