@@ -4,6 +4,8 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import VerifyUserIDModal from '@/components/settings/VerifyUserIDModal';
 import styles from './page.module.css';
+import { useAuth } from '@/contexts/AuthContext';
+import { apiClient } from '@/lib/api';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
@@ -15,20 +17,13 @@ interface EventData {
     end_date: string;
     poster: string | null;
     is_registered?: boolean;
-}
-
-interface UserData {
-    id: number;
-    username: string;
-    email: string;
-    is_verified: boolean;
-    verification_status: string | null;
+    eligibility_status?: 'pending' | 'approved' | 'rejected' | null;
 }
 
 export default function EventPage({ params }: { params: { id: string } }) {
     const router = useRouter();
+    const { user, checkAuth } = useAuth(); // Use global auth state
     const [event, setEvent] = useState<EventData | null>(null);
-    const [user, setUser] = useState<UserData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
@@ -38,112 +33,83 @@ export default function EventPage({ params }: { params: { id: string } }) {
 
     useEffect(() => {
         const fetchEvent = async () => {
-            const token = localStorage.getItem('accessToken');
-            if (!token) {
-                const currentPath = window.location.pathname + window.location.search;
-                router.push(`/login?next=${encodeURIComponent(currentPath)}`);
-                return;
-            }
-
             try {
-                // Use the ID from params
-                const res = await fetch(`${API_BASE}/api/events/latest/`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!res.ok) {
-                    if (res.status === 401) {
-                        const currentPath = window.location.pathname + window.location.search;
-                        router.push(`/login?next=${encodeURIComponent(currentPath)}`);
-                        return;
-                    }
-                    throw new Error('Failed to load event');
-                }
-
-                const data = await res.json();
-                const eventData = data.data || data;
-                setEvent(eventData);
-
-                // Fetch User Profile
-                const userRes = await fetch(`${API_BASE}/api/auth/me/`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (userRes.ok) {
-                    const userData = await userRes.json();
-                    setUser(userData);
-                }
+                // Use apiClient to handle response unwrapping automatically
+                const data = await apiClient.get<EventData>('/api/events/latest/');
+                setEvent(data);
             } catch (err) {
-                setError('Could not access event details.');
+                console.error(err);
+                setError('Failed to load event');
             } finally {
                 setLoading(false);
             }
         };
 
         fetchEvent();
-    }, [params.id, router]);
+    }, [user, checkAuth]); // Refetch if user changes
 
-    const handleRegister = async () => {
+    const handleCheckEligibility = async () => {
         if (!event) return;
         setRegisterStatus('loading');
         setRegisterError('');
 
-        const token = localStorage.getItem('accessToken');
+        if (!event || !event.id) {
+            console.error("DEBUG: Event ID is missing", event);
+            setRegisterError("Event data is invalid. Please refresh.");
+            return;
+        }
+
+        console.log('DEBUG: Checking eligibility for event:', event);
+
         try {
-            // 1. Check Eligibility
-            const eligibilityRes = await fetch(`${API_BASE}/api/events/check-eligibility/`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ event_id: event.id })
-            });
+            const data = await apiClient.post<{ status: string; message: string; eligible?: boolean }>(
+                '/api/events/check-eligibility/',
+                { event_id: event.id }
+            );
 
-            if (!eligibilityRes.ok) {
-                const data = await eligibilityRes.json();
-                throw new Error(data.error || 'Failed to check eligibility');
-            }
+            console.log('DEBUG: Eligibility response:', data);
 
-            const json = await eligibilityRes.json();
-            const eligibilityData = json.data || json;
-
-            if (!eligibilityData.eligible) {
-                setRegisterStatus('error');
-                setRegisterError("You are not eligible to participate in this event (Verification Required).");
+            if (data.status === 'pending') {
+                setEvent(prev => prev ? { ...prev, eligibility_status: 'pending' } : null);
+                alert(data.message);
+                setRegisterStatus('idle');
                 return;
             }
 
-            // 2. Register (if eligible)
-            const res = await fetch(`${API_BASE}/api/events/register/`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ event_id: event.id })
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                const msg = data.error || data.message || 'Registration failed';
-                if (msg.toLowerCase().includes('verified')) {
-                    setRegisterError('Verification required to participate.');
-                } else {
-                    setRegisterError(msg);
-                }
-                setRegisterStatus('error');
+            if (data.eligible) {
+                // If eligible immediately (approved), register them
+                await handleRegister();
             } else {
-                setRegisterStatus('success');
-                setEvent(prev => prev ? { ...prev, is_registered: true } : null);
+                setRegisterError("You are not eligible for this event.");
+                setRegisterStatus('error');
             }
 
         } catch (err: any) {
+            console.error('DEBUG: Eligibility check failed', err);
             setRegisterStatus('error');
-            setRegisterError(err.message || 'Something went wrong. Please try again.');
+            setRegisterError(err.message || 'Something went wrong.');
+        }
+    };
+
+    const handleRegister = async () => {
+        if (!event) return;
+
+        try {
+            const data = await apiClient.post<{ status?: string; message?: string; error?: string }>(
+                '/api/events/register/',
+                { event_id: event.id }
+            );
+
+            setRegisterStatus('success');
+            setEvent(prev => prev ? { ...prev, is_registered: true, eligibility_status: 'approved' } : null);
+        } catch (err: any) {
+            setRegisterStatus('error');
+            const msg = err.message || 'Registration failed';
+            if (msg.toLowerCase().includes('verified')) {
+                setRegisterError('Verification required to participate.');
+            } else {
+                setRegisterError(msg);
+            }
         }
     };
 
@@ -182,31 +148,80 @@ export default function EventPage({ params }: { params: { id: string } }) {
         setRegisterError('');
 
         // Re-fetch user to update verification status visually if needed
-        const userRes = await fetch(`${API_BASE}/api/auth/me/`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (userRes.ok) {
-            const userData = await userRes.json();
-            setUser(userData);
-        }
+        await checkAuth();
 
         alert("Verification successful! You can now check eligibility.");
     };
 
-    if (loading) return (
-        <div className={styles.container} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <p>Loading Event...</p>
-        </div>
-    );
+    // Render Logic for Button
+    const renderActionButton = () => {
+        if (!event) return null;
 
-    if (error) return (
-        <div className={styles.container} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <div className={styles.errorBox}>{error}</div>
-        </div>
-    );
+        // 0. Guest User (Not Logged In)
+        if (!user) {
+            return (
+                <button
+                    className={styles.checkBtn}
+                    onClick={() => router.push(`/login?next=/events/${event.id}`)}
+                >
+                    Login to Participate
+                </button>
+            );
+        }
+
+        // 1. Registered
+        if (event.is_registered) {
+            return (
+                <button className={styles.checkBtn} style={{ background: '#4ade80', cursor: 'default' }} disabled>
+                    ✓ You are Registered!
+                </button>
+            );
+        }
+
+        // 2. Eligibility Pending (Show this first if pending, regardless of other states, assuming user triggered it)
+        if (event.eligibility_status === 'pending') {
+            return (
+                <div className={styles.pendingMessage} style={{ textAlign: 'center', color: '#ffd700', padding: '1rem', background: 'rgba(255, 215, 0, 0.1)', borderRadius: '8px' }}>
+                    Your eligibility is being checked. Please check back in a while.
+                </div>
+            );
+        }
+
+        // 3. Verification Checks
+        if (user.verification_status === 'pending') {
+            return (
+                <div className={styles.pendingMessage} style={{ textAlign: 'center', color: '#a0aec0', padding: '1rem', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px' }}>
+                    Your verification is pending, we will send you an email after your verification is approved.
+                </div>
+            );
+        }
+
+        if (!user.is_verified) {
+            return (
+                <button
+                    className={styles.checkBtn}
+                    onClick={() => setIsVerifyModalOpen(true)}
+                >
+                    Verify
+                </button>
+            );
+        }
+
+        // 4. Verified & Not Registered & Not Pending Eligibility -> Show Register (Check Eligibility)
+        return (
+            <button
+                className={styles.checkBtn}
+                onClick={handleCheckEligibility}
+                disabled={registerStatus === 'loading'}
+            >
+                {registerStatus === 'loading' ? 'Checking...' : 'Register'}
+            </button>
+        );
+    };
 
     return (
         <div className={styles.container}>
+            {/* ... Header and Cards ... */}
             <div className={styles.contentWrapper}>
                 <header className={styles.header}>
                     <div className={styles.logoContainer}>
@@ -296,19 +311,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
                     )}
 
                     {/* Action Button */}
-                    {event?.is_registered ? (
-                        <button className={styles.checkBtn} style={{ background: '#4ade80', cursor: 'default' }} disabled>
-                            ✓ You are Registered!
-                        </button>
-                    ) : (
-                        <button
-                            className={styles.checkBtn}
-                            onClick={handleRegister}
-                            disabled={registerStatus === 'loading'}
-                        >
-                            {registerStatus === 'loading' ? 'Checking...' : 'Check Eligibility'}
-                        </button>
-                    )}
+                    {renderActionButton()}
 
                     <div className={styles.footer}>
                         Sponsored by Hi-Rollin
