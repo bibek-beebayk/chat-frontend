@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { Suspense, useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Header } from '@/components/layout/Header';
@@ -13,12 +13,11 @@ import { Modal } from '@/components/ui/Modal';
 import { Toast } from '@/components/ui/Toast';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
 import styles from './page.module.css';
-// import activeStyles from './active-queues.module.css'; // Just merging into page.module.css for simplicity or using multi-file?
-// Let's merge into page.module.css actually, easier than maintaining two files or refactoring imports everywhere.
 
-
-export default function ChatPage() {
+function ChatPageContent() {
     const { user, loading: authLoading } = useAuth();
+    // ... rest of component logic
+
     const router = useRouter();
     const [supportRooms, setSupportRooms] = useState<any[]>([]);
     // Multi-room support
@@ -1424,5 +1423,13 @@ export default function ChatPage() {
                 />
             )}
         </div>
+    );
+}
+
+export default function ChatPage() {
+    return (
+        <Suspense fallback={<div className="loading"><div className="spinner"></div></div>}>
+            <ChatPageContent />
+        </Suspense>
     );
 }
