@@ -210,7 +210,11 @@ export default function EventPage({ params }: { params: { id: string } }) {
             <div className={styles.contentWrapper}>
                 <header className={styles.header}>
                     <div className={styles.logoContainer}>
-                        <div style={{ fontSize: '3rem' }}>🌸</div> {/* Placeholder Logo Icon */}
+                        <img
+                            src="/logo.png"
+                            alt="Rollin Community Logo"
+                            style={{ width: '80px', height: 'auto', marginBottom: '0.5rem' }}
+                        />
                         <div className={styles.logoText}>Serving the Community</div>
 
                         <div className={styles.rewardBadge}>
