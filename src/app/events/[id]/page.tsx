@@ -49,7 +49,8 @@ export default function EventPage({ params }: { params: { id: string } }) {
         const fetchEvent = async () => {
             const token = localStorage.getItem('accessToken');
             if (!token) {
-                router.push('/login'); // Or wherever your login page is
+                const currentPath = window.location.pathname + window.location.search;
+                router.push(`/login?next=${encodeURIComponent(currentPath)}`);
                 return;
             }
 
@@ -63,7 +64,8 @@ export default function EventPage({ params }: { params: { id: string } }) {
 
                 if (!res.ok) {
                     if (res.status === 401) {
-                        router.push('/login');
+                        const currentPath = window.location.pathname + window.location.search;
+                        router.push(`/login?next=${encodeURIComponent(currentPath)}`);
                         return;
                     }
                     throw new Error('Failed to load event');
