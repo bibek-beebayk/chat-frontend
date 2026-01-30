@@ -61,7 +61,7 @@ export default function RegisterPage() {
             <div className={`${styles.loginCard} glass`}>
                 <div className={styles.header}>
                     <h1 className="gradient-text">Create Account</h1>
-                    <p>Join Rollers Community today!</p>
+                    <p>Join Rollin Community today!</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className={styles.form}>

@@ -11,7 +11,7 @@ export default function PrivacyPage() {
                 <div style={{ background: 'rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '12px' }}>
                     <p style={{ marginBottom: '1rem' }}>Last updated: January 2026</p>
                     <p style={{ marginBottom: '1rem' }}>
-                        At Rollers Community, we take your privacy seriously. This Privacy Policy explains how we collect, use, and protect your personal information.
+                        At Rollin Community, we take your privacy seriously. This Privacy Policy explains how we collect, use, and protect your personal information.
                     </p>
                     <h2 style={{ fontSize: '1.5rem', marginTop: '1.5rem', marginBottom: '1rem' }}>1. Information We Collect</h2>
                     <p style={{ marginBottom: '1rem' }}>

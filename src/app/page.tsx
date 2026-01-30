@@ -50,7 +50,7 @@ export default function HomePage() {
                                 Hello, <strong>{user.username}</strong>!
                             </p>
                             <h1 className={styles.title}>
-                                Welcome to <span className="gradient-text">Rollers Community </span>
+                                Welcome to <span className="gradient-text">Rollin Community </span>
                             </h1>
 
                             {events.length > 0 && (

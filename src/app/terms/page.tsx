@@ -11,7 +11,7 @@ export default function TermsPage() {
                 <div style={{ background: 'rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '12px' }}>
                     <p style={{ marginBottom: '1rem' }}>Last updated: January 2026</p>
                     <p style={{ marginBottom: '1rem' }}>
-                        Please read these Terms of Service carefully before using the Rollers Community platform.
+                        Please read these Terms of Service carefully before using the Rollin Community platform.
                     </p>
                     <h2 style={{ fontSize: '1.5rem', marginTop: '1.5rem', marginBottom: '1rem' }}>1. Acceptance of Terms</h2>
                     <p style={{ marginBottom: '1rem' }}>

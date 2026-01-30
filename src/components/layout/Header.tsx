@@ -33,7 +33,7 @@ export const Header: React.FC = () => {
             <div className={styles.container}>
                 <div className={styles.topRow}>
                     <Link href="/" className={styles.logo} onClick={closeMenu}>
-                        <span className="gradient-text">Rollers Community</span>
+                        <span className="gradient-text">Rollin Community</span>
                     </Link>
                     <button
                         className={styles.menuButton}
