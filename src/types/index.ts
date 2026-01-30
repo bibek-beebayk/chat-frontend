@@ -12,6 +12,18 @@ export interface User {
     last_name?: string;
 }
 
+export interface Event {
+    id: number;
+    title: string;
+    description: string;
+    start_date: string;
+    end_date: string;
+    poster: string | null;
+    is_active: boolean;
+    is_registered?: boolean;
+    eligibility_status?: 'pending' | 'approved' | 'rejected' | null;
+}
+
 // Room types
 export interface Room {
     id: number;

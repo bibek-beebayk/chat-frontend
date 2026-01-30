@@ -64,14 +64,6 @@ export const Header: React.FC = () => {
                             Payments
                         </Link>
 
-                        <Link
-                            href="/feed"
-                            className={isActive('/feed') ? styles.active : ''}
-                            onClick={closeMenu}
-                        >
-                            Feed
-                        </Link>
-
                         {user.user_type === 'staff' && (
                             <Link
                                 href="/staff-dashboard"

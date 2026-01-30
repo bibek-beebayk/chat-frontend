@@ -21,25 +21,8 @@
     animation: fadeIn 0.6s ease;
 }
 
-.twoColumnLayout {
-    display: grid;
-    grid-template-columns: 1fr 400px;
-    gap: var(--spacing-2xl);
-    align-items: start;
-}
-
 /* ... existing styles ... */
 
-.newsWidget {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-    backdrop-filter: blur(10px);
-    position: sticky;
-    top: calc(80px + var(--spacing-lg));
-    /* Header height + spacing */
-}
 
 .card {
     padding: var(--spacing-xl);
@@ -123,20 +106,6 @@
     margin-bottom: var(--spacing-xs);
 }
 
-.newsHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-lg);
-    padding-bottom: var(--spacing-md);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.newsList {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-lg);
-}
 
 /* Ensure features grid is responsive within the left column */
 .features {
@@ -147,6 +116,32 @@
     margin-bottom: var(--spacing-2xl);
 }
 
+.eventsSection {
+    margin: var(--spacing-2xl) 0;
+}
+
+.eventGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-lg);
+}
+
+.eventPoster {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.eventDate {
+    color: var(--color-primary-light);
+    font-size: 0.9rem;
+    margin-top: -10px;
+    margin-bottom: var(--spacing-md);
+}
+
 .stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -155,18 +150,10 @@
 }
 
 @media (max-width: 1024px) {
-    .twoColumnLayout {
-        grid-template-columns: 1fr;
-    }
-
     .hero {
         text-align: center;
     }
 
-    .newsWidget {
-        position: static;
-        margin-top: var(--spacing-2xl);
-    }
 }
 
 .statLabel {
@@ -176,23 +163,6 @@
     letter-spacing: 1px;
 }
 
-.viewAllBtn {
-    background: var(--color-primary);
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius-md);
-    font-weight: 600;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.viewAllBtn:hover {
-    background: var(--color-primary-dark);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-}
 
 @media (max-width: 768px) {
     .title {
