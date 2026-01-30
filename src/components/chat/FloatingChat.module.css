@@ -335,14 +335,30 @@
     }
 
     .launcher {
-        width: 60px;
-        min-width: 0;
-        padding: 0;
-        border-radius: 50%;
+        width: auto;
+        min-width: 50px;
+        height: auto;
+        padding: 8px 12px;
+        border-radius: 16px;
+        flex-direction: column;
+        gap: 2px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .launcher span:first-child {
+        font-size: 1.2rem !important;
+        /* Slightly larger icon again? or keep 1rem */
+        line-height: 1;
     }
 
     .launcher span:last-child {
-        display: none;
+        display: block;
+        font-size: 0.65rem;
+        font-weight: 500;
+        opacity: 0.9;
+        margin-left: 0;
+        text-align: center;
+        line-height: 1;
     }
 
     .window {

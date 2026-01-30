@@ -54,9 +54,12 @@ export const FloatingChat: React.FC = () => {
                 setSelectedRoom(room.id);
                 setRoomData(room);
 
-                // Fetch Request History
                 const history = await apiClient.get<Message[]>(`/api/rooms/${room.id}/messages/?limit=50`);
                 setMessages(history.reverse());
+            } else {
+                setRoomData(null);
+                setSelectedRoom(null);
+                setMessages([]);
             }
         } catch (error) {
             console.error('Error fetching room:', error);
@@ -187,9 +190,15 @@ export const FloatingChat: React.FC = () => {
                     </div>
 
                     <div className={styles.messagesContainer}>
-                        {loading && <div style={{ textAlign: 'center', padding: '1rem', color: '#666' }}>Loading...</div>}
+                        {!loading && !roomData && (
+                            <div className={`${styles.message} ${styles.system}`} style={{ marginTop: '2rem' }}>
+                                <div className={styles.systemContent}>
+                                    No chat history found.
+                                </div>
+                            </div>
+                        )}
 
-                        {!loading && unifiedMessages.map((msg) => {
+                        {!loading && roomData && unifiedMessages.map((msg) => {
                             const isOwn = msg.sender.id === user.id;
                             const isSystem = msg.content.startsWith('System:');
 
@@ -219,6 +228,16 @@ export const FloatingChat: React.FC = () => {
                                 </div>
                             );
                         })}
+
+                        {/* Notice if no active support room (staff offline)
+                        {!loading && roomData && roomData.is_staff_online === false && (
+                            <div className={`${styles.message} ${styles.system}`} style={{ margin: '1rem 0' }}>
+                                <div className={styles.systemContent} style={{ background: '#fee2e2', color: '#dc2626' }}>
+                                    ⚠️ No active support agents are currently available. You can leave a message, and we'll get back to you.
+                                </div>
+                            </div>
+                        )} */}
+
                         <div ref={messagesEndRef} />
                     </div>
 

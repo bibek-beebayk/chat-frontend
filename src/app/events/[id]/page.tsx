@@ -249,7 +249,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
                             alt="Rollin Community Logo"
                             style={{ width: '80px', height: 'auto', marginBottom: '0.5rem' }}
                         />
-                        <div className={styles.logoText}>Serving the Community</div>
+                        {/* <div className={styles.logoText}>Serving the Community</div> */}
 
                         {/* <div className={styles.rewardBadge}>
                             🎁 Community Reward Pool
@@ -342,7 +342,8 @@ export default function EventPage({ params }: { params: { id: string } }) {
                     {/* Action Button */}
                     {renderActionButton()}
 
-                    <div className={styles.footer}>
+                    <div className={styles.footer} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <img src="/hi-rollin-logo.png" alt="Hi-Rollin" style={{ width: '60px', height: 'auto', marginBottom: '0.5rem' }} />
                         Sponsored by Hi-Rollin
                     </div>
                 </main>
