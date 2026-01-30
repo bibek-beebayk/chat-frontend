@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import { AuthProvider } from '@/contexts/AuthContext';
 import '@/styles/globals.css';
 import { FloatingChat } from '@/components/chat/FloatingChat';
+import { Footer } from '@/components/layout/Footer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -18,6 +19,8 @@ export const viewport: Viewport = {
     userScalable: false,
 };
 
+
+
 export default function RootLayout({
     children,
 }: {
@@ -25,9 +28,10 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en">
-            <body className={inter.className}>
+            <body className={inter.className} style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
                 <AuthProvider>
                     {children}
+                    <Footer />
                     <FloatingChat />
                 </AuthProvider>
             </body>
