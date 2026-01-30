@@ -198,9 +198,23 @@ export const FloatingChat: React.FC = () => {
                             </div>
                         )}
 
-                        {!loading && roomData && unifiedMessages.map((msg) => {
+                        {!loading && roomData && unifiedMessages.map((msg, index) => {
                             const isOwn = msg.sender.id === user.id;
                             const isSystem = msg.content.startsWith('System:');
+
+                            // Check previous message for grouping (am I a continuation?)
+                            const prevMsg = index > 0 ? unifiedMessages[index - 1] : null;
+                            const isContinued = prevMsg &&
+                                prevMsg.sender.id === msg.sender.id &&
+                                !prevMsg.content.startsWith('System:') &&
+                                (new Date(msg.timestamp).getTime() - new Date(prevMsg.timestamp).getTime() < 10 * 60 * 1000);
+
+                            // Check next message (is the next one a continuation of me?)
+                            const nextMsg = index < unifiedMessages.length - 1 ? unifiedMessages[index + 1] : null;
+                            const isNextContinued = nextMsg &&
+                                nextMsg.sender.id === msg.sender.id &&
+                                !nextMsg.content.startsWith('System:') &&
+                                (new Date(nextMsg.timestamp).getTime() - new Date(msg.timestamp).getTime() < 10 * 60 * 1000);
 
                             if (isSystem) {
                                 return (
@@ -210,8 +224,15 @@ export const FloatingChat: React.FC = () => {
                                 );
                             }
 
+                            // Dynamic classes for visual merging
+                            const groupClass = isContinued ? styles.groupedTop : '';
+                            const nextGroupClass = isNextContinued ? styles.groupedBottom : '';
+
                             return (
-                                <div key={msg.id} className={`${styles.message} ${isOwn ? styles.own : ''}`}>
+                                <div
+                                    key={msg.id}
+                                    className={`${styles.message} ${isOwn ? styles.own : ''} ${groupClass} ${nextGroupClass}`}
+                                >
                                     <div className={styles.messageContent}>
                                         {msg.attachment && (
                                             <div className={styles.imagePreview}>
@@ -222,9 +243,12 @@ export const FloatingChat: React.FC = () => {
                                         )}
                                         {msg.content}
                                     </div>
-                                    <div className={styles.messageMeta}>
-                                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    </div>
+                                    {/* Only show timestamp if it's the LAST message in the group */}
+                                    {!isNextContinued && (
+                                        <div className={styles.messageMeta}>
+                                            {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </div>
+                                    )}
                                 </div>
                             );
                         })}

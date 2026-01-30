@@ -126,7 +126,8 @@
     padding: 1rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0;
+    /* Handled by message margins now for grouping */
     background: var(--color-bg-primary);
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
@@ -138,6 +139,62 @@
     flex-direction: column;
     max-width: 80%;
     animation: fadeIn 0.2s ease;
+    margin-top: 0.5rem;
+    /* Standard spacing */
+}
+
+/* Grouping: "Top" means I am a continuation of above (reduced top margin) */
+.message.groupedTop {
+    margin-top: 2px;
+}
+
+/* Grouping: "Bottom" means I have a continuation below (adjust border radius) */
+.message.groupedBottom .messageContent {
+    /* If there's a message below me, flatten my bottom corner */
+    border-bottom-left-radius: 4px;
+    /* Received: default is 2px, but let's make it standard "connected" look?
+                                       Actually default received is:
+                                       border-radius: 12px;
+                                       border-bottom-left-radius: 2px;
+                                     */
+    /* If I am NOT the last one, I don't need the "tail" effect of 2px. But maybe 4px is good. */
+}
+
+.message.own.groupedBottom .messageContent {
+    /* Sent messages */
+    border-bottom-right-radius: 4px;
+    /* Flatten the "tail" corner */
+}
+
+/* Grouping: "Top" means I am below someone (adjust top border radius) */
+.message.groupedTop .messageContent {
+    /* If there is a message above me, flatten my top corner to match it */
+    border-top-left-radius: 4px;
+}
+
+.message.own.groupedTop .messageContent {
+    border-top-right-radius: 4px;
+}
+
+/* If I am both Top AND Bottom (Middle message), flatten both */
+.message.groupedTop.groupedBottom .messageContent {
+    border-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-top-left-radius: 4px;
+}
+
+/* Refine for "Own" (Sent) Middle/Connected */
+.message.own.groupedTop.groupedBottom .messageContent {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+/* Refine for Received Middle/Connected */
+.message:not(.own).groupedTop.groupedBottom .messageContent {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
 }
 
 .message.own {
