@@ -90,6 +90,16 @@
     display: inline-block;
 }
 
+.postTitleLink {
+    text-decoration: none;
+    display: inline-block;
+    transition: opacity 0.2s;
+}
+
+.postTitleLink:hover {
+    opacity: 0.8;
+}
+
 .postContent {
     color: var(--color-text-secondary);
     line-height: 1.7;

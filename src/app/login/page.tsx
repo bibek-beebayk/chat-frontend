@@ -51,7 +51,7 @@ function LoginPageContent() {
         <div className={styles.container}>
             <div className={`${styles.loginCard} glass`}>
                 <div className={styles.header}>
-                    <h1 className="gradient-text">Hi-Rollin  Portal</h1>
+                    <h1 className="gradient-text">Rollin Community</h1>
                     <p>Welcome back! Please login to your account.</p>
                 </div>
 

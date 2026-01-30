@@ -7,7 +7,7 @@ import { FloatingChat } from '@/components/chat/FloatingChat';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-    title: 'Hi-Rollin Portal',
+    title: 'Rollers Community',
     description: 'Officia; Support Portal for Hi-Rollin Players and Agents',
 };
 

@@ -34,7 +34,13 @@ export const FeedItem: React.FC<FeedItemProps> = ({ post, compact = false }) => 
             </div>
 
             <div className={styles.postBody}>
-                <h2 className={styles.postTitle}>{post.title}</h2>
+                {post.link ? (
+                    <a href={post.link} target="_blank" rel="noopener noreferrer" className={styles.postTitleLink}>
+                        <h2 className={styles.postTitle}>{post.title} ↗</h2>
+                    </a>
+                ) : (
+                    <h2 className={styles.postTitle}>{post.title}</h2>
+                )}
 
                 {post.content && (
                     <div className={styles.postContent}>

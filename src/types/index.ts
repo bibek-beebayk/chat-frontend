@@ -49,6 +49,7 @@ export interface Post {
     content: string;
     image?: string;
     video?: string;
+    link?: string;
     author: User;
     created_at: string;
     is_active: boolean;

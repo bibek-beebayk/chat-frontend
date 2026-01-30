@@ -50,7 +50,7 @@ export default function HomePage() {
                         <div className={styles.mainContent}>
                             <div className={styles.hero}>
                                 <h1 className={styles.title}>
-                                    Welcome to <span className="gradient-text">Hi-Rollin Portal </span>
+                                    Welcome to <span className="gradient-text">Rollers Community </span>
                                 </h1>
                                 <p className={styles.subtitle}>
                                     Hello, <strong>{user.username}</strong>! You are logged in as a <strong>{user.user_type}</strong>.

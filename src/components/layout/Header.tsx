@@ -33,7 +33,7 @@ export const Header: React.FC = () => {
             <div className={styles.container}>
                 <div className={styles.topRow}>
                     <Link href="/" className={styles.logo} onClick={closeMenu}>
-                        <span className="gradient-text">Hi-Rollin Portal</span>
+                        <span className="gradient-text">Rollers Community</span>
                     </Link>
                     <button
                         className={styles.menuButton}
@@ -90,18 +90,20 @@ export const Header: React.FC = () => {
                                 {user.username}
                                 {(user.user_type === 'player' || user.user_type === 'agent') && (
                                     user.is_verified ? (
-                                        <span style={{ color: '#3b82f6', display: 'inline-flex', alignItems: 'center' }} title="Verified Account">
+                                        <span style={{ color: '#3b82f6', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem' }} title="Verified Account">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
                                                 <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-7l2 2 4-4" stroke="none" fill="currentColor" fillOpacity="0.2" />
                                             </svg>
+                                            Verified
                                         </span>
                                     ) : user.verification_status === 'pending' ? (
-                                        <span style={{ color: '#fbbf24', display: 'inline-flex', alignItems: 'center' }} title="Verification Pending">
+                                        <span style={{ color: '#fbbf24', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem' }} title="Verification Pending">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                 <circle cx="12" cy="12" r="10"></circle>
                                                 <polyline points="12 6 12 12 16 14"></polyline>
                                             </svg>
+                                            Pending
                                         </span>
                                     ) : (
                                         <button
@@ -116,7 +118,9 @@ export const Header: React.FC = () => {
                                                 cursor: 'pointer',
                                                 color: '#9ca3af',
                                                 display: 'inline-flex',
-                                                alignItems: 'center'
+                                                alignItems: 'center',
+                                                gap: '4px',
+                                                fontSize: '0.85rem'
                                             }}
                                             title="Click to verify your account"
                                         >
@@ -125,6 +129,7 @@ export const Header: React.FC = () => {
                                                 <line x1="12" y1="8" x2="12" y2="12"></line>
                                                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
                                             </svg>
+                                            Verify Now
                                         </button>
                                     )
                                 )}
@@ -163,7 +168,10 @@ export const Header: React.FC = () => {
                                                 color: '#3b82f6',
                                                 display: 'inline-flex',
                                                 alignItems: 'center',
-                                                verticalAlign: 'middle'
+                                                verticalAlign: 'middle',
+                                                gap: '4px',
+                                                fontSize: '0.85rem',
+                                                fontWeight: 500
                                             }}
                                             title="Verified Account"
                                         >
@@ -171,6 +179,7 @@ export const Header: React.FC = () => {
                                                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
                                                 <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-7l2 2 4-4" stroke="none" fill="currentColor" fillOpacity="0.2" />
                                             </svg>
+                                            Verified
                                         </span>
                                     ) : user.verification_status === 'pending' ? (
                                         <span
@@ -179,7 +188,10 @@ export const Header: React.FC = () => {
                                                 color: '#fbbf24',
                                                 display: 'inline-flex',
                                                 alignItems: 'center',
-                                                verticalAlign: 'middle'
+                                                verticalAlign: 'middle',
+                                                gap: '4px',
+                                                fontSize: '0.85rem',
+                                                fontWeight: 500
                                             }}
                                             title="Verification Pending"
                                         >
@@ -187,6 +199,7 @@ export const Header: React.FC = () => {
                                                 <circle cx="12" cy="12" r="10"></circle>
                                                 <polyline points="12 6 12 12 16 14"></polyline>
                                             </svg>
+                                            Pending
                                         </span>
                                     ) : (
                                         <span
@@ -201,7 +214,10 @@ export const Header: React.FC = () => {
                                                 color: '#9ca3af',
                                                 display: 'inline-flex',
                                                 alignItems: 'center',
-                                                verticalAlign: 'middle'
+                                                verticalAlign: 'middle',
+                                                gap: '4px',
+                                                fontSize: '0.85rem',
+                                                fontWeight: 500
                                             }}
                                             title="Click to verify your account"
                                         >
@@ -210,6 +226,7 @@ export const Header: React.FC = () => {
                                                 <line x1="12" y1="8" x2="12" y2="12"></line>
                                                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
                                             </svg>
+                                            Verify Now
                                         </span>
                                     )
                                 )}

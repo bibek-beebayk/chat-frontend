@@ -284,7 +284,8 @@ export const FloatingChat: React.FC = () => {
             {/* Launcher Bubble */}
             {!isOpen && (
                 <button className={styles.launcher} onClick={handleToggleOpen}>
-                    💬
+                    <span style={{ fontSize: '1.5rem' }}>💬</span>
+                    <span>Support Chat</span>
                 </button>
             )}
         </div>
