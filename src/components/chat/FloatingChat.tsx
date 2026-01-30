@@ -33,7 +33,7 @@ export const FloatingChat: React.FC = () => {
 
     // Determine Context
     const isEventPage = pathname?.startsWith('/events/');
-    const desiredRoomType = isEventPage ? 'event' : undefined;
+    const desiredRoomType = isEventPage ? 'event' : (user?.user_type === 'agent' ? 'agent' : 'player');
 
     // WebSocket
     const { sendMessage, sendJsonMessage, messages: wsMessages, isConnected } = useWebSocket(selectedRoom);

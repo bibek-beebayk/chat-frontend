@@ -334,6 +334,17 @@
         right: 1rem;
     }
 
+    .launcher {
+        width: 60px;
+        min-width: 0;
+        padding: 0;
+        border-radius: 50%;
+    }
+
+    .launcher span:last-child {
+        display: none;
+    }
+
     .window {
         position: fixed;
         bottom: 0;
