@@ -18,9 +18,14 @@ interface EventData {
     poster: string | null;
     is_registered?: boolean;
     eligibility_status?: 'pending' | 'approved' | 'rejected' | null;
+    base_prize_pool: number;
+    max_prize_pool: number;
+    current_prize_pool: number;
+    participants_count: number;
 }
 
-import { Modal } from '@/components/ui/Modal'; // Import Modal
+import { Modal } from '@/components/ui/Modal';
+import { PrizePoolMeter } from '@/components/events/PrizePoolMeter';
 
 export default function EventPage({ params }: { params: { id: string } }) {
     const router = useRouter();
@@ -49,6 +54,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
             try {
                 // Use apiClient to handle response unwrapping automatically
                 const data = await apiClient.get<EventData>('/api/events/latest/');
+                console.log('Event Data Loaded:', data);
                 setEvent(data);
             } catch (err) {
                 console.error(err);
@@ -245,9 +251,9 @@ export default function EventPage({ params }: { params: { id: string } }) {
                         />
                         <div className={styles.logoText}>Serving the Community</div>
 
-                        <div className={styles.rewardBadge}>
+                        {/* <div className={styles.rewardBadge}>
                             🎁 Community Reward Pool
-                        </div>
+                        </div> */}
                     </div>
 
                     <h1 className={styles.title}>Valentine Giveaway</h1>
@@ -266,6 +272,16 @@ export default function EventPage({ params }: { params: { id: string } }) {
                 </header>
 
                 <main>
+                    {/* Prize Pool Meter */}
+                    {event && (
+                        <PrizePoolMeter
+                            basePool={Number(event.base_prize_pool)}
+                            currentPool={Number(event.current_prize_pool)}
+                            maxPool={Number(event.max_prize_pool)}
+                            participants={event.participants_count}
+                        />
+                    )}
+
                     {/* Card 1: How Participation Works */}
                     <div className={styles.card}>
                         <h2 className={styles.cardTitle}>How Participation Works</h2>
