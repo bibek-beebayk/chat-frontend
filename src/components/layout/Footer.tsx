@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 export const Footer: React.FC = () => {
     return (
@@ -13,9 +14,8 @@ export const Footer: React.FC = () => {
         }}>
             <p>&copy; 2024 Rollers Community. All rights reserved.</p>
             <div style={{ marginTop: '0.5rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                <span style={{ cursor: 'pointer' }}>Privacy Policy</span>
-                <span style={{ cursor: 'pointer' }}>Terms of Service</span>
-                <span style={{ cursor: 'pointer' }}>Responsible Gaming</span>
+                <Link href="/privacy" style={{ cursor: 'pointer', color: '#666', textDecoration: 'none' }}>Privacy Policy</Link>
+                <Link href="/terms" style={{ cursor: 'pointer', color: '#666', textDecoration: 'none' }}>Terms of Service</Link>
             </div>
         </footer>
     );
