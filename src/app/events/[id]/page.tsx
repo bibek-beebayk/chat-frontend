@@ -29,7 +29,7 @@ import { PrizePoolMeter } from '@/components/events/PrizePoolMeter';
 
 export default function EventPage({ params }: { params: { id: string } }) {
     const router = useRouter();
-    const { user, checkAuth } = useAuth(); // Use global auth state
+    const { user, checkAuth, verifyUserID, initiateVerificationRequest } = useAuth(); // Use global auth state
     const [event, setEvent] = useState<EventData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -132,44 +132,18 @@ export default function EventPage({ params }: { params: { id: string } }) {
         }
     };
 
-    const handleVerifyInitiate = async () => {
-        const token = localStorage.getItem('accessToken');
-        const res = await fetch(`${API_BASE}/api/auth/initiate-verification-request/`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        if (!res.ok) {
-            const data = await res.json();
-            throw new Error(data.error || 'Failed to initiate verification');
-        }
-    };
+
 
     const handleVerifySubmit = async (userId: string, otp: string) => {
-        const token = localStorage.getItem('accessToken');
-        const res = await fetch(`${API_BASE}/api/auth/verify-user-id/`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ user_id: userId, otp: otp })
-        });
-        if (!res.ok) {
-            const data = await res.json();
-            throw new Error(data.error || 'Verification failed');
+        try {
+            await verifyUserID(userId, otp);
+            setIsVerifyModalOpen(false);
+            setRegisterStatus('idle');
+            setRegisterError('');
+            showMessage("Verification Successful", "Your account has been verified successfully!");
+        } catch (error: any) {
+            throw new Error(error.message || 'Verification failed');
         }
-
-        setIsVerifyModalOpen(false);
-        setRegisterStatus('idle');
-        setRegisterError('');
-
-        // Re-fetch user to update verification status visually if needed
-        await checkAuth();
-
-        showMessage("Verification Request Submitted", "Your Verification request has been submitted. Please check back later to proceed further."); // Use Modal
     };
 
     // Render Logic for Button
@@ -354,8 +328,8 @@ export default function EventPage({ params }: { params: { id: string } }) {
                 <VerifyUserIDModal
                     isOpen={isVerifyModalOpen}
                     onClose={() => setIsVerifyModalOpen(false)}
-                    onInitiate={handleVerifyInitiate}
                     onVerify={handleVerifySubmit}
+                    onInitiate={initiateVerificationRequest}
                 />
 
                 <Modal

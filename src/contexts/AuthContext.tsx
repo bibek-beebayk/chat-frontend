@@ -127,14 +127,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             { user_id: userId, otp }
         );
 
-        if (user) {
-            const updatedUser: User = {
-                ...user,
-                verification_status: response.status as User['verification_status']
-            };
-            setUser(updatedUser);
-            localStorage.setItem('user', JSON.stringify(updatedUser));
-            return updatedUser;
+        if (response.status === 'verified') {
+            if (user) {
+                const updatedUser: User = {
+                    ...user,
+                    is_verified: true,
+                    verification_status: 'approved'
+                };
+                setUser(updatedUser);
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+                return updatedUser;
+            }
+        } else {
+            throw new Error(response.message || 'Verification failed');
         }
 
         throw new Error('User not found in state');

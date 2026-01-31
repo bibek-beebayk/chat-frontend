@@ -97,7 +97,7 @@ export default function VerifyUserIDModal({ isOpen, onClose, onVerify, onInitiat
 
         try {
             await onVerify(userId.trim(), otpValue);
-            setSuccess('Verification request sent. A staff will verify your account and contact you');
+            setSuccess('Verification successful! You can now register.');
 
             // Close modal after a short delay
             setTimeout(() => {
