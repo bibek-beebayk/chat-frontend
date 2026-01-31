@@ -291,6 +291,9 @@ export default function EventPage({ params }: { params: { id: string } }) {
                             <li>Participation is based on overall activity during the event period</li>
                             <li>Rewards increase progressively with higher activity</li>
                         </ul>
+                        <div className={styles.footer} style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
+                            <em>Please contact support for information regarding verification and eligibility criteria.</em>
+                        </div>
                     </div>
 
                     {/* Card 2: Reward Progression */}
@@ -342,9 +345,9 @@ export default function EventPage({ params }: { params: { id: string } }) {
                     {/* Action Button */}
                     {renderActionButton()}
 
-                    <div className={styles.footer} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <img src="/hi-rollin-logo.png" alt="Hi-Rollin" style={{ width: '60px', height: 'auto', marginBottom: '0.5rem' }} />
+                    <div className={styles.footer} style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
                         Sponsored by Hi-Rollin
+                        <img src="/hi-rollin-logo.png" alt="Hi-Rollin" style={{ width: '60px', height: 'auto', marginBottom: '0.5rem' }} />
                     </div>
                 </main>
 
