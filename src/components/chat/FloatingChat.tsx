@@ -184,7 +184,7 @@ export const FloatingChat: React.FC = () => {
                                 </button>
                             )}
                             <button className={styles.iconBtn} onClick={handleToggleOpen} aria-label="Minimize">
-                                −
+                                X
                             </button>
                         </div>
                     </div>
