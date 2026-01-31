@@ -286,13 +286,13 @@ export default function EventPage({ params }: { params: { id: string } }) {
                     <div className={styles.card}>
                         <h2 className={styles.cardTitle}>How Participation Works</h2>
                         <ul className={styles.list}>
-                            <li>Participation is open to community members</li>
-                            <li>Entry requires verification of your game UserID</li>
-                            <li>Participation is based on overall activity during the event period</li>
-                            <li>Rewards increase progressively with higher activity</li>
+                            <li>Participation is open to community members residing in the USA only.</li>
+                            <li>Entry requires verification of your Hi-Rollin game UserID.</li>
+                            <li>Participation is based on overall activity during the event period.</li>
+                            <li>Rewards increase progressively with higher activity.</li>
                         </ul>
                         <div className={styles.footer} style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
-                            <em>Please contact support for information regarding verification and eligibility criteria.</em>
+                            <em style={{ color: '#f1428bff' }}>*Please contact support for information regarding verification and eligibility criteria.</em>
                         </div>
                     </div>
 
