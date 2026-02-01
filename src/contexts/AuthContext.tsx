@@ -114,11 +114,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const initiateVerificationRequest = async () => {
         await apiClient.post('/api/auth/initiate-verification-request/');
-        if (user) {
-            const updatedUser: User = { ...user, verification_status: 'pending' };
-            setUser(updatedUser);
-            localStorage.setItem('user', JSON.stringify(updatedUser));
-        }
+        // Do not update user status to pending here. 
+        // The OTP flow is handled within the modal, and verification is synchronous.
+        // Updating it to 'pending' blocks the Verify button if the modal is closed.
     };
 
     const verifyUserID = async (userId: string, otp: string) => {
