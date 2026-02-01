@@ -99,7 +99,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
                 // If eligible immediately (approved), register them
                 await handleRegister();
             } else {
-                setRegisterError("You are not eligible for this event.");
+                setRegisterError("You are not eligible for this event. Contact support for eligibility criteria.");
                 setRegisterStatus('error');
             }
 
