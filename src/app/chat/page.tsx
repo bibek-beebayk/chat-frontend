@@ -952,8 +952,9 @@ function ChatPageContent() {
 
                                                     <div className={styles.roomMeta}>
                                                         {room.unread_count && room.unread_count > 0 ? (
-                                                            <div className={styles.roomUnread}>
-                                                            </div>
+                                                            <span className={styles.unreadBadge}>
+                                                                {room.unread_count}
+                                                            </span>
                                                         ) : null}
                                                     </div>
                                                 </button>
