@@ -516,9 +516,15 @@ function ChatPageContent() {
                 // Check if user is near bottom? Or just force?
                 // For simplicity, force scroll if live.
                 messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+
+                // Play notification sound if message is not from current user
+                if (user?.username && lastMsg.username !== user.username) {
+                    const audio = new Audio('/notification.mp3');
+                    audio.play().catch((error) => console.error('Error playing notification sound:', error));
+                }
             }
         }
-    }, [wsMessages, hasMoreNewer]);
+    }, [wsMessages, hasMoreNewer, user]);
 
 
     const closeChat = async () => {
