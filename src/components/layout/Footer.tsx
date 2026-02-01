@@ -1,7 +1,15 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export const Footer: React.FC = () => {
+    const pathname = usePathname();
+    const isChatPage = pathname?.startsWith('/chat') || pathname?.startsWith('/staff-dashboard');
+
+    if (isChatPage) return null;
+
     return (
         <footer style={{
             marginTop: 'auto',

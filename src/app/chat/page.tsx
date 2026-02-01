@@ -61,6 +61,35 @@ function ChatPageContent() {
     const emojiPickerRef = useRef<HTMLDivElement>(null);
     const emojiButtonRef = useRef<HTMLButtonElement>(null);
 
+    // Audio Unlock State
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const [isAudioUnlocked, setIsAudioUnlocked] = useState(false);
+
+    // Initial Audio Unlock - iOS requires user interaction to play audio
+    const initAudio = () => {
+        if (!isAudioUnlocked && typeof window !== 'undefined') {
+            if (!audioRef.current) {
+                audioRef.current = new Audio('/notification.mp3');
+            }
+            // Play and immediately pause to unlock logic
+            audioRef.current.play().then(() => {
+                audioRef.current?.pause();
+                audioRef.current!.currentTime = 0;
+                setIsAudioUnlocked(true);
+            }).catch(e => {
+                console.log("Audio unlock failed (likely waiting for interaction)", e);
+            });
+        }
+    };
+
+    const playNotificationSound = () => {
+        if (!audioRef.current) {
+            audioRef.current = new Audio('/notification.mp3');
+        }
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(e => console.error("Notification sound failed:", e));
+    };
+
     const onEmojiClick = (emojiObject: any) => {
         setMessageInput(prev => prev + emojiObject.emoji);
     };
@@ -519,8 +548,7 @@ function ChatPageContent() {
 
                 // Play notification sound if message is not from current user
                 if (user?.username && lastMsg.username !== user.username) {
-                    const audio = new Audio('/notification.mp3');
-                    audio.play().catch((error) => console.error('Error playing notification sound:', error));
+                    playNotificationSound();
                 }
             }
         }
@@ -584,6 +612,43 @@ function ChatPageContent() {
 
 
 
+
+    // Global Notification Listener
+    useEffect(() => {
+        if (!user || user.user_type !== 'staff') return;
+
+        const wsUrl = (process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000') + '/ws/notifications/?token=' + localStorage.getItem('accessToken');
+        const notificationWs = new WebSocket(wsUrl);
+
+        notificationWs.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.type === 'new_message_notification') {
+                    // Play sound IF:
+                    // 1. It's not the room I'm currently looking at (selectedRoom)
+                    // OR
+                    // 2. I have no room selected
+                    // Note: If I AM looking at the room, the existing chat socket logic handles the sound (or we rely on this one and remove the other? 
+                    // Let's rely on this one for "background" and the other for "active" to be safe, BUT duplications might happen.
+                    // Better approach: The chat socket logic plays sound if *message received*.
+                    // This socket plays sound if *notification received*.
+
+                    // IF selectedRoom === data.room_id, we let the Chat socket handle it (it has better context like scroll).
+                    // So here we only play if room_id !== selectedRoom.
+
+                    if (selectedRoom !== data.room_id) {
+                        playNotificationSound();
+                    }
+                }
+            } catch (e) {
+                console.error('Notification WS error', e);
+            }
+        };
+
+        return () => {
+            notificationWs.close();
+        };
+    }, [user, selectedRoom]);
 
     const handleEnterSupportRoom = async (roomId: number) => {
         try {
@@ -766,7 +831,7 @@ function ChatPageContent() {
     const selectedRoomData = rooms.find(r => r.id === selectedRoom);
 
     return (
-        <div className={styles.pageWrapper}>
+        <div className={styles.pageWrapper} onClick={initAudio} onTouchStart={initAudio}>
             {/* Hide Header for Staff in Workstation */}
             {!(user.user_type === 'staff' && mySupportRooms.length > 0) && <Header />}
             <main className={styles.main}>
