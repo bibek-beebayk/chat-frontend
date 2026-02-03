@@ -9,7 +9,16 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
     title: 'Rollin Community',
-    description: 'Officia; Support Portal for Hi-Rollin Players and Agents',
+    description: 'Rollin Community Chat Application',
+    manifest: "/manifest.json",
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: "black-translucent",
+        title: "Rollin",
+        startupImage: [
+            "/icon-512.png",
+        ],
+    },
 };
 
 export const viewport: Viewport = {
@@ -17,9 +26,12 @@ export const viewport: Viewport = {
     initialScale: 1,
     maximumScale: 1,
     userScalable: false,
+    themeColor: "#1a1a1a",
 };
 
 
+
+import { NotificationProvider } from '@/contexts/NotificationContext';
 
 export default function RootLayout({
     children,
@@ -30,9 +42,11 @@ export default function RootLayout({
         <html lang="en">
             <body className={inter.className} style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
                 <AuthProvider>
-                    {children}
-                    <Footer />
-                    <FloatingChat />
+                    <NotificationProvider>
+                        {children}
+                        <Footer />
+                        <FloatingChat />
+                    </NotificationProvider>
                 </AuthProvider>
             </body>
         </html>
