@@ -37,15 +37,59 @@ export const Header: React.FC = () => {
                     <Link href="/" className={styles.logo} onClick={closeMenu}>
                         <span className="gradient-text">Rollin Community</span>
                     </Link>
-                    <button
-                        className={styles.menuButton}
-                        onClick={toggleMenu}
-                        aria-label="Toggle menu"
-                    >
-                        <span className={`${styles.bar} ${isMenuOpen ? styles.open : ''}`}></span>
-                        <span className={`${styles.bar} ${isMenuOpen ? styles.open : ''}`}></span>
-                        <span className={`${styles.bar} ${isMenuOpen ? styles.open : ''}`}></span>
-                    </button>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        {/* Mobile Notification Bell */}
+                        <button
+                            onClick={requestPermission}
+                            className={styles.mobileNotificationBtn} // New class for mobile styling
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: 'white',
+                                position: 'relative',
+                                display: 'flex', // Only show on mobile via CSS usually, or just show always if design permits
+                                alignItems: 'center',
+                                padding: '8px'
+                            }}
+                            aria-label="Notifications"
+                        >
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                            </svg>
+                            {unreadCount > 0 && (
+                                <span style={{
+                                    position: 'absolute',
+                                    top: '4px',
+                                    right: '4px',
+                                    background: '#ef4444',
+                                    color: 'white',
+                                    fontSize: '0.65rem',
+                                    borderRadius: '50%',
+                                    width: '16px',
+                                    height: '16px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    border: '1px solid #1a1a1a'
+                                }}>
+                                    {unreadCount}
+                                </span>
+                            )}
+                        </button>
+
+                        <button
+                            className={styles.menuButton}
+                            onClick={toggleMenu}
+                            aria-label="Toggle menu"
+                        >
+                            <span className={`${styles.bar} ${isMenuOpen ? styles.open : ''}`}></span>
+                            <span className={`${styles.bar} ${isMenuOpen ? styles.open : ''}`}></span>
+                            <span className={`${styles.bar} ${isMenuOpen ? styles.open : ''}`}></span>
+                        </button>
+                    </div>
                 </div>
 
                 <div className={`${styles.menu} ${isMenuOpen ? styles.show : ''}`}>
@@ -128,39 +172,6 @@ export const Header: React.FC = () => {
                                     )
                                 )}
                             </div>
-                            <button
-                                onClick={requestPermission}
-                                className={styles.mobileMenuItem}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    color: permission === 'granted' ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'
-                                }}
-                            >
-                                <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                                    </svg>
-                                    Notifications
-                                </span>
-                                {unreadCount > 0 && (
-                                    <span style={{
-                                        background: '#ef4444',
-                                        color: 'white',
-                                        fontSize: '0.75rem',
-                                        borderRadius: '999px',
-                                        padding: '0 6px',
-                                        height: '20px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
-                                    }}>
-                                        {unreadCount}
-                                    </span>
-                                )}
-                            </button>
                             <Link href="/settings" className={styles.mobileMenuItem} onClick={closeMenu}>
                                 Settings
                             </Link>

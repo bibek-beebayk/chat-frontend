@@ -27,6 +27,7 @@ interface NotificationContextType {
     requestPermission: () => Promise<void>;
     notifications: any[]; // TODO: Define type
     unreadCount: number;
+    clearNotifications: () => void;
 }
 
 const NotificationContext = createContext<NotificationContextType>({
@@ -35,6 +36,7 @@ const NotificationContext = createContext<NotificationContextType>({
     requestPermission: async () => { },
     notifications: [],
     unreadCount: 0,
+    clearNotifications: () => { },
 });
 
 export const useNotification = () => useContext(NotificationContext);
@@ -130,6 +132,15 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         const unsubscribe = onMessage(messaging, (payload) => {
             console.log("Foreground message:", payload);
             setNotifications(prev => [payload, ...prev]);
+
+            // Play Sound
+            try {
+                const audio = new Audio('/notification.mp3');
+                audio.play().catch(e => console.log('Audio play failed (user interaction needed):', e));
+            } catch (e) {
+                console.error('Audio initialization failed', e);
+            }
+
             // Show toast?
             if (document.hidden && 'Notification' in window) {
                 new Notification(payload.notification?.title || 'New Message', {
@@ -175,11 +186,26 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                 }, 30000); // 30 seconds
             };
 
+            const playSound = () => {
+                try {
+                    const audio = new Audio('/notification.mp3');
+                    audio.play().catch(e => console.log('Audio play failed (user interaction needed):', e));
+                } catch (e) {
+                    console.error('Audio initialization failed', e);
+                }
+            };
+
             socket.onmessage = (event) => {
                 try {
                     const data = JSON.parse(event.data);
                     if (data.type === 'new_message_notification') {
+                        // Play sound for incoming message
+                        if (data.sender_username !== user?.username) {
+                            playSound();
+                        }
+
                         setNotifications(prev => [data, ...prev]);
+
                         if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
                             new Notification(data.sender_username || 'New Message', {
                                 body: 'You have a new message',
@@ -209,8 +235,12 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         };
     }, [user]);
 
+    const clearNotifications = () => {
+        setNotifications([]);
+    };
+
     return (
-        <NotificationContext.Provider value={{ token, permission, requestPermission, notifications, unreadCount: notifications.length }}>
+        <NotificationContext.Provider value={{ token, permission, requestPermission, notifications, unreadCount: notifications.length, clearNotifications }}>
             {children}
         </NotificationContext.Provider>
     );

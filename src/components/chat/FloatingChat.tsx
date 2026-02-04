@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { usePathname } from 'next/navigation'; // Only need pathname for context
 import { useAuth } from '@/contexts/AuthContext';
+import { useNotification } from '@/contexts/NotificationContext';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useTypingThrottle } from '@/hooks/useTypingThrottle';
 import { apiClient } from '@/lib/api';
@@ -12,6 +13,7 @@ import EmojiPicker, { Theme } from 'emoji-picker-react';
 
 export const FloatingChat: React.FC = () => {
     const { user } = useAuth();
+    const { unreadCount, clearNotifications } = useNotification();
     const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(false);
     const [isMinimizing, setIsMinimizing] = useState(false); // For animation handling if needed
@@ -111,6 +113,9 @@ export const FloatingChat: React.FC = () => {
 
     // Handlers
     const handleToggleOpen = () => {
+        if (!isOpen) {
+            clearNotifications();
+        }
         setIsOpen(!isOpen);
     };
 
@@ -326,9 +331,30 @@ export const FloatingChat: React.FC = () => {
 
             {/* Launcher Bubble */}
             {!isOpen && (
-                <button className={styles.launcher} onClick={handleToggleOpen}>
+                <button className={styles.launcher} onClick={handleToggleOpen} style={{ position: 'relative' }}>
                     <span style={{ fontSize: '1.5rem' }}>💬</span>
                     <span>Support Chat</span>
+                    {unreadCount > 0 && (
+                        <span style={{
+                            position: 'absolute',
+                            top: '-5px',
+                            right: '-5px',
+                            background: '#ef4444',
+                            color: 'white',
+                            fontSize: '0.75rem',
+                            fontWeight: 'bold',
+                            borderRadius: '50%',
+                            width: '24px',
+                            height: '24px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+                            zIndex: 20
+                        }}>
+                            {unreadCount}
+                        </span>
+                    )}
                 </button>
             )}
         </div>
