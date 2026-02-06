@@ -4,6 +4,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import '@/styles/globals.css';
 import { FloatingChat } from '@/components/chat/FloatingChat';
 import { Footer } from '@/components/layout/Footer';
+import { PWAManager } from '@/components/PWAManager';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -19,7 +20,21 @@ export const metadata: Metadata = {
             "/icon-512.png",
         ],
     },
+    openGraph: {
+        title: 'Rollin Community',
+        description: 'Rollin Community Chat Application',
+        images: ['/icon-512.png'],
+        type: 'website',
+        siteName: 'Rollin Community',
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'Rollin Community',
+        description: 'Rollin Community Chat Application',
+        images: ['/icon-512.png'],
+    },
 };
+
 
 export const viewport: Viewport = {
     width: 'device-width',
@@ -41,6 +56,7 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={inter.className} style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+                <PWAManager />
                 <AuthProvider>
                     <NotificationProvider>
                         {children}
