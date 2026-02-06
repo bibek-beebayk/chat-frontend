@@ -5,6 +5,7 @@ import '@/styles/globals.css';
 import { FloatingChat } from '@/components/chat/FloatingChat';
 import { Footer } from '@/components/layout/Footer';
 import { PWAManager } from '@/components/PWAManager';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -56,14 +57,16 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={inter.className} style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-                <PWAManager />
-                <AuthProvider>
-                    <NotificationProvider>
-                        {children}
-                        <Footer />
-                        <FloatingChat />
-                    </NotificationProvider>
-                </AuthProvider>
+                <ErrorBoundary>
+                    <PWAManager />
+                    <AuthProvider>
+                        <NotificationProvider>
+                            {children}
+                            <Footer />
+                            <FloatingChat />
+                        </NotificationProvider>
+                    </AuthProvider>
+                </ErrorBoundary>
             </body>
         </html>
     );

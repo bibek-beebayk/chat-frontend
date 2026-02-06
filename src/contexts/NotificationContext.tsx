@@ -15,8 +15,25 @@ const firebaseConfig = {
     appId: "1:195206028710:web:679e28b5500192f4284367"
 };
 
-const app = initializeApp(firebaseConfig);
-const messaging = typeof window !== 'undefined' ? getMessaging(app) : null;
+// Initialize Firebase with error handling for unsupported browsers (in-app browsers)
+let app;
+let messaging = null;
+
+try {
+    app = initializeApp(firebaseConfig);
+    // Only initialize messaging if in browser environment and supported
+    if (typeof window !== 'undefined') {
+        try {
+            messaging = getMessaging(app);
+        } catch (messagingError) {
+            console.warn('[Firebase] Messaging not supported in this browser:', messagingError);
+            messaging = null;
+        }
+    }
+} catch (error) {
+    console.error('[Firebase] Initialization error:', error);
+}
+
 // VAPID Key must be a valid P-256 public key (approx 87-88 characters)
 // Get this from Firebase Console > Project Settings > Cloud Messaging > Web Push certificates
 const VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || "YOUR_VALID_VAPID_KEY_HERE";
