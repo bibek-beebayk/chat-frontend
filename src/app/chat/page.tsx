@@ -52,11 +52,13 @@ function ChatPageContent() {
 
     const [pinnedMessages, setPinnedMessages] = useState<Message[]>([]); // New State
     const [messageInput, setMessageInput] = useState('');
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [loading, setLoading] = useState(true);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [showRoomList, setShowRoomList] = useState(true); // Default to list on mobile
     const [isUploading, setIsUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const emojiPickerRef = useRef<HTMLDivElement>(null);
     const emojiButtonRef = useRef<HTMLButtonElement>(null);
@@ -134,37 +136,57 @@ function ChatPageContent() {
         }
     };
 
-    const handleSendMessage = (e: React.FormEvent) => {
+    const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Upload files first if any are selected
+        if (selectedFiles.length > 0 && selectedRoom) {
+            try {
+                setIsUploading(true);
+                setUploadProgress({ current: 0, total: selectedFiles.length });
+
+                // Upload files sequentially
+                for (let i = 0; i < selectedFiles.length; i++) {
+                    setUploadProgress({ current: i + 1, total: selectedFiles.length });
+                    const formData = new FormData();
+                    formData.append('file', selectedFiles[i]);
+                    await apiClient.postFormData(`/api/rooms/${selectedRoom}/attachments/`, formData);
+                }
+
+                setSelectedFiles([]);
+                setUploadProgress({ current: 0, total: 0 });
+            } catch (error) {
+                console.error('Upload failed:', error);
+                showToast('Failed to upload files', 'error');
+                setUploadProgress({ current: 0, total: 0 });
+            } finally {
+                setIsUploading(false);
+            }
+        }
+
+        // Send text message if there is one
         if (messageInput.trim() && isConnected) {
             sendMessage(messageInput);
             setMessageInput('');
         }
     };
 
-    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file || !selectedRoom) return;
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
 
-        const formData = new FormData();
-        formData.append('file', file);
+        // Add new files to the selected files array
+        const newFiles = Array.from(files);
+        setSelectedFiles(prev => [...prev, ...newFiles]);
 
-        // Optional: add text content if needed, or backend can handle it
-        // formData.append('content', `Uploaded ${file.name}`);
-
-        try {
-            setIsUploading(true);
-            await apiClient.postFormData(`/api/rooms/${selectedRoom}/attachments/`, formData);
-            // Success - message will come via WebSocket
-        } catch (error) {
-            console.error('Error uploading file:', error);
-        } finally {
-            setIsUploading(false);
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
-            }
-            showToast('Failed to upload file', 'error');
+        // Clear the input so the same file can be selected again if needed
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
         }
+    };
+
+    const removeFile = (index: number) => {
+        setSelectedFiles(prev => prev.filter((_, i) => i !== index));
     };
 
     // Message Actions State
@@ -1159,7 +1181,7 @@ function ChatPageContent() {
                                                                     <a href={msg.attachment} target="_blank" rel="noopener noreferrer">
                                                                         <img src={msg.attachment} alt="Attachment" style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '8px', cursor: 'pointer', display: 'block' }} />
                                                                     </a>
-                                                                ) : msg.attachment.match(/\.(mp4|webm|ogg)(\?.*)?$/i) ? (
+                                                                ) : msg.attachment.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i) ? (
                                                                     <video src={msg.attachment} controls style={{ maxWidth: '100%', borderRadius: '8px', display: 'block' }} />
                                                                 ) : (
                                                                     <a href={msg.attachment} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-primary)', textDecoration: 'none', padding: '0.5rem', background: 'rgba(0,0,0,0.05)', borderRadius: '6px' }}>
@@ -1225,6 +1247,51 @@ function ChatPageContent() {
                                         />
                                     </div>
                                 )}
+                                {/* File Preview Section */}
+                                {selectedFiles.length > 0 && (
+                                    <div className={styles.filePreviewContainer}>
+                                        {selectedFiles.map((file, index) => {
+                                            const isImage = file.type.startsWith('image/');
+                                            const previewUrl = isImage ? URL.createObjectURL(file) : null;
+
+                                            return (
+                                                <div key={index} className={styles.filePreviewItem}>
+                                                    <button
+                                                        type="button"
+                                                        className={styles.removeFileBtn}
+                                                        onClick={() => removeFile(index)}
+                                                        title="Remove file"
+                                                    >
+                                                        ×
+                                                    </button>
+                                                    {isImage && previewUrl ? (
+                                                        <img src={previewUrl} alt={file.name} className={styles.previewImage} />
+                                                    ) : (
+                                                        <div className={styles.fileIcon}>📄</div>
+                                                    )}
+                                                    <div className={styles.fileName}>{file.name}</div>
+                                                    <div className={styles.fileSize}>
+                                                        {(file.size / 1024).toFixed(1)} KB
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                                {/* Upload Progress Indicator */}
+                                {isUploading && uploadProgress.total > 0 && (
+                                    <div className={styles.uploadProgressContainer}>
+                                        <div className={styles.uploadProgressBar}>
+                                            <div
+                                                className={styles.uploadProgressFill}
+                                                style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
+                                            />
+                                        </div>
+                                        <div className={styles.uploadProgressText}>
+                                            Uploading file {uploadProgress.current} of {uploadProgress.total}...
+                                        </div>
+                                    </div>
+                                )}
                                 {isUploading && (
                                     <div className={styles.uploadingIndicator}>
                                         <div className="spinner-small"></div>
@@ -1236,6 +1303,7 @@ function ChatPageContent() {
                                     ref={fileInputRef}
                                     onChange={handleFileSelect}
                                     style={{ display: 'none' }}
+                                    multiple
                                 />
                                 <button
                                     type="button"
@@ -1282,7 +1350,7 @@ function ChatPageContent() {
                                 <button
                                     type="submit"
                                     className={styles.sendButton}
-                                    disabled={!isConnected || !messageInput.trim()}
+                                    disabled={(!messageInput.trim() && selectedFiles.length === 0) || !isConnected}
                                 >
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -1292,8 +1360,8 @@ function ChatPageContent() {
                             </form>
                         </div>
                     </div>
-                </div>
-            </main>
+                </div >
+            </main >
 
             <Modal
                 isOpen={leaveModalOpen}
@@ -1487,14 +1555,16 @@ function ChatPageContent() {
             </Modal>
 
             {/* Toast Notification */}
-            {toast.isVisible && (
-                <Toast
-                    message={toast.message}
-                    type={toast.type}
-                    onClose={() => setToast(prev => ({ ...prev, isVisible: false }))}
-                />
-            )}
-        </div>
+            {
+                toast.isVisible && (
+                    <Toast
+                        message={toast.message}
+                        type={toast.type}
+                        onClose={() => setToast(prev => ({ ...prev, isVisible: false }))}
+                    />
+                )
+            }
+        </div >
     );
 }
 
