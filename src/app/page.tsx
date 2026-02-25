@@ -103,6 +103,18 @@ export default function HomePage() {
                                         </button>
                                     </div>
                                 )}
+
+                                <div className={`${styles.card} glass`}>
+                                    <div className={styles.cardIcon}>📱</div>
+                                    <h3>Mobile App</h3>
+                                    <p>Get the best native experience by downloading our Android app.</p>
+                                    <button
+                                        className={styles.cardButton}
+                                        onClick={() => router.push('/download')}
+                                    >
+                                        Download App
+                                    </button>
+                                </div>
                             </div>
 
 

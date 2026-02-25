@@ -24,6 +24,7 @@ export const Footer: React.FC = () => {
             <div style={{ marginTop: '0.5rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
                 <Link href="/privacy" style={{ cursor: 'pointer', color: '#666', textDecoration: 'none' }}>Privacy Policy</Link>
                 <Link href="/terms" style={{ cursor: 'pointer', color: '#666', textDecoration: 'none' }}>Terms of Service</Link>
+                <Link href="/download" style={{ cursor: 'pointer', color: '#666', textDecoration: 'none' }}>Download App</Link>
             </div>
         </footer>
     );
