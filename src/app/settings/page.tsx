@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Header } from '@/components/layout/Header';
 import { ChangePasswordModal } from '@/components/settings/ChangePasswordModal';
 import { Toast } from '@/components/ui/Toast';
+import { Modal } from '@/components/ui/Modal';
 import styles from './page.module.css';
 
 export default function SettingsPage() {
@@ -12,19 +13,11 @@ export default function SettingsPage() {
     const [activeTab, setActiveTab] = useState('profile');
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+    const [isDeleteFinalOpen, setIsDeleteFinalOpen] = useState(false);
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     const handleDeleteAccount = async () => {
-        const firstConfirm = window.confirm(
-            'Are you sure you want to permanently delete your account? This action cannot be undone.'
-        );
-        if (!firstConfirm) return;
-
-        const secondConfirm = window.confirm(
-            'Final confirmation: all your account data will be permanently removed. Continue?'
-        );
-        if (!secondConfirm) return;
-
         try {
             setIsDeletingAccount(true);
             await deleteAccount();
@@ -86,7 +79,7 @@ export default function SettingsPage() {
                                 <div className={styles.profileField} style={{ marginTop: '1.2rem' }}>
                                     <span className={styles.label}>Danger Zone</span>
                                     <button
-                                        onClick={handleDeleteAccount}
+                                        onClick={() => setIsDeleteConfirmOpen(true)}
                                         className={`${styles.actionButton} ${styles.dangerButton}`}
                                         disabled={isDeletingAccount}
                                     >
@@ -106,6 +99,65 @@ export default function SettingsPage() {
                 onSuccess={(msg) => setToast({ message: msg, type: 'success' })}
                 onError={(msg) => setToast({ message: msg, type: 'error' })}
             />
+
+            <Modal
+                isOpen={isDeleteConfirmOpen}
+                onClose={() => setIsDeleteConfirmOpen(false)}
+                title="Delete Account"
+                footer={
+                    <>
+                        <button
+                            className={styles.modalSecondaryBtn}
+                            onClick={() => setIsDeleteConfirmOpen(false)}
+                            disabled={isDeletingAccount}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            className={styles.modalDangerBtn}
+                            onClick={() => {
+                                setIsDeleteConfirmOpen(false);
+                                setIsDeleteFinalOpen(true);
+                            }}
+                            disabled={isDeletingAccount}
+                        >
+                            Continue
+                        </button>
+                    </>
+                }
+            >
+                <p className={styles.modalText}>
+                    Are you sure you want to permanently delete your account? This action cannot be undone.
+                </p>
+            </Modal>
+
+            <Modal
+                isOpen={isDeleteFinalOpen}
+                onClose={() => setIsDeleteFinalOpen(false)}
+                title="Final Confirmation"
+                footer={
+                    <>
+                        <button
+                            className={styles.modalSecondaryBtn}
+                            onClick={() => setIsDeleteFinalOpen(false)}
+                            disabled={isDeletingAccount}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            className={styles.modalDangerBtn}
+                            onClick={handleDeleteAccount}
+                            disabled={isDeletingAccount}
+                        >
+                            {isDeletingAccount ? 'Deleting...' : 'Delete Permanently'}
+                        </button>
+                    </>
+                }
+            >
+                <p className={styles.modalText}>
+                    All data related to your account will be removed permanently. Do you want to proceed?
+                </p>
+            </Modal>
 
             {toast && (
                 <Toast

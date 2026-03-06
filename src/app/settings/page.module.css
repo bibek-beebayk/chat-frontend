@@ -114,6 +114,35 @@
     cursor: not-allowed;
 }
 
+.modalText {
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+.modalSecondaryBtn {
+    padding: 0.55rem 1rem;
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--color-text-primary);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.modalDangerBtn {
+    padding: 0.55rem 1rem;
+    background: #b42318;
+    border: none;
+    color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.modalSecondaryBtn:disabled,
+.modalDangerBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
     .content {
         flex-direction: column;
