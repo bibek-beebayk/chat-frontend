@@ -8,10 +8,35 @@ import { Toast } from '@/components/ui/Toast';
 import styles from './page.module.css';
 
 export default function SettingsPage() {
-    const { user } = useAuth();
+    const { user, deleteAccount } = useAuth();
     const [activeTab, setActiveTab] = useState('profile');
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [isDeletingAccount, setIsDeletingAccount] = useState(false);
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+    const handleDeleteAccount = async () => {
+        const firstConfirm = window.confirm(
+            'Are you sure you want to permanently delete your account? This action cannot be undone.'
+        );
+        if (!firstConfirm) return;
+
+        const secondConfirm = window.confirm(
+            'Final confirmation: all your account data will be permanently removed. Continue?'
+        );
+        if (!secondConfirm) return;
+
+        try {
+            setIsDeletingAccount(true);
+            await deleteAccount();
+            setToast({ message: 'Account deleted successfully.', type: 'success' });
+            window.location.href = '/login';
+        } catch (error: any) {
+            const msg = error?.message || 'Failed to delete account.';
+            setToast({ message: msg, type: 'error' });
+        } finally {
+            setIsDeletingAccount(false);
+        }
+    };
 
     // Provide default user object if null to avoid runtime crashes during redirects/loading
     if (!user) return null; // Or loading spinner
@@ -55,6 +80,17 @@ export default function SettingsPage() {
                                         className={styles.actionButton}
                                     >
                                         Change Password
+                                    </button>
+                                </div>
+
+                                <div className={styles.profileField} style={{ marginTop: '1.2rem' }}>
+                                    <span className={styles.label}>Danger Zone</span>
+                                    <button
+                                        onClick={handleDeleteAccount}
+                                        className={`${styles.actionButton} ${styles.dangerButton}`}
+                                        disabled={isDeletingAccount}
+                                    >
+                                        {isDeletingAccount ? 'Deleting Account...' : 'Delete Account'}
                                     </button>
                                 </div>
                             </div>

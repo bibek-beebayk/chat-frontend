@@ -10,6 +10,7 @@ interface AuthContextType {
     login: (data: LoginData) => Promise<User>;
     register: (data: RegisterData) => Promise<{ email: string; email_sent: boolean }>;
     logout: () => Promise<void>;
+    deleteAccount: () => Promise<void>;
     checkAuth: () => Promise<void>;
     verifyOTP: (email: string, otpCode: string) => Promise<User>;
     resendOTP: (email: string) => Promise<void>;
@@ -179,6 +180,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
     };
 
+    const deleteAccount = async () => {
+        await apiClient.delete('/api/auth/delete-account/');
+        apiClient.clearTokens();
+        setUser(null);
+        localStorage.removeItem('user');
+    };
+
     return (
         <AuthContext.Provider value={{
             user,
@@ -186,6 +194,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             login,
             register,
             logout,
+            deleteAccount,
             checkAuth,
             verifyOTP,
             resendOTP,

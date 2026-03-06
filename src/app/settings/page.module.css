@@ -100,6 +100,20 @@
     filter: brightness(1.1);
 }
 
+.dangerButton {
+    background: #b42318;
+}
+
+.dangerButton:hover {
+    background: #912018;
+    filter: none;
+}
+
+.dangerButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
     .content {
         flex-direction: column;
