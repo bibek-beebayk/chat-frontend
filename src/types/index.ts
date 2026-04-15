@@ -28,9 +28,17 @@ export interface Event {
 export interface Room {
     id: number;
     name: string;
+    room_type?: 'support' | 'direct_agent' | 'group' | string;
+    counterpart?: User | null;
     current_handler?: User;
     client?: User;
+    group_admin?: User;
+    group_description?: string;
+    group_member_count?: number;
+    user_is_group_admin?: boolean;
     created_at: string;
+    last_activity?: string;
+    last_message_sender_id?: number;
     status: 'OPEN' | 'CLOSED';
     participant_count?: number;
     unread_count?: number;
@@ -80,6 +88,7 @@ export interface Message {
     edited_at?: string;
     is_pinned?: boolean;
     is_deleted?: boolean;
+    is_broadcast?: boolean;
 }
 
 // Participant types
@@ -97,6 +106,7 @@ export interface WSMessage {
     message?: string;
     username?: string;
     user_id?: number;
+    user_type?: UserType | string;
     message_id?: number;
     timestamp?: string;
     attachment?: string;
@@ -104,6 +114,25 @@ export interface WSMessage {
     edited_at?: string;
     is_pinned?: boolean;
     is_deleted?: boolean;
+    is_broadcast?: boolean;
+}
+
+export interface GroupDiscoverItem {
+    id: number;
+    name: string;
+    group_description?: string;
+    group_admin?: string | null;
+    member_count: number;
+    relation: 'none' | 'pending' | 'member' | 'admin' | 'rejected' | string;
+}
+
+export interface GroupJoinRequestItem {
+    id: number;
+    status: 'pending' | 'approved' | 'rejected' | string;
+    requested_at: string;
+    reviewed_at?: string | null;
+    player: User;
+    room: Room;
 }
 
 // Auth types

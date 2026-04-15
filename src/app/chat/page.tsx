@@ -7,12 +7,22 @@ import { Header } from '@/components/layout/Header';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useTypingThrottle } from '@/hooks/useTypingThrottle';
 import { apiClient } from '@/lib/api';
-import { Room, Message, SupportRoom } from '@/types';
+import { Room, Message, SupportRoom, GroupDiscoverItem, GroupJoinRequestItem, User } from '@/types';
 import { MessageActionMenu } from '@/components/chat/MessageActionMenu';
 import { Modal } from '@/components/ui/Modal';
 import { Toast } from '@/components/ui/Toast';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
 import styles from './page.module.css';
+
+interface AgentSearchResult {
+    id: number;
+    username: string;
+    first_name?: string;
+    last_name?: string;
+    is_verified?: boolean;
+    agent_availability?: 'online' | 'busy' | 'away' | 'offline' | string;
+    agent_status_note?: string;
+}
 
 function ChatPageContent() {
     const { user, loading: authLoading } = useAuth();
@@ -35,9 +45,45 @@ function ChatPageContent() {
     const [rooms, setRooms] = useState<Room[]>([]);
     const [selectedRoom, setSelectedRoom] = useState<number | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
+    const roomMessagesCacheRef = useRef<Record<number, Message[]>>({});
+    const roomPinnedCacheRef = useRef<Record<number, Message[]>>({});
+    const selectedRoomRef = useRef<number | null>(null);
+    const roomLoadTokenRef = useRef(0);
 
     // Switch Station Modal
     const [switchModalOpen, setSwitchModalOpen] = useState(false);
+    const [agentSearchOpen, setAgentSearchOpen] = useState(false);
+    const [agentSearchQuery, setAgentSearchQuery] = useState('');
+    const [agentSearchResults, setAgentSearchResults] = useState<AgentSearchResult[]>([]);
+    const [isSearchingAgents, setIsSearchingAgents] = useState(false);
+    const [agentSearchError, setAgentSearchError] = useState<string | null>(null);
+    const [groupDiscoverOpen, setGroupDiscoverOpen] = useState(false);
+    const [groupDiscoverQuery, setGroupDiscoverQuery] = useState('');
+    const [groupDiscoverResults, setGroupDiscoverResults] = useState<GroupDiscoverItem[]>([]);
+    const [isDiscoveringGroups, setIsDiscoveringGroups] = useState(false);
+    const [groupDiscoverError, setGroupDiscoverError] = useState<string | null>(null);
+    const [groupRequestsOpen, setGroupRequestsOpen] = useState(false);
+    const [groupJoinRequests, setGroupJoinRequests] = useState<GroupJoinRequestItem[]>([]);
+    const [isLoadingGroupRequests, setIsLoadingGroupRequests] = useState(false);
+    const [createGroupOpen, setCreateGroupOpen] = useState(false);
+    const [newGroupName, setNewGroupName] = useState('');
+    const [newGroupDescription, setNewGroupDescription] = useState('');
+    const [isCreatingGroup, setIsCreatingGroup] = useState(false);
+    const [groupMembersOpen, setGroupMembersOpen] = useState(false);
+    const [groupMembers, setGroupMembers] = useState<User[]>([]);
+    const [isLoadingGroupMembers, setIsLoadingGroupMembers] = useState(false);
+    const [sendingBroadcast, setSendingBroadcast] = useState(false);
+    const [agentChatFilter, setAgentChatFilter] = useState<'all' | 'needs_reply' | 'unread'>('all');
+    const [internalNoteOpen, setInternalNoteOpen] = useState(false);
+    const [internalNoteValue, setInternalNoteValue] = useState('');
+    const [isSavingInternalNote, setIsSavingInternalNote] = useState(false);
+    const [quickRepliesOpen, setQuickRepliesOpen] = useState(false);
+    const [quickReplies, setQuickReplies] = useState<Array<{ id: number; title: string; content: string }>>([]);
+    const [isQuickRepliesLoading, setIsQuickRepliesLoading] = useState(false);
+    const [quickReplyTitle, setQuickReplyTitle] = useState('');
+    const [quickReplyContent, setQuickReplyContent] = useState('');
+    const [isSavingQuickReply, setIsSavingQuickReply] = useState(false);
+    const hasHydratedCacheRef = useRef(false);
 
     // Toast State
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error'; isVisible: boolean }>({
@@ -66,6 +112,7 @@ function ChatPageContent() {
     // Audio Unlock State
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const [isAudioUnlocked, setIsAudioUnlocked] = useState(false);
+    const storageKey = user ? `chat_page_cache_v1_${user.id}` : null;
 
     // Initial Audio Unlock - iOS requires user interaction to play audio
     const initAudio = () => {
@@ -115,14 +162,72 @@ function ChatPageContent() {
         };
     }, [showEmojiPicker]);
 
+    useEffect(() => {
+        if (!user || hasHydratedCacheRef.current || typeof window === 'undefined' || !storageKey) return;
+        hasHydratedCacheRef.current = true;
+        try {
+            const raw = window.sessionStorage.getItem(storageKey);
+            if (!raw) return;
+            const parsed = JSON.parse(raw);
+            const cachedRooms = Array.isArray(parsed?.rooms) ? parsed.rooms as Room[] : [];
+            const cachedSelectedRoom = typeof parsed?.selectedRoom === 'number' ? parsed.selectedRoom as number : null;
+            const cachedMessages = parsed?.roomMessagesCache && typeof parsed.roomMessagesCache === 'object'
+                ? parsed.roomMessagesCache as Record<number, Message[]>
+                : {};
+            const cachedPinned = parsed?.roomPinnedCache && typeof parsed.roomPinnedCache === 'object'
+                ? parsed.roomPinnedCache as Record<number, Message[]>
+                : {};
+            const cachedFilter = parsed?.agentChatFilter;
+
+            roomMessagesCacheRef.current = cachedMessages;
+            roomPinnedCacheRef.current = cachedPinned;
+            if (cachedRooms.length > 0) {
+                setRooms(cachedRooms);
+            }
+            if (cachedSelectedRoom) {
+                setSelectedRoom(cachedSelectedRoom);
+                setMessages(cachedMessages[cachedSelectedRoom] || []);
+                setPinnedMessages(cachedPinned[cachedSelectedRoom] || []);
+            } else if (cachedRooms.length > 0) {
+                const firstRoomId = cachedRooms[0].id;
+                setSelectedRoom(firstRoomId);
+                setMessages(cachedMessages[firstRoomId] || []);
+                setPinnedMessages(cachedPinned[firstRoomId] || []);
+            }
+            if (cachedFilter === 'all' || cachedFilter === 'needs_reply' || cachedFilter === 'unread') {
+                setAgentChatFilter(cachedFilter);
+            }
+            setLoading(false);
+        } catch (error) {
+            console.error('Failed to hydrate chat cache:', error);
+        }
+    }, [user, storageKey]);
+
     // Infinite Scroll State
     const [hasMore, setHasMore] = useState(true); // older
     const [hasMoreNewer, setHasMoreNewer] = useState(false); // newer
     const [isFetchingMore, setIsFetchingMore] = useState(false);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
+    const wsBaselineRef = useRef(0);
 
     const { sendMessage, sendJsonMessage, messages: wsMessages, isConnected } = useWebSocket(selectedRoom);
     const sendTyping = useTypingThrottle(sendJsonMessage);
+
+    const switchToRoom = (roomId: number, updateUrlForNonStaff: boolean = true) => {
+        roomLoadTokenRef.current += 1;
+        selectedRoomRef.current = roomId;
+        const cachedMessages = roomMessagesCacheRef.current[roomId] ?? [];
+        const cachedPinned = roomPinnedCacheRef.current[roomId] ?? [];
+        setSelectedRoom(roomId);
+        setMessages(cachedMessages);
+        setPinnedMessages(cachedPinned);
+        setHasMore(true);
+        setHasMoreNewer(false);
+        wsBaselineRef.current = wsMessages.length;
+        if (updateUrlForNonStaff && user?.user_type !== 'staff') {
+            router.replace(`/chat?room_id=${roomId}`);
+        }
+    };
 
     // ... (logic)
 
@@ -298,8 +403,145 @@ function ChatPageContent() {
     }, [user, authLoading, router]);
 
     const searchParams = useSearchParams();
+    const requestedRoomIdParam = Number(searchParams.get('room_id'));
 
     // ... (existing code)
+
+    const roomDisplayName = (room: Room) => {
+        if (room.room_type === 'support') return 'Support Chat';
+        if (room.room_type === 'direct_agent') {
+            return room.counterpart?.username || 'Direct Chat';
+        }
+        if (room.room_type === 'group') {
+            return room.name || 'Group Chat';
+        }
+        return room.name;
+    };
+
+    const roomSubtitle = (room: Room) => {
+        if (room.room_type === 'support') {
+            return room.queue_name || 'Support queue';
+        }
+        if (room.room_type === 'direct_agent') {
+            return room.counterpart?.user_type === 'agent' ? 'Agent chat' : 'Player chat';
+        }
+        if (room.room_type === 'group') {
+            const memberCount = room.group_member_count || room.participant_count || 0;
+            const adminName = room.group_admin?.username;
+            return `${memberCount} members${adminName ? ` • by ${adminName}` : ''}`;
+        }
+        return 'Chat';
+    };
+
+    const availabilityLabel = (availability?: string) => {
+        switch (availability) {
+            case 'online':
+                return 'Online';
+            case 'busy':
+                return 'Busy';
+            case 'away':
+                return 'Away';
+            case 'offline':
+                return 'Offline';
+            default:
+                return 'Unknown';
+        }
+    };
+
+    const availabilityColor = (availability?: string) => {
+        switch (availability) {
+            case 'online':
+                return '#22c55e';
+            case 'busy':
+                return '#f59e0b';
+            case 'away':
+                return '#facc15';
+            case 'offline':
+                return '#ef4444';
+            default:
+                return '#94a3b8';
+        }
+    };
+
+    const needsReply = (room: Room) => {
+        if (!user?.id || !room.last_message_sender_id) return false;
+        return room.last_message_sender_id !== user.id;
+    };
+
+    const loadQuickReplies = async () => {
+        setIsQuickRepliesLoading(true);
+        try {
+            const data = await apiClient.get<Array<{ id: number; title: string; content: string }>>('/api/quick-replies/');
+            setQuickReplies(data);
+        } catch (error: any) {
+            showToast(error?.message || 'Failed to load quick replies', 'error');
+        } finally {
+            setIsQuickRepliesLoading(false);
+        }
+    };
+
+    const openQuickReplies = async () => {
+        setQuickRepliesOpen(true);
+        await loadQuickReplies();
+    };
+
+    const createQuickReply = async () => {
+        const title = quickReplyTitle.trim();
+        const content = quickReplyContent.trim();
+        if (!title || !content) return;
+        setIsSavingQuickReply(true);
+        try {
+            await apiClient.post('/api/quick-replies/', { title, content });
+            setQuickReplyTitle('');
+            setQuickReplyContent('');
+            await loadQuickReplies();
+            showToast('Quick reply saved', 'success');
+        } catch (error: any) {
+            showToast(error?.message || 'Failed to save quick reply', 'error');
+        } finally {
+            setIsSavingQuickReply(false);
+        }
+    };
+
+    const deleteQuickReply = async (id: number) => {
+        try {
+            await apiClient.delete(`/api/quick-replies/${id}/`);
+            await loadQuickReplies();
+            showToast('Quick reply removed', 'success');
+        } catch (error: any) {
+            showToast(error?.message || 'Failed to delete quick reply', 'error');
+        }
+    };
+
+    const applyQuickReply = (content: string) => {
+        setMessageInput(content);
+        setQuickRepliesOpen(false);
+    };
+
+    const openInternalNote = async () => {
+        if (!selectedRoom) return;
+        try {
+            const data = await apiClient.get<{ content?: string }>(`/api/rooms/${selectedRoom}/internal-note/`);
+            setInternalNoteValue(data?.content || '');
+            setInternalNoteOpen(true);
+        } catch (error: any) {
+            showToast(error?.message || 'Failed to load internal note', 'error');
+        }
+    };
+
+    const saveInternalNote = async () => {
+        if (!selectedRoom) return;
+        setIsSavingInternalNote(true);
+        try {
+            await apiClient.patch(`/api/rooms/${selectedRoom}/internal-note/`, { content: internalNoteValue.trim() });
+            setInternalNoteOpen(false);
+            showToast('Internal note updated', 'success');
+        } catch (error: any) {
+            showToast(error?.message || 'Failed to save internal note', 'error');
+        } finally {
+            setIsSavingInternalNote(false);
+        }
+    };
 
     const fetchRooms = async () => {
         try {
@@ -308,11 +550,16 @@ function ChatPageContent() {
 
             const data = await apiClient.get<Room[]>(url);
             setRooms(data);
-            // Auto-select first room if none selected
-            if (data.length > 0 && !selectedRoom) {
-                if (user?.user_type !== 'staff') {
-                    setSelectedRoom(data[0].id);
+            if (data.length > 0) {
+                const currentSelectedRoom = selectedRoomRef.current;
+                const hasCurrentRoom = !!currentSelectedRoom && data.some((room) => room.id === currentSelectedRoom);
+                if (!hasCurrentRoom) {
+                    // Only auto-select on first load when nothing is selected.
+                    switchToRoom(data[0].id, false);
                 }
+            } else {
+                setSelectedRoom(null);
+                selectedRoomRef.current = null;
             }
         } catch (error) {
             console.error('Error loading rooms:', error);
@@ -356,11 +603,194 @@ function ChatPageContent() {
         }
     }, [user, mySupportRooms.length]);
 
+    useEffect(() => {
+        if (!agentSearchOpen || user?.user_type !== 'player') return;
+        const timeoutId = setTimeout(async () => {
+            setIsSearchingAgents(true);
+            setAgentSearchError(null);
+            try {
+                const q = agentSearchQuery.trim();
+                const endpoint = q
+                    ? `/api/agents/search/?q=${encodeURIComponent(q)}`
+                    : '/api/agents/search/';
+                const data = await apiClient.get<AgentSearchResult[]>(endpoint);
+                setAgentSearchResults(data);
+            } catch (error: any) {
+                setAgentSearchResults([]);
+                setAgentSearchError(error?.message || 'Failed to search agents');
+            } finally {
+                setIsSearchingAgents(false);
+            }
+        }, 300);
+
+        return () => clearTimeout(timeoutId);
+    }, [agentSearchOpen, agentSearchQuery, user?.user_type]);
+
+    useEffect(() => {
+        if (!groupDiscoverOpen || (user?.user_type !== 'player' && user?.user_type !== 'agent')) return;
+        const timeoutId = setTimeout(async () => {
+            setIsDiscoveringGroups(true);
+            setGroupDiscoverError(null);
+            try {
+                const q = groupDiscoverQuery.trim();
+                const endpoint = q
+                    ? `/api/groups/discover/?q=${encodeURIComponent(q)}`
+                    : '/api/groups/discover/';
+                const data = await apiClient.get<GroupDiscoverItem[]>(endpoint);
+                setGroupDiscoverResults(data);
+            } catch (error: any) {
+                setGroupDiscoverResults([]);
+                setGroupDiscoverError(error?.message || 'Failed to load groups');
+            } finally {
+                setIsDiscoveringGroups(false);
+            }
+        }, 300);
+
+        return () => clearTimeout(timeoutId);
+    }, [groupDiscoverOpen, groupDiscoverQuery, user?.user_type]);
+
+    const startDirectAgentChat = async (agentId: number) => {
+        try {
+            const room = await apiClient.post<Room>('/api/rooms/direct/start/', { agent_id: agentId });
+            setAgentSearchOpen(false);
+            setAgentSearchQuery('');
+            await fetchRooms();
+            switchToRoom(room.id, true);
+            showToast('Direct chat started', 'success');
+        } catch (error: any) {
+            showToast(error?.message || 'Unable to start chat with this agent', 'error');
+        }
+    };
+
+    const requestGroupJoin = async (groupId: number) => {
+        try {
+            await apiClient.post(`/api/groups/${groupId}/join-requests/`, {});
+            showToast('Join request sent', 'success');
+            const q = groupDiscoverQuery.trim();
+            const endpoint = q ? `/api/groups/discover/?q=${encodeURIComponent(q)}` : '/api/groups/discover/';
+            const data = await apiClient.get<GroupDiscoverItem[]>(endpoint);
+            setGroupDiscoverResults(data);
+        } catch (error: any) {
+            showToast(error?.message || 'Failed to send join request', 'error');
+        }
+    };
+
+    const createGroup = async () => {
+        const name = newGroupName.trim();
+        if (!name) return;
+        setIsCreatingGroup(true);
+        try {
+            const room = await apiClient.post<Room>('/api/groups/', {
+                name,
+                group_description: newGroupDescription.trim(),
+            });
+            setCreateGroupOpen(false);
+            setNewGroupName('');
+            setNewGroupDescription('');
+            await fetchRooms();
+            switchToRoom(room.id, true);
+            showToast('Group created', 'success');
+        } catch (error: any) {
+            showToast(error?.message || 'Failed to create group', 'error');
+        } finally {
+            setIsCreatingGroup(false);
+        }
+    };
+
+    const loadManagedGroupRequests = async () => {
+        setIsLoadingGroupRequests(true);
+        try {
+            const data = await apiClient.get<GroupJoinRequestItem[]>('/api/groups/managed/requests/');
+            setGroupJoinRequests(data);
+        } catch (error: any) {
+            showToast(error?.message || 'Failed to load join requests', 'error');
+        } finally {
+            setIsLoadingGroupRequests(false);
+        }
+    };
+
+    const openGroupRequests = async () => {
+        setGroupRequestsOpen(true);
+        await loadManagedGroupRequests();
+    };
+
+    const reviewGroupJoinRequest = async (requestId: number, action: 'approve' | 'reject') => {
+        try {
+            await apiClient.post(`/api/groups/join-requests/${requestId}/review/`, { action });
+            await loadManagedGroupRequests();
+            await fetchRooms();
+            showToast(action === 'approve' ? 'Player added to group' : 'Join request rejected', 'success');
+        } catch (error: any) {
+            showToast(error?.message || 'Failed to review request', 'error');
+        }
+    };
+
+    const openGroupMembers = async () => {
+        const currentRoom = rooms.find((r) => r.id === selectedRoom);
+        if (!currentRoom || currentRoom.room_type !== 'group') return;
+        setIsLoadingGroupMembers(true);
+        setGroupMembersOpen(true);
+        try {
+            const data = await apiClient.get<User[]>(`/api/groups/${currentRoom.id}/members/`);
+            setGroupMembers(data);
+        } catch (error: any) {
+            showToast(error?.message || 'Failed to load group members', 'error');
+            setGroupMembers([]);
+        } finally {
+            setIsLoadingGroupMembers(false);
+        }
+    };
+
+    const startDirectFromGroup = async (playerId: number) => {
+        const currentRoom = rooms.find((r) => r.id === selectedRoom);
+        if (!currentRoom || currentRoom.room_type !== 'group') return;
+        try {
+            const room = await apiClient.post<Room>(`/api/groups/${currentRoom.id}/direct/${playerId}/start/`, {});
+            setGroupMembersOpen(false);
+            await fetchRooms();
+            switchToRoom(room.id, true);
+            showToast('Direct chat opened', 'success');
+        } catch (error: any) {
+            showToast(error?.message || 'Failed to start direct chat', 'error');
+        }
+    };
+
+    const sendBroadcast = async () => {
+        const currentRoom = rooms.find((r) => r.id === selectedRoom);
+        if (!currentRoom || currentRoom.room_type !== 'group') return;
+        if (!messageInput.trim()) return;
+        setSendingBroadcast(true);
+        try {
+            await apiClient.post(`/api/groups/${currentRoom.id}/broadcast/`, {
+                content: messageInput.trim(),
+            });
+            setMessageInput('');
+        } catch (error: any) {
+            showToast(error?.message || 'Failed to send broadcast', 'error');
+        } finally {
+            setSendingBroadcast(false);
+        }
+    };
+
+    useEffect(() => {
+        if (!Number.isFinite(requestedRoomIdParam) || rooms.length === 0) return;
+        const requestedRoom = rooms.find((room) => room.id === requestedRoomIdParam);
+        if (requestedRoom && selectedRoom !== requestedRoom.id) {
+            switchToRoom(requestedRoom.id, false);
+        }
+    }, [requestedRoomIdParam, rooms, selectedRoom]);
+
     // ... (rest of message loading logic logic)
     // Load Messages Function
-    const loadMessages = async (direction: 'older' | 'newer' | 'around' | 'initial' = 'initial', referenceId?: number) => {
-        if (!selectedRoom) return;
+    const loadMessages = async (
+        direction: 'older' | 'newer' | 'around' | 'initial' = 'initial',
+        referenceId?: number,
+        roomIdOverride?: number
+    ) => {
+        const roomId = roomIdOverride ?? selectedRoom;
+        if (!roomId) return;
         if (isFetchingMore) return;
+        const requestToken = roomLoadTokenRef.current;
 
         try {
             setIsFetchingMore(true);
@@ -371,25 +801,45 @@ function ChatPageContent() {
             if (direction === 'newer' && referenceId) params.append('after_id', referenceId.toString());
             if (direction === 'around' && referenceId) params.append('around_id', referenceId.toString());
 
-            const url = `/api/rooms/${selectedRoom}/messages/?${params.toString()}`;
+            const url = `/api/rooms/${roomId}/messages/?${params.toString()}`;
             const data = await apiClient.get<Message[]>(url);
+            const isCurrentRoom = selectedRoomRef.current === roomId;
+            const isCurrentToken = requestToken === roomLoadTokenRef.current;
 
             if (direction === 'initial') {
-                setMessages(data);
+                if (isCurrentRoom && isCurrentToken) {
+                    setMessages(data);
+                }
+                roomMessagesCacheRef.current[roomId] = data;
                 setHasMore(data.length >= 20);
                 setHasMoreNewer(false);
                 setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'auto' }), 100);
             }
             else if (direction === 'older') {
                 if (data.length < 20) setHasMore(false);
-                setMessages(prev => [...data, ...prev]);
+                if (isCurrentRoom && isCurrentToken) {
+                    setMessages(prev => {
+                        const merged = [...data, ...prev];
+                        roomMessagesCacheRef.current[roomId] = merged;
+                        return merged;
+                    });
+                }
             }
             else if (direction === 'newer') {
                 if (data.length < 20) setHasMoreNewer(false);
-                setMessages(prev => [...prev, ...data]);
+                if (isCurrentRoom && isCurrentToken) {
+                    setMessages(prev => {
+                        const merged = [...prev, ...data];
+                        roomMessagesCacheRef.current[roomId] = merged;
+                        return merged;
+                    });
+                }
             }
             else if (direction === 'around') {
-                setMessages(data);
+                if (isCurrentRoom && isCurrentToken) {
+                    setMessages(data);
+                }
+                roomMessagesCacheRef.current[roomId] = data;
                 setHasMore(true); // Assumption: history exists
                 setHasMoreNewer(true); // Assumption: newer messages exist
 
@@ -407,12 +857,16 @@ function ChatPageContent() {
     };
 
     // Load Pinned Messages
-    const loadPinnedMessages = async () => {
-        if (!selectedRoom) return;
+    const loadPinnedMessages = async (roomIdOverride?: number) => {
+        const roomId = roomIdOverride ?? selectedRoom;
+        if (!roomId) return;
+        const requestToken = roomLoadTokenRef.current;
         try {
-            const data = await apiClient.get<Message[]>(`/api/rooms/${selectedRoom}/pinned/`);
-            console.log('Fetched Pinned Messages:', data);
-            setPinnedMessages(data);
+            const data = await apiClient.get<Message[]>(`/api/rooms/${roomId}/pinned/`);
+            roomPinnedCacheRef.current[roomId] = data;
+            if (selectedRoomRef.current === roomId && requestToken === roomLoadTokenRef.current) {
+                setPinnedMessages(data);
+            }
         } catch (error) {
             console.error('Error loading pinned messages:', error);
         }
@@ -420,12 +874,25 @@ function ChatPageContent() {
 
     useEffect(() => {
         if (selectedRoom) {
-            setMessages([]);
-            setPinnedMessages([]); // Clear pinned
+            selectedRoomRef.current = selectedRoom;
+            const cachedMessages = roomMessagesCacheRef.current[selectedRoom];
+            const cachedPinned = roomPinnedCacheRef.current[selectedRoom];
+
+            if (cachedMessages) {
+                setMessages(cachedMessages);
+            } else {
+                setMessages([]);
+            }
+            if (cachedPinned) {
+                setPinnedMessages(cachedPinned);
+            } else {
+                setPinnedMessages([]);
+            }
             setHasMore(true);
             setHasMoreNewer(false);
-            loadMessages('initial');
-            loadPinnedMessages(); // Fetch pinned
+            // Refresh in background to keep cache accurate without blocking UI.
+            loadMessages('initial', undefined, selectedRoom);
+            loadPinnedMessages(selectedRoom);
 
             const joinRoom = async () => {
                 try {
@@ -437,6 +904,38 @@ function ChatPageContent() {
             joinRoom();
         }
     }, [selectedRoom]);
+
+    useEffect(() => {
+        wsBaselineRef.current = wsMessages.length;
+    }, [selectedRoom]);
+
+    useEffect(() => {
+        if (selectedRoom) {
+            roomMessagesCacheRef.current[selectedRoom] = messages;
+        }
+    }, [selectedRoom, messages]);
+
+    useEffect(() => {
+        if (selectedRoom) {
+            roomPinnedCacheRef.current[selectedRoom] = pinnedMessages;
+        }
+    }, [selectedRoom, pinnedMessages]);
+
+    useEffect(() => {
+        if (!user || !storageKey || typeof window === 'undefined') return;
+        try {
+            const payload = {
+                rooms,
+                selectedRoom,
+                roomMessagesCache: roomMessagesCacheRef.current,
+                roomPinnedCache: roomPinnedCacheRef.current,
+                agentChatFilter,
+            };
+            window.sessionStorage.setItem(storageKey, JSON.stringify(payload));
+        } catch (error) {
+            console.error('Failed to persist chat cache:', error);
+        }
+    }, [rooms, selectedRoom, messages, pinnedMessages, agentChatFilter, user, storageKey]);
 
     // Jump / Scroll to Bottom Helper
     const scrollToBottom = () => {
@@ -481,6 +980,7 @@ function ChatPageContent() {
     const unifiedMessages = useMemo(() => {
         // 1. Start with historical messages
         let allMessages = [...messages];
+        const scopedWsMessages = wsMessages.slice(wsBaselineRef.current);
 
         // 2. Merge Pinned Messages (deduplicated)
         pinnedMessages.forEach(pinMsg => {
@@ -493,7 +993,7 @@ function ChatPageContent() {
         allMessages.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
         // 3. Add NEW WS messages (chat_message type)
-        const newWsMessages = wsMessages
+        const newWsMessages = scopedWsMessages
             .filter(msg => msg.type === 'chat_message')
             .map(msg => ({
                 id: msg.message_id || Date.now() + Math.random(),
@@ -501,7 +1001,7 @@ function ChatPageContent() {
                 sender: {
                     id: msg.user_id || 0,
                     username: msg.username || 'Unknown',
-                    user_type: 'player' as const
+                    user_type: (msg as any).user_type || 'player'
                 },
                 content: msg.message || '',
                 attachment: msg.attachment,
@@ -510,6 +1010,7 @@ function ChatPageContent() {
                 is_edited: false,
                 is_pinned: false,
                 is_deleted: false,
+                is_broadcast: !!msg.is_broadcast,
             } as Message));
 
         // Deduplicate and Append
@@ -520,7 +1021,7 @@ function ChatPageContent() {
         });
 
         // 4. Apply Update/Delete/Pin events to the FULL list
-        wsMessages.forEach(wsMsg => {
+        scopedWsMessages.forEach(wsMsg => {
             // ... (existing logic)
         });
 
@@ -605,7 +1106,7 @@ function ChatPageContent() {
             const data = await apiClient.get<Room[]>('/api/rooms/');
             setRooms(data);
             // Ensure valid room is selected
-            if (data.length > 0) setSelectedRoom(data[0].id);
+            if (data.length > 0) switchToRoom(data[0].id);
             setSwitchModalOpen(false);
         } catch (error: any) {
             console.error('Error switching station:', error);
@@ -747,10 +1248,94 @@ function ChatPageContent() {
             showToast('Failed to leave some rooms. Please check console.', 'error');
         }
     };
+    const selectedRoomData = rooms.find(r => r.id === selectedRoom);
+    const directAgentChatCount = rooms.filter((r) => r.room_type === 'direct_agent').length;
+    const orderedClientRooms = useMemo(() => {
+        const supportRoom = rooms.find((r) => r.room_type === 'support');
+        const nonSupportRooms = rooms.filter((r) => r.room_type !== 'support');
+        const directRooms = nonSupportRooms.filter((r) => r.room_type === 'direct_agent');
+        const otherNonSupportRooms = nonSupportRooms.filter((r) => r.room_type !== 'direct_agent');
+
+        const sortedDirectRooms = [...directRooms].sort((a, b) => {
+            if (user?.user_type === 'agent') {
+                const aNeedsReply = needsReply(a);
+                const bNeedsReply = needsReply(b);
+                if (aNeedsReply !== bNeedsReply) return aNeedsReply ? -1 : 1;
+            }
+            const aUnread = a.unread_count || 0;
+            const bUnread = b.unread_count || 0;
+            if (aUnread !== bUnread) return bUnread - aUnread;
+            const aTs = a.last_activity ? new Date(a.last_activity).getTime() : 0;
+            const bTs = b.last_activity ? new Date(b.last_activity).getTime() : 0;
+            return bTs - aTs;
+        }).filter((room) => {
+            if (user?.user_type !== 'agent') return true;
+            if (agentChatFilter === 'needs_reply') return needsReply(room);
+            if (agentChatFilter === 'unread') return (room.unread_count || 0) > 0;
+            return true;
+        });
+
+        const combined = [...sortedDirectRooms, ...otherNonSupportRooms];
+        return supportRoom ? [supportRoom, ...combined] : combined;
+    }, [rooms, user?.user_type, user?.id, agentChatFilter]);
+
+    const renderRoomListButton = (room: Room) => {
+        const displayName = user?.user_type === 'staff'
+            ? (room.client ? room.client.username : room.name)
+            : roomDisplayName(room);
+        const initial = displayName.charAt(0).toUpperCase();
+
+        return (
+            <button
+                key={room.id}
+                className={`${styles.roomButton} ${selectedRoom === room.id ? styles.active : ''}`}
+                onClick={() => {
+                    switchToRoom(room.id, true);
+                }}
+            >
+                <div className={styles.roomAvatar}>
+                    {initial}
+                </div>
+
+                <div className={styles.roomInfo}>
+                    <div className={styles.roomName}>
+                        {displayName}
+                    </div>
+                    <div className={styles.roomSubtext}>
+                        {user?.user_type === 'staff'
+                            ? 'Support chat'
+                            : `${roomSubtitle(room)}${user?.user_type === 'agent' && needsReply(room) ? ' • Needs reply' : ''}`}
+                    </div>
+                </div>
+
+                <div className={styles.roomMeta}>
+                    {room.unread_count && room.unread_count > 0 ? (
+                        <span className={styles.unreadBadge}>
+                            {room.unread_count}
+                        </span>
+                    ) : null}
+                </div>
+            </button>
+        );
+    };
+    const agentSupportRoom = user?.user_type === 'agent'
+        ? orderedClientRooms.find((room) => room.room_type === 'support')
+        : undefined;
+    const agentOtherRooms = user?.user_type === 'agent'
+        ? orderedClientRooms.filter((room) => room.room_type !== 'support')
+        : [];
+
     if (authLoading || loading) {
         return (
-            <div className={styles.loading}>
-                <div className="spinner"></div>
+            <div className={styles.pageWrapper}>
+                <Header />
+                <main className={styles.main}>
+                    <div className={styles.container}>
+                        <div className={styles.loading}>
+                            <div className="spinner"></div>
+                        </div>
+                    </div>
+                </main>
             </div>
         );
     }
@@ -850,8 +1435,6 @@ function ChatPageContent() {
         );
     }
 
-    const selectedRoomData = rooms.find(r => r.id === selectedRoom);
-
     return (
         <div className={styles.pageWrapper} onClick={initAudio} onTouchStart={initAudio}>
             {/* Hide Header for Staff in Workstation */}
@@ -940,48 +1523,96 @@ function ChatPageContent() {
                         </div>
                     )}
 
-                    <div className={`${styles.chatContainer} ${user.user_type !== 'staff' ? styles.singleColumn : ''}`}>
-                        {user.user_type === 'staff' && (
+                    <div className={`${styles.chatContainer} ${user.user_type !== 'staff' ? styles.clientLayout : ''}`}>
+                        {(user.user_type === 'staff' || user.user_type === 'player' || user.user_type === 'agent') && (
                             <div className={`${styles.roomList} glass ${!showRoomList && user.user_type !== 'staff' ? styles.hidden : ''}`}>
-                                <h2>Active Chats</h2>
-                                <div className={styles.rooms}>
-                                    {rooms.length > 0 ? (
-                                        rooms.map((room) => {
-                                            const displayName = room.client ? room.client.username : room.name;
-                                            const initial = displayName.charAt(0).toUpperCase();
-
-                                            return (
+                                <div className={styles.clientRoomHeader}>
+                                    <h2>
+                                        {user.user_type === 'staff'
+                                            ? 'Active Chats'
+                                            : 'Chats'}
+                                    </h2>
+                                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                                        {user.user_type === 'player' && (
+                                            <>
                                                 <button
-                                                    key={room.id}
-                                                    className={`${styles.roomButton} ${selectedRoom === room.id ? styles.active : ''}`}
-                                                    onClick={() => {
-                                                        setSelectedRoom(room.id);
-                                                        // setShowRoomList(false); // No longer needed for staff mini-sidebar
-                                                    }}
+                                                    className={styles.findAgentsBtn}
+                                                    onClick={() => setAgentSearchOpen(true)}
                                                 >
-                                                    <div className={styles.roomAvatar}>
-                                                        {initial}
-                                                    </div>
-
-                                                    <div className={styles.roomInfo}>
-                                                        <div className={styles.roomName}>
-                                                            {displayName}
-                                                        </div>
-                                                        {/* <div className={styles.roomSubtext}>
-                                                            {room.room_type === 'player' ? 'Player' : room.room_type} • {room.participant_count || 1} online
-                                                        </div> */}
-                                                    </div>
-
-                                                    <div className={styles.roomMeta}>
-                                                        {room.unread_count && room.unread_count > 0 ? (
-                                                            <span className={styles.unreadBadge}>
-                                                                {room.unread_count}
-                                                            </span>
-                                                        ) : null}
-                                                    </div>
+                                                    Find Agents
                                                 </button>
-                                            )
-                                        })
+                                                <button
+                                                    className={styles.findAgentsBtn}
+                                                    onClick={() => setGroupDiscoverOpen(true)}
+                                                >
+                                                    Groups
+                                                </button>
+                                            </>
+                                        )}
+                                        {user.user_type === 'agent' && (
+                                            <>
+                                                <button
+                                                    className={styles.findAgentsBtn}
+                                                    onClick={() => setCreateGroupOpen(true)}
+                                                >
+                                                    New Group
+                                                </button>
+                                                <button
+                                                    className={styles.findAgentsBtn}
+                                                    onClick={openGroupRequests}
+                                                >
+                                                    Requests
+                                                </button>
+                                                <button
+                                                    className={styles.findAgentsBtn}
+                                                    onClick={() => setGroupDiscoverOpen(true)}
+                                                >
+                                                    Groups
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className={styles.rooms}>
+                                    {user.user_type === 'agent' ? (
+                                        <>
+                                            {agentSupportRoom ? (
+                                                renderRoomListButton(agentSupportRoom)
+                                            ) : (
+                                                <div className={styles.noRooms}>Support chat unavailable</div>
+                                            )}
+
+                                            <div className={styles.agentChatsHeader}>Chats</div>
+                                            {directAgentChatCount > 0 && (
+                                                <div className={styles.agentFilterRow}>
+                                                    <button
+                                                        className={`${styles.agentFilterPill} ${agentChatFilter === 'all' ? styles.activeFilter : ''}`}
+                                                        onClick={() => setAgentChatFilter('all')}
+                                                    >
+                                                        All
+                                                    </button>
+                                                    <button
+                                                        className={`${styles.agentFilterPill} ${agentChatFilter === 'needs_reply' ? styles.activeFilter : ''}`}
+                                                        onClick={() => setAgentChatFilter('needs_reply')}
+                                                    >
+                                                        Needs Reply
+                                                    </button>
+                                                    <button
+                                                        className={`${styles.agentFilterPill} ${agentChatFilter === 'unread' ? styles.activeFilter : ''}`}
+                                                        onClick={() => setAgentChatFilter('unread')}
+                                                    >
+                                                        Unread
+                                                    </button>
+                                                </div>
+                                            )}
+                                            {agentOtherRooms.length > 0 ? (
+                                                agentOtherRooms.map((room) => renderRoomListButton(room))
+                                            ) : (
+                                                <div className={styles.noRooms}>No direct chats</div>
+                                            )}
+                                        </>
+                                    ) : (user.user_type === 'staff' ? rooms : orderedClientRooms).length > 0 ? (
+                                        (user.user_type === 'staff' ? rooms : orderedClientRooms).map((room) => renderRoomListButton(room))
                                     ) : (
                                         <div className={styles.noRooms}>No active chats</div>
                                     )}
@@ -989,9 +1620,7 @@ function ChatPageContent() {
                             </div>
                         )}
 
-
-
-                        <div className={`${styles.chatArea} glass ${user.user_type !== 'staff' ? styles.fullWidth : ''} ${showRoomList && user.user_type !== 'staff' ? styles.hidden : ''}`}>
+                        <div className={`${styles.chatArea} glass ${showRoomList && user.user_type !== 'staff' ? styles.hidden : ''}`}>
                             <div className={styles.chatHeader}>
                                 {/* Left Side: Title & Back Button */}
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -1009,7 +1638,7 @@ function ChatPageContent() {
                                             ? (selectedRoomData
                                                 ? (selectedRoomData.client ? `${selectedRoomData.client.username}` : selectedRoomData.name)
                                                 : 'Select a chat')
-                                            : (selectedRoomData?.queue_name || 'Support')}
+                                            : (selectedRoomData ? roomDisplayName(selectedRoomData) : 'Select a chat')}
                                     </h2>
                                 </div>
 
@@ -1054,6 +1683,40 @@ function ChatPageContent() {
                                             Switch Station ⇄
                                         </button>
                                     )}
+                                    {user.user_type === 'agent' && selectedRoomData?.room_type === 'direct_agent' && (
+                                        <>
+                                            <button
+                                                onClick={openQuickReplies}
+                                                className={styles.headerActionBtn}
+                                                title="Quick replies"
+                                            >
+                                                Replies
+                                            </button>
+                                            <button
+                                                onClick={openInternalNote}
+                                                className={styles.headerActionBtn}
+                                                title="Internal notes"
+                                            >
+                                                Notes
+                                            </button>
+                                            <button
+                                                onClick={closeChat}
+                                                className={styles.resolveBtn}
+                                                title="Resolve chat"
+                                            >
+                                                Resolve
+                                            </button>
+                                        </>
+                                    )}
+                                    {user.user_type === 'agent' && selectedRoomData?.room_type === 'group' && selectedRoomData.user_is_group_admin && (
+                                        <button
+                                            onClick={openGroupMembers}
+                                            className={styles.headerActionBtn}
+                                            title="Open group members"
+                                        >
+                                            Members
+                                        </button>
+                                    )}
                                     <div className={styles.status}>
                                         <span className={isConnected ? styles.connected : styles.disconnected} title={isConnected ? 'Connected' : 'Disconnected'}></span>
                                     </div>
@@ -1061,7 +1724,10 @@ function ChatPageContent() {
                             </div>
 
                             {/* Away Message Banner */}
-                            {user.user_type !== 'staff' && selectedRoomData && (!selectedRoomData.current_handler && !selectedRoomData.is_staff_online) && (
+                            {user.user_type !== 'staff'
+                                && selectedRoomData
+                                && selectedRoomData.room_type === 'support'
+                                && (!selectedRoomData.current_handler && !selectedRoomData.is_staff_online) && (
                                 <div className={styles.awayMessageBanner}>
                                     All our staffs are away right now. Your messages might take some time to be responded.
                                 </div>
@@ -1194,6 +1860,9 @@ function ChatPageContent() {
 
                                                         {(!msg.attachment || !msg.content.startsWith('Sent a file:')) && msg.content && (
                                                             <div className={styles.messageContent}>
+                                                                {msg.is_broadcast && (
+                                                                    <span className={styles.broadcastBadge}>Broadcast</span>
+                                                                )}
                                                                 {msg.content}
                                                                 {msg.is_edited && <span className={styles.editedLabel}>(edited)</span>}
                                                             </div>
@@ -1322,6 +1991,24 @@ function ChatPageContent() {
                                 >
                                     📎
                                 </button>
+                                {user.user_type === 'agent' && selectedRoomData?.room_type === 'direct_agent' && (
+                                    <button
+                                        type="button"
+                                        onClick={openQuickReplies}
+                                        className={styles.emojiButton}
+                                        style={{
+                                            marginRight: '0.5rem',
+                                            background: 'none',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            fontSize: '1.05rem',
+                                            color: 'var(--color-text-secondary)'
+                                        }}
+                                        title="Instant replies"
+                                    >
+                                        ⚡
+                                    </button>
+                                )}
                                 <button
                                     type="button"
                                     ref={emojiButtonRef}
@@ -1357,6 +2044,17 @@ function ChatPageContent() {
                                         <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                                     </svg>
                                 </button>
+                                {user.user_type === 'agent' && selectedRoomData?.room_type === 'group' && selectedRoomData.user_is_group_admin && (
+                                    <button
+                                        type="button"
+                                        className={styles.headerActionBtn}
+                                        onClick={sendBroadcast}
+                                        disabled={!messageInput.trim() || sendingBroadcast}
+                                        title="Send as broadcast message"
+                                    >
+                                        {sendingBroadcast ? '...' : 'Broadcast'}
+                                    </button>
+                                )}
                             </form>
                         </div>
                     </div>
@@ -1477,6 +2175,350 @@ function ChatPageContent() {
             </Modal>
 
             <Modal
+                isOpen={agentSearchOpen}
+                onClose={() => setAgentSearchOpen(false)}
+                title="Find Agents"
+            >
+                <div className={styles.agentSearchModalContent}>
+                    <input
+                        type="text"
+                        value={agentSearchQuery}
+                        onChange={(e) => setAgentSearchQuery(e.target.value)}
+                        placeholder="Search agents by username"
+                        className={styles.agentSearchInput}
+                    />
+
+                    {isSearchingAgents && (
+                        <div className={styles.agentSearchInfo}>Searching...</div>
+                    )}
+                    {agentSearchError && (
+                        <div className={styles.agentSearchError}>{agentSearchError}</div>
+                    )}
+
+                    <div className={styles.agentSearchList}>
+                        {agentSearchResults.length === 0 && !isSearchingAgents ? (
+                            <div className={styles.agentSearchInfo}>No agents found.</div>
+                        ) : (
+                            agentSearchResults.map((agent) => (
+                                <div key={agent.id} className={styles.agentSearchItem}>
+                                    <div className={styles.agentSearchIdentity}>
+                                        <div className={styles.agentSearchAvatar}>
+                                            {(agent.username || 'A').charAt(0).toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <div className={styles.agentSearchName}>{agent.username}</div>
+                                            <div className={styles.agentSearchNote}>
+                                                {agent.agent_status_note || (agent.is_verified ? 'Verified agent' : 'Agent')}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className={styles.agentSearchActions}>
+                                        <span
+                                            className={styles.agentAvailabilityBadge}
+                                            style={{
+                                                borderColor: availabilityColor(agent.agent_availability),
+                                                color: availabilityColor(agent.agent_availability),
+                                                background: `${availabilityColor(agent.agent_availability)}22`,
+                                            }}
+                                        >
+                                            {availabilityLabel(agent.agent_availability)}
+                                        </span>
+                                        <button
+                                            className={styles.agentChatBtn}
+                                            onClick={() => startDirectAgentChat(agent.id)}
+                                            disabled={agent.agent_availability === 'offline'}
+                                        >
+                                            {agent.agent_availability === 'offline' ? 'Offline' : 'Chat'}
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            </Modal>
+
+            <Modal
+                isOpen={groupDiscoverOpen}
+                onClose={() => setGroupDiscoverOpen(false)}
+                title="Discover Groups"
+            >
+                <div className={styles.agentSearchModalContent}>
+                    <input
+                        type="text"
+                        value={groupDiscoverQuery}
+                        onChange={(e) => setGroupDiscoverQuery(e.target.value)}
+                        placeholder="Search groups by name"
+                        className={styles.agentSearchInput}
+                    />
+                    {isDiscoveringGroups && (
+                        <div className={styles.agentSearchInfo}>Loading groups...</div>
+                    )}
+                    {groupDiscoverError && (
+                        <div className={styles.agentSearchError}>{groupDiscoverError}</div>
+                    )}
+                    <div className={styles.agentSearchList}>
+                        {groupDiscoverResults.length === 0 && !isDiscoveringGroups ? (
+                            <div className={styles.agentSearchInfo}>No groups found.</div>
+                        ) : (
+                            groupDiscoverResults.map((group) => (
+                                <div key={group.id} className={styles.agentSearchItem}>
+                                    <div className={styles.agentSearchIdentity}>
+                                        <div className={styles.agentSearchAvatar}>
+                                            {(group.name || 'G').charAt(0).toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <div className={styles.agentSearchName}>{group.name}</div>
+                                            <div className={styles.agentSearchNote}>
+                                                {group.group_description || 'No description'}
+                                            </div>
+                                            <div className={styles.agentSearchNote}>
+                                                {group.member_count} members {group.group_admin ? `• admin ${group.group_admin}` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className={styles.agentSearchActions}>
+                                        {group.relation === 'member' || group.relation === 'admin' ? (
+                                            <button
+                                                className={styles.agentChatBtn}
+                                                onClick={async () => {
+                                                    await fetchRooms();
+                                                    switchToRoom(group.id, true);
+                                                    setGroupDiscoverOpen(false);
+                                                }}
+                                            >
+                                                Open
+                                            </button>
+                                        ) : group.relation === 'pending' ? (
+                                            <span className={styles.agentAvailabilityBadge}>Pending</span>
+                                        ) : user.user_type === 'player' ? (
+                                            <button
+                                                className={styles.agentChatBtn}
+                                                onClick={() => requestGroupJoin(group.id)}
+                                            >
+                                                Request Join
+                                            </button>
+                                        ) : (
+                                            <span className={styles.agentAvailabilityBadge}>View</span>
+                                        )}
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            </Modal>
+
+            <Modal
+                isOpen={createGroupOpen}
+                onClose={() => setCreateGroupOpen(false)}
+                title="Create Group"
+            >
+                <div className={styles.quickReplyCreator}>
+                    <input
+                        type="text"
+                        value={newGroupName}
+                        onChange={(e) => setNewGroupName(e.target.value)}
+                        placeholder="Group name"
+                        className={styles.quickReplyInput}
+                    />
+                    <textarea
+                        value={newGroupDescription}
+                        onChange={(e) => setNewGroupDescription(e.target.value)}
+                        placeholder="Description (optional)"
+                        className={styles.quickReplyTextarea}
+                        rows={3}
+                    />
+                    <button
+                        className={styles.quickReplySaveBtn}
+                        onClick={createGroup}
+                        disabled={isCreatingGroup || !newGroupName.trim()}
+                    >
+                        {isCreatingGroup ? 'Creating...' : 'Create Group'}
+                    </button>
+                </div>
+            </Modal>
+
+            <Modal
+                isOpen={groupRequestsOpen}
+                onClose={() => setGroupRequestsOpen(false)}
+                title="Group Join Requests"
+            >
+                <div className={styles.quickRepliesList}>
+                    {isLoadingGroupRequests ? (
+                        <div className={styles.agentSearchInfo}>Loading requests...</div>
+                    ) : groupJoinRequests.length === 0 ? (
+                        <div className={styles.agentSearchInfo}>No pending requests.</div>
+                    ) : (
+                        groupJoinRequests.map((requestItem) => (
+                            <div key={requestItem.id} className={styles.quickReplyItem}>
+                                <div className={styles.quickReplyTexts}>
+                                    <div className={styles.quickReplyTitle}>{requestItem.player.username}</div>
+                                    <div className={styles.quickReplyContent}>wants to join {requestItem.room.name}</div>
+                                </div>
+                                <div className={styles.quickReplyActions}>
+                                    <button
+                                        className={styles.quickReplyUseBtn}
+                                        onClick={() => reviewGroupJoinRequest(requestItem.id, 'approve')}
+                                    >
+                                        Approve
+                                    </button>
+                                    <button
+                                        className={styles.quickReplyDeleteBtn}
+                                        onClick={() => reviewGroupJoinRequest(requestItem.id, 'reject')}
+                                    >
+                                        Reject
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </Modal>
+
+            <Modal
+                isOpen={groupMembersOpen}
+                onClose={() => setGroupMembersOpen(false)}
+                title="Group Members"
+            >
+                <div className={styles.quickRepliesList}>
+                    {isLoadingGroupMembers ? (
+                        <div className={styles.agentSearchInfo}>Loading members...</div>
+                    ) : groupMembers.length === 0 ? (
+                        <div className={styles.agentSearchInfo}>No members available.</div>
+                    ) : (
+                        groupMembers.map((member) => (
+                            <div key={member.id} className={styles.quickReplyItem}>
+                                <div className={styles.quickReplyTexts}>
+                                    <div className={styles.quickReplyTitle}>{member.username}</div>
+                                    <div className={styles.quickReplyContent}>{member.user_type}</div>
+                                </div>
+                                {member.user_type === 'player' && (
+                                    <div className={styles.quickReplyActions}>
+                                        <button
+                                            className={styles.quickReplyUseBtn}
+                                            onClick={() => startDirectFromGroup(member.id)}
+                                        >
+                                            Direct Chat
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        ))
+                    )}
+                </div>
+            </Modal>
+
+            <Modal
+                isOpen={quickRepliesOpen}
+                onClose={() => setQuickRepliesOpen(false)}
+                title="Instant Replies"
+            >
+                <div className={styles.quickRepliesModal}>
+                    <div className={styles.quickReplyCreator}>
+                        <input
+                            type="text"
+                            value={quickReplyTitle}
+                            onChange={(e) => setQuickReplyTitle(e.target.value)}
+                            placeholder="Reply title"
+                            className={styles.quickReplyInput}
+                        />
+                        <textarea
+                            value={quickReplyContent}
+                            onChange={(e) => setQuickReplyContent(e.target.value)}
+                            placeholder="Reply content"
+                            className={styles.quickReplyTextarea}
+                            rows={3}
+                        />
+                        <button
+                            className={styles.quickReplySaveBtn}
+                            onClick={createQuickReply}
+                            disabled={isSavingQuickReply || !quickReplyTitle.trim() || !quickReplyContent.trim()}
+                        >
+                            {isSavingQuickReply ? 'Saving...' : 'Save Reply'}
+                        </button>
+                    </div>
+
+                    {isQuickRepliesLoading ? (
+                        <div className={styles.agentSearchInfo}>Loading replies...</div>
+                    ) : quickReplies.length === 0 ? (
+                        <div className={styles.agentSearchInfo}>No quick replies yet.</div>
+                    ) : (
+                        <div className={styles.quickRepliesList}>
+                            {quickReplies.map((reply) => (
+                                <div key={reply.id} className={styles.quickReplyItem}>
+                                    <div className={styles.quickReplyTexts}>
+                                        <div className={styles.quickReplyTitle}>{reply.title}</div>
+                                        <div className={styles.quickReplyContent}>{reply.content}</div>
+                                    </div>
+                                    <div className={styles.quickReplyActions}>
+                                        <button
+                                            className={styles.quickReplyUseBtn}
+                                            onClick={() => applyQuickReply(reply.content)}
+                                        >
+                                            Use
+                                        </button>
+                                        <button
+                                            className={styles.quickReplyDeleteBtn}
+                                            onClick={() => deleteQuickReply(reply.id)}
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </Modal>
+
+            <Modal
+                isOpen={internalNoteOpen}
+                onClose={() => setInternalNoteOpen(false)}
+                title="Internal Note"
+                footer={
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                        <button
+                            onClick={() => setInternalNoteOpen(false)}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                borderRadius: '6px',
+                                border: '1px solid var(--color-border)',
+                                background: 'transparent',
+                                color: 'var(--color-text-primary)',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={saveInternalNote}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                borderRadius: '6px',
+                                border: 'none',
+                                background: 'var(--color-primary)',
+                                color: 'white',
+                                cursor: 'pointer',
+                                fontWeight: 600
+                            }}
+                            disabled={isSavingInternalNote}
+                        >
+                            {isSavingInternalNote ? 'Saving...' : 'Save'}
+                        </button>
+                    </div>
+                }
+            >
+                <textarea
+                    value={internalNoteValue}
+                    onChange={(e) => setInternalNoteValue(e.target.value)}
+                    rows={8}
+                    className={styles.internalNoteTextarea}
+                    placeholder="Add private notes for this chat..."
+                />
+            </Modal>
+
+            <Modal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 title="Delete Message"
@@ -1570,8 +2612,22 @@ function ChatPageContent() {
 
 export default function ChatPage() {
     return (
-        <Suspense fallback={<div className="loading"><div className="spinner"></div></div>}>
+        <Suspense
+            fallback={
+                <div className={styles.pageWrapper}>
+                    <Header />
+                    <main className={styles.main}>
+                        <div className={styles.container}>
+                            <div className={styles.loading}>
+                                <div className="spinner"></div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            }
+        >
             <ChatPageContent />
         </Suspense>
     );
 }
+

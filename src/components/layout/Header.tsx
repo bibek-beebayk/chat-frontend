@@ -49,7 +49,6 @@ export const Header: React.FC = () => {
                                 cursor: 'pointer',
                                 color: 'white',
                                 position: 'relative',
-                                display: 'flex', // Only show on mobile via CSS usually, or just show always if design permits
                                 alignItems: 'center',
                                 padding: '8px'
                             }}
@@ -100,6 +99,21 @@ export const Header: React.FC = () => {
                             onClick={closeMenu}
                         >
                             Home
+                        </Link>
+
+                        <Link
+                            href="/chat"
+                            className={isActive('/chat') ? styles.active : ''}
+                            onClick={(e) => {
+                                if (isActive('/chat')) {
+                                    e.preventDefault();
+                                    closeMenu();
+                                    return;
+                                }
+                                closeMenu();
+                            }}
+                        >
+                            Chat
                         </Link>
 
                         <Link

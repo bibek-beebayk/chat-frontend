@@ -40,6 +40,10 @@
     height: calc(100vh - 120px);
 }
 
+.clientLayout {
+    grid-template-columns: 290px 1fr;
+}
+
 .singleColumn {
     grid-template-columns: 1fr;
     max-width: 100%;
@@ -64,6 +68,66 @@
     color: var(--color-text-primary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+.clientRoomHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.clientRoomHeader h2 {
+    margin-bottom: 0;
+}
+
+.findAgentsBtn {
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    border-radius: 999px;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.findAgentsBtn:hover {
+    border-color: var(--color-primary);
+    background: rgba(37, 99, 235, 0.12);
+}
+
+.agentFilterRow {
+    display: flex;
+    gap: 0.4rem;
+    margin: 0.55rem 0 0.7rem;
+    flex-wrap: wrap;
+}
+
+.agentChatsHeader {
+    margin-top: 0.7rem;
+    margin-bottom: 0.35rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+.agentFilterPill {
+    border: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--color-text-primary);
+    border-radius: 999px;
+    padding: 0.2rem 0.55rem;
+    font-size: 0.72rem;
+    cursor: pointer;
+}
+
+.activeFilter {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
 }
 
 /* ... */
@@ -103,6 +167,23 @@
     /* OR a subtle active color */
     background: rgba(37, 99, 235, 0.1);
     /* Light blue tint */
+}
+
+.supportRoomButton {
+    border: 1px solid rgba(59, 130, 246, 0.24);
+    background: rgba(59, 130, 246, 0.03);
+    box-shadow: inset 3px 0 0 rgba(59, 130, 246, 0.55);
+}
+
+.supportRoomButton:hover {
+    background: rgba(59, 130, 246, 0.08);
+    border-color: rgba(59, 130, 246, 0.34);
+}
+
+.supportRoomButton.active {
+    background: rgba(37, 99, 235, 0.16);
+    border-color: rgba(37, 99, 235, 0.48);
+    box-shadow: inset 3px 0 0 rgba(147, 197, 253, 0.9);
 }
 
 /* Avatar Circle */
@@ -482,6 +563,37 @@
 .sendButton:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.headerActionBtn {
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    border-radius: 999px;
+    padding: 0.28rem 0.75rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.headerActionBtn:hover {
+    border-color: var(--color-primary);
+    background: rgba(37, 99, 235, 0.12);
+}
+
+.resolveBtn {
+    border: none;
+    background: rgba(34, 197, 94, 0.2);
+    color: #86efac;
+    border-radius: 999px;
+    padding: 0.28rem 0.75rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+.resolveBtn:hover {
+    background: rgba(34, 197, 94, 0.28);
 }
 
 @media (max-width: 768px) {
@@ -1103,4 +1215,296 @@
 
 .queueAddItem:hover {
     background: rgba(139, 92, 246, 0.1);
+}
+
+.broadcastBadge {
+    display: inline-block;
+    margin-right: 0.4rem;
+    padding: 0.08rem 0.38rem;
+    border-radius: 999px;
+    border: 1px solid rgba(251, 191, 36, 0.45);
+    background: rgba(251, 191, 36, 0.15);
+    color: #f59e0b;
+    font-size: 0.64rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.35px;
+}
+
+.agentSearchModalContent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.agentSearchInput {
+    width: 100%;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
+    outline: none;
+}
+
+.agentSearchInput:focus {
+    border-color: var(--color-primary);
+}
+
+.agentSearchList {
+    max-height: 52vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.agentSearchItem {
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 0.65rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    background: var(--color-bg-secondary);
+}
+
+.agentSearchIdentity {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+}
+
+.agentSearchAvatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: #fff;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.agentSearchName {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.agentSearchNote {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.agentSearchActions {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    flex-shrink: 0;
+}
+
+.agentAvailabilityBadge {
+    border: 1px solid;
+    border-radius: 999px;
+    padding: 0.2rem 0.55rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.agentChatBtn {
+    border: none;
+    border-radius: 8px;
+    background: var(--color-primary);
+    color: #fff;
+    font-weight: 600;
+    padding: 0.42rem 0.75rem;
+    cursor: pointer;
+}
+
+.agentChatBtn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.agentSearchInfo {
+    text-align: center;
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+    padding: 0.5rem 0;
+}
+
+.agentSearchError {
+    color: #ef4444;
+    font-size: 0.82rem;
+}
+
+.quickRepliesModal {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.quickReplyCreator {
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 0.65rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: var(--color-bg-secondary);
+}
+
+.quickReplyInput,
+.quickReplyTextarea,
+.internalNoteTextarea {
+    width: 100%;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    border-radius: 8px;
+    padding: 0.55rem 0.7rem;
+    outline: none;
+    resize: vertical;
+}
+
+.quickReplyInput:focus,
+.quickReplyTextarea:focus,
+.internalNoteTextarea:focus {
+    border-color: var(--color-primary);
+}
+
+.quickReplySaveBtn {
+    align-self: flex-end;
+    border: none;
+    border-radius: 8px;
+    background: var(--color-primary);
+    color: #fff;
+    font-weight: 600;
+    padding: 0.45rem 0.75rem;
+    cursor: pointer;
+}
+
+.quickReplySaveBtn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.quickRepliesList {
+    max-height: 38vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.quickReplyItem {
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 0.6rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.65rem;
+    background: var(--color-bg-secondary);
+}
+
+.quickReplyTexts {
+    min-width: 0;
+}
+
+.quickReplyTitle {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.quickReplyContent {
+    margin-top: 0.2rem;
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 380px;
+}
+
+.quickReplyActions {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+}
+
+.quickReplyUseBtn,
+.quickReplyDeleteBtn {
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    padding: 0.35rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.quickReplyUseBtn {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+.quickReplyDeleteBtn {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+}
+
+.noRooms {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    padding: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .clientLayout {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .clientLayout .roomList {
+        width: 100%;
+        max-height: 220px;
+        border-right: none;
+        border-bottom: 1px solid var(--color-border);
+        padding: var(--spacing-sm);
+    }
+
+    .clientLayout .roomList h2,
+    .clientLayout .roomInfo {
+        display: block;
+    }
+
+    .clientLayout .roomButton {
+        justify-content: flex-start;
+        padding: var(--spacing-sm);
+    }
+
+    .clientLayout .roomMeta {
+        position: static;
+    }
+
+    .clientLayout .roomAvatar {
+        width: 34px;
+        height: 34px;
+        font-size: 0.95rem;
+    }
+
+    .clientLayout .chatArea {
+        width: 100%;
+        flex: 1;
+    }
 }

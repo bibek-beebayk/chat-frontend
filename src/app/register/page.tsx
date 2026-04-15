@@ -147,6 +147,12 @@ export default function RegisterPage() {
                             Sign In
                         </Link>
                     </div>
+                    <div className={styles.footer}>
+                        <span>Prefer the mobile app?</span>
+                        <Link href="/download" className={styles.link}>
+                            Download App
+                        </Link>
+                    </div>
                 </form>
             </div>
         </div>

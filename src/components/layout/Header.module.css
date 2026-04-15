@@ -237,7 +237,8 @@
 }
 
 .desktopUserMenu {
-    display: block;
+    display: flex;
+    align-items: center;
     position: relative;
 }
 
