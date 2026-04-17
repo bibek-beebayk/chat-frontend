@@ -65,6 +65,7 @@ function ChatPageContent() {
     const [groupRequestsOpen, setGroupRequestsOpen] = useState(false);
     const [groupJoinRequests, setGroupJoinRequests] = useState<GroupJoinRequestItem[]>([]);
     const [isLoadingGroupRequests, setIsLoadingGroupRequests] = useState(false);
+    const [pendingGroupRequestCount, setPendingGroupRequestCount] = useState(0);
     const [createGroupOpen, setCreateGroupOpen] = useState(false);
     const [newGroupName, setNewGroupName] = useState('');
     const [newGroupDescription, setNewGroupDescription] = useState('');
@@ -73,6 +74,11 @@ function ChatPageContent() {
     const [groupMembers, setGroupMembers] = useState<User[]>([]);
     const [isLoadingGroupMembers, setIsLoadingGroupMembers] = useState(false);
     const [sendingBroadcast, setSendingBroadcast] = useState(false);
+    const [deleteGroupModalOpen, setDeleteGroupModalOpen] = useState(false);
+    const [isDeletingGroup, setIsDeletingGroup] = useState(false);
+    const [leaveGroupModalOpen, setLeaveGroupModalOpen] = useState(false);
+    const [isLeavingGroup, setIsLeavingGroup] = useState(false);
+    const [mobileOptionsOpen, setMobileOptionsOpen] = useState(false);
     const [agentChatFilter, setAgentChatFilter] = useState<'all' | 'needs_reply' | 'unread'>('all');
     const [internalNoteOpen, setInternalNoteOpen] = useState(false);
     const [internalNoteValue, setInternalNoteValue] = useState('');
@@ -83,6 +89,7 @@ function ChatPageContent() {
     const [quickReplyTitle, setQuickReplyTitle] = useState('');
     const [quickReplyContent, setQuickReplyContent] = useState('');
     const [isSavingQuickReply, setIsSavingQuickReply] = useState(false);
+    const [showQuickReplyCreateForm, setShowQuickReplyCreateForm] = useState(false);
     const hasHydratedCacheRef = useRef(false);
 
     // Toast State
@@ -103,6 +110,8 @@ function ChatPageContent() {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [showRoomList, setShowRoomList] = useState(true); // Default to list on mobile
+    const [isMobileViewport, setIsMobileViewport] = useState(false);
+    const [chatSwitcherOpen, setChatSwitcherOpen] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -202,6 +211,23 @@ function ChatPageContent() {
             console.error('Failed to hydrate chat cache:', error);
         }
     }, [user, storageKey]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const mediaQuery = window.matchMedia('(max-width: 768px)');
+        const applyViewport = () => setIsMobileViewport(mediaQuery.matches);
+        applyViewport();
+        mediaQuery.addEventListener('change', applyViewport);
+        return () => mediaQuery.removeEventListener('change', applyViewport);
+    }, []);
+
+    useEffect(() => {
+        if (!isMobileViewport) {
+            setMobileOptionsOpen(false);
+            return;
+        }
+        setMobileOptionsOpen(false);
+    }, [isMobileViewport, selectedRoom]);
 
     // Infinite Scroll State
     const [hasMore, setHasMore] = useState(true); // older
@@ -482,6 +508,9 @@ function ChatPageContent() {
 
     const openQuickReplies = async () => {
         setQuickRepliesOpen(true);
+        setShowQuickReplyCreateForm(false);
+        setQuickReplyTitle('');
+        setQuickReplyContent('');
         await loadQuickReplies();
     };
 
@@ -494,6 +523,7 @@ function ChatPageContent() {
             await apiClient.post('/api/quick-replies/', { title, content });
             setQuickReplyTitle('');
             setQuickReplyContent('');
+            setShowQuickReplyCreateForm(false);
             await loadQuickReplies();
             showToast('Quick reply saved', 'success');
         } catch (error: any) {
@@ -702,6 +732,7 @@ function ChatPageContent() {
         try {
             const data = await apiClient.get<GroupJoinRequestItem[]>('/api/groups/managed/requests/');
             setGroupJoinRequests(data);
+            setPendingGroupRequestCount(data.length);
         } catch (error: any) {
             showToast(error?.message || 'Failed to load join requests', 'error');
         } finally {
@@ -724,6 +755,26 @@ function ChatPageContent() {
             showToast(error?.message || 'Failed to review request', 'error');
         }
     };
+
+    useEffect(() => {
+        if (user?.user_type !== 'agent') {
+            setPendingGroupRequestCount(0);
+            return;
+        }
+
+        const refreshPendingCount = async () => {
+            try {
+                const data = await apiClient.get<GroupJoinRequestItem[]>('/api/groups/managed/requests/');
+                setPendingGroupRequestCount(data.length);
+            } catch {
+                // keep current badge value on transient failures
+            }
+        };
+
+        refreshPendingCount();
+        const intervalId = setInterval(refreshPendingCount, 10000);
+        return () => clearInterval(intervalId);
+    }, [user?.user_type]);
 
     const openGroupMembers = async () => {
         const currentRoom = rooms.find((r) => r.id === selectedRoom);
@@ -769,6 +820,40 @@ function ChatPageContent() {
             showToast(error?.message || 'Failed to send broadcast', 'error');
         } finally {
             setSendingBroadcast(false);
+        }
+    };
+
+    const deleteCurrentGroup = async () => {
+        const currentRoom = rooms.find((r) => r.id === selectedRoom);
+        if (!currentRoom || currentRoom.room_type !== 'group') return;
+        setIsDeletingGroup(true);
+        try {
+            await apiClient.delete(`/api/groups/${currentRoom.id}/`);
+            setDeleteGroupModalOpen(false);
+            setGroupMembersOpen(false);
+            showToast('Group deleted', 'success');
+            await fetchRooms();
+        } catch (error: any) {
+            showToast(error?.message || 'Failed to delete group', 'error');
+        } finally {
+            setIsDeletingGroup(false);
+        }
+    };
+
+    const leaveCurrentGroup = async () => {
+        const currentRoom = rooms.find((r) => r.id === selectedRoom);
+        if (!currentRoom || currentRoom.room_type !== 'group') return;
+        setIsLeavingGroup(true);
+        try {
+            await apiClient.post(`/api/groups/${currentRoom.id}/leave/`, {});
+            setLeaveGroupModalOpen(false);
+            setGroupMembersOpen(false);
+            showToast('You left the group', 'success');
+            await fetchRooms();
+        } catch (error: any) {
+            showToast(error?.message || 'Failed to leave group', 'error');
+        } finally {
+            setIsLeavingGroup(false);
         }
     };
 
@@ -1254,7 +1339,8 @@ function ChatPageContent() {
         const supportRoom = rooms.find((r) => r.room_type === 'support');
         const nonSupportRooms = rooms.filter((r) => r.room_type !== 'support');
         const directRooms = nonSupportRooms.filter((r) => r.room_type === 'direct_agent');
-        const otherNonSupportRooms = nonSupportRooms.filter((r) => r.room_type !== 'direct_agent');
+        const groupRooms = nonSupportRooms.filter((r) => r.room_type === 'group');
+        const otherNonSupportRooms = nonSupportRooms.filter((r) => r.room_type !== 'direct_agent' && r.room_type !== 'group');
 
         const sortedDirectRooms = [...directRooms].sort((a, b) => {
             if (user?.user_type === 'agent') {
@@ -1275,11 +1361,20 @@ function ChatPageContent() {
             return true;
         });
 
-        const combined = [...sortedDirectRooms, ...otherNonSupportRooms];
+        const sortedGroupRooms = [...groupRooms].sort((a, b) => {
+            const aUnread = a.unread_count || 0;
+            const bUnread = b.unread_count || 0;
+            if (aUnread !== bUnread) return bUnread - aUnread;
+            const aTs = a.last_activity ? new Date(a.last_activity).getTime() : 0;
+            const bTs = b.last_activity ? new Date(b.last_activity).getTime() : 0;
+            return bTs - aTs;
+        });
+
+        const combined = [...sortedDirectRooms, ...sortedGroupRooms, ...otherNonSupportRooms];
         return supportRoom ? [supportRoom, ...combined] : combined;
     }, [rooms, user?.user_type, user?.id, agentChatFilter]);
 
-    const renderRoomListButton = (room: Room) => {
+    const renderRoomListButton = (room: Room, onSelect?: () => void) => {
         const displayName = user?.user_type === 'staff'
             ? (room.client ? room.client.username : room.name)
             : roomDisplayName(room);
@@ -1291,6 +1386,7 @@ function ChatPageContent() {
                 className={`${styles.roomButton} ${selectedRoom === room.id ? styles.active : ''}`}
                 onClick={() => {
                     switchToRoom(room.id, true);
+                    onSelect?.();
                 }}
             >
                 <div className={styles.roomAvatar}>
@@ -1323,6 +1419,21 @@ function ChatPageContent() {
         : undefined;
     const agentOtherRooms = user?.user_type === 'agent'
         ? orderedClientRooms.filter((room) => room.room_type !== 'support')
+        : [];
+    const agentDirectRooms = user?.user_type === 'agent'
+        ? agentOtherRooms.filter((room) => room.room_type === 'direct_agent')
+        : [];
+    const agentGroupRooms = user?.user_type === 'agent'
+        ? agentOtherRooms.filter((room) => room.room_type === 'group')
+        : [];
+    const clientSupportRoom = user?.user_type !== 'staff'
+        ? orderedClientRooms.find((room) => room.room_type === 'support')
+        : undefined;
+    const clientDirectRooms = user?.user_type !== 'staff'
+        ? orderedClientRooms.filter((room) => room.room_type === 'direct_agent')
+        : [];
+    const clientGroupRooms = user?.user_type !== 'staff'
+        ? orderedClientRooms.filter((room) => room.room_type === 'group')
         : [];
 
     if (authLoading || loading) {
@@ -1524,9 +1635,18 @@ function ChatPageContent() {
                     )}
 
                     <div className={`${styles.chatContainer} ${user.user_type !== 'staff' ? styles.clientLayout : ''}`}>
-                        {(user.user_type === 'staff' || user.user_type === 'player' || user.user_type === 'agent') && (
+                        {(user.user_type === 'staff' || ((user.user_type === 'player' || user.user_type === 'agent') && !isMobileViewport)) && (
                             <div className={`${styles.roomList} glass ${!showRoomList && user.user_type !== 'staff' ? styles.hidden : ''}`}>
                                 <div className={styles.clientRoomHeader}>
+                                    {user.user_type !== 'staff' && isMobileViewport && (
+                                        <button
+                                            className={styles.headerActionBtn}
+                                            onClick={() => setChatSwitcherOpen(true)}
+                                            style={{ marginRight: '0.5rem' }}
+                                        >
+                                            Chats
+                                        </button>
+                                    )}
                                     <h2>
                                         {user.user_type === 'staff'
                                             ? 'Active Chats'
@@ -1534,42 +1654,12 @@ function ChatPageContent() {
                                     </h2>
                                     <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
                                         {user.user_type === 'player' && (
-                                            <>
-                                                <button
-                                                    className={styles.findAgentsBtn}
-                                                    onClick={() => setAgentSearchOpen(true)}
-                                                >
-                                                    Find Agents
-                                                </button>
-                                                <button
-                                                    className={styles.findAgentsBtn}
-                                                    onClick={() => setGroupDiscoverOpen(true)}
-                                                >
-                                                    Groups
-                                                </button>
-                                            </>
-                                        )}
-                                        {user.user_type === 'agent' && (
-                                            <>
-                                                <button
-                                                    className={styles.findAgentsBtn}
-                                                    onClick={() => setCreateGroupOpen(true)}
-                                                >
-                                                    New Group
-                                                </button>
-                                                <button
-                                                    className={styles.findAgentsBtn}
-                                                    onClick={openGroupRequests}
-                                                >
-                                                    Requests
-                                                </button>
-                                                <button
-                                                    className={styles.findAgentsBtn}
-                                                    onClick={() => setGroupDiscoverOpen(true)}
-                                                >
-                                                    Groups
-                                                </button>
-                                            </>
+                                            <button
+                                                className={styles.findAgentsBtn}
+                                                onClick={() => setAgentSearchOpen(true)}
+                                            >
+                                                Find Agents
+                                            </button>
                                         )}
                                     </div>
                                 </div>
@@ -1605,10 +1695,69 @@ function ChatPageContent() {
                                                     </button>
                                                 </div>
                                             )}
-                                            {agentOtherRooms.length > 0 ? (
-                                                agentOtherRooms.map((room) => renderRoomListButton(room))
+                                            {agentDirectRooms.length > 0 ? (
+                                                agentDirectRooms.map((room) => renderRoomListButton(room))
                                             ) : (
                                                 <div className={styles.noRooms}>No direct chats</div>
+                                            )}
+                                            <div className={styles.agentChatsHeader}>Groups</div>
+                                            <div className={styles.agentFilterRow}>
+                                                <button
+                                                    className={styles.agentFilterPill}
+                                                    onClick={() => setGroupDiscoverOpen(true)}
+                                                >
+                                                    Browse
+                                                </button>
+                                                <button
+                                                    className={styles.agentFilterPill}
+                                                    onClick={() => setCreateGroupOpen(true)}
+                                                >
+                                                    New
+                                                </button>
+                                                <button
+                                                    className={styles.agentFilterPill}
+                                                    onClick={openGroupRequests}
+                                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                                                >
+                                                    Requests
+                                                    {pendingGroupRequestCount > 0 && (
+                                                        <span className={styles.unreadBadge} style={{ minWidth: '16px', height: '16px', fontSize: '0.62rem', padding: '0 4px', marginTop: 0 }}>
+                                                            {pendingGroupRequestCount}
+                                                        </span>
+                                                    )}
+                                                </button>
+                                            </div>
+                                            {agentGroupRooms.length > 0 ? (
+                                                agentGroupRooms.map((room) => renderRoomListButton(room))
+                                            ) : (
+                                                <div className={styles.noRooms}>No groups</div>
+                                            )}
+                                        </>
+                                    ) : user.user_type === 'player' ? (
+                                        <>
+                                            {clientSupportRoom && renderRoomListButton(clientSupportRoom)}
+                                            {clientDirectRooms.length > 0 && (
+                                                <>
+                                                    <div className={styles.agentChatsHeader}>Chats</div>
+                                                    {clientDirectRooms.map((room) => renderRoomListButton(room))}
+                                                </>
+                                            )}
+                                            <div className={styles.agentChatsHeader}>Groups</div>
+                                            <div className={styles.agentFilterRow}>
+                                                <button
+                                                    className={styles.agentFilterPill}
+                                                    onClick={() => setGroupDiscoverOpen(true)}
+                                                >
+                                                    Browse
+                                                </button>
+                                            </div>
+                                            {clientGroupRooms.length > 0 ? (
+                                                clientGroupRooms.map((room) => renderRoomListButton(room))
+                                            ) : (
+                                                <div className={styles.noRooms}>No groups</div>
+                                            )}
+                                            {!clientSupportRoom && clientDirectRooms.length === 0 && clientGroupRooms.length === 0 && (
+                                                <div className={styles.noRooms}>No active chats</div>
                                             )}
                                         </>
                                     ) : (user.user_type === 'staff' ? rooms : orderedClientRooms).length > 0 ? (
@@ -1620,12 +1769,12 @@ function ChatPageContent() {
                             </div>
                         )}
 
-                        <div className={`${styles.chatArea} glass ${showRoomList && user.user_type !== 'staff' ? styles.hidden : ''}`}>
+                        <div className={`${styles.chatArea} glass`}>
                             <div className={styles.chatHeader}>
                                 {/* Left Side: Title & Back Button */}
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                     {/* Back Button for non-staff */}
-                                    {user.user_type !== 'staff' && (
+                                    {user.user_type !== 'staff' && !isMobileViewport && (
                                         <button
                                             className={styles.backButton}
                                             onClick={() => setShowRoomList(true)}
@@ -1643,7 +1792,15 @@ function ChatPageContent() {
                                 </div>
 
                                 {/* Right Side: Actions & Status */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <div className={styles.chatHeaderActions}>
+                                    {user.user_type !== 'staff' && isMobileViewport && (
+                                        <button
+                                            className={styles.headerActionBtn}
+                                            onClick={() => setChatSwitcherOpen(true)}
+                                        >
+                                            Chats
+                                        </button>
+                                    )}
                                     {/* Close Chat button disabled for now 
                                     {user.user_type === 'staff' && selectedRoomData && (
                                         <button
@@ -1664,7 +1821,7 @@ function ChatPageContent() {
                                     */}
 
                                     {/* Switch Station for Clients */}
-                                    {user.user_type !== 'staff' && selectedRoomData?.can_switch_station && (
+                                    {user.user_type !== 'staff' && selectedRoomData?.can_switch_station && !isMobileViewport && (
                                         <button
                                             onClick={handleSwitchStation}
                                             style={{
@@ -1683,7 +1840,7 @@ function ChatPageContent() {
                                             Switch Station ⇄
                                         </button>
                                     )}
-                                    {user.user_type === 'agent' && selectedRoomData?.room_type === 'direct_agent' && (
+                                    {user.user_type === 'agent' && selectedRoomData?.room_type === 'direct_agent' && !isMobileViewport && (
                                         <>
                                             <button
                                                 onClick={openQuickReplies}
@@ -1708,14 +1865,122 @@ function ChatPageContent() {
                                             </button>
                                         </>
                                     )}
-                                    {user.user_type === 'agent' && selectedRoomData?.room_type === 'group' && selectedRoomData.user_is_group_admin && (
+                                    {user.user_type === 'agent' && selectedRoomData?.room_type === 'group' && selectedRoomData.user_is_group_admin && !isMobileViewport && (
+                                        <>
+                                            <button
+                                                onClick={openGroupMembers}
+                                                className={styles.headerActionBtn}
+                                                title="Open group members"
+                                            >
+                                                Members
+                                            </button>
+                                            <button
+                                                onClick={() => setDeleteGroupModalOpen(true)}
+                                                className={styles.resolveBtn}
+                                                title="Delete group"
+                                            >
+                                                Delete Group
+                                            </button>
+                                        </>
+                                    )}
+                                    {user.user_type === 'player' && selectedRoomData?.room_type === 'group' && !isMobileViewport && (
                                         <button
-                                            onClick={openGroupMembers}
-                                            className={styles.headerActionBtn}
-                                            title="Open group members"
+                                            onClick={() => setLeaveGroupModalOpen(true)}
+                                            className={styles.resolveBtn}
+                                            title="Leave group"
                                         >
-                                            Members
+                                            Leave Group
                                         </button>
+                                    )}
+                                    {user.user_type !== 'staff' && isMobileViewport && selectedRoomData && (
+                                        <div className={styles.mobileOptionsWrapper}>
+                                            <button
+                                                className={styles.mobileOptionsTrigger}
+                                                onClick={() => setMobileOptionsOpen((prev) => !prev)}
+                                                title="Chat options"
+                                            >
+                                                ⋮
+                                            </button>
+                                            {mobileOptionsOpen && (
+                                                <div className={styles.mobileOptionsMenu}>
+                                                    {selectedRoomData.can_switch_station && (
+                                                        <button
+                                                            className={styles.mobileOptionsItem}
+                                                            onClick={() => {
+                                                                setMobileOptionsOpen(false);
+                                                                handleSwitchStation();
+                                                            }}
+                                                        >
+                                                            Switch Station
+                                                        </button>
+                                                    )}
+                                                    {user.user_type === 'agent' && selectedRoomData.room_type === 'direct_agent' && (
+                                                        <>
+                                                            <button
+                                                                className={styles.mobileOptionsItem}
+                                                                onClick={() => {
+                                                                    setMobileOptionsOpen(false);
+                                                                    openQuickReplies();
+                                                                }}
+                                                            >
+                                                                Replies
+                                                            </button>
+                                                            <button
+                                                                className={styles.mobileOptionsItem}
+                                                                onClick={() => {
+                                                                    setMobileOptionsOpen(false);
+                                                                    openInternalNote();
+                                                                }}
+                                                            >
+                                                                Notes
+                                                            </button>
+                                                            <button
+                                                                className={styles.mobileOptionsItem}
+                                                                onClick={() => {
+                                                                    setMobileOptionsOpen(false);
+                                                                    closeChat();
+                                                                }}
+                                                            >
+                                                                Resolve
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                    {user.user_type === 'agent' && selectedRoomData.room_type === 'group' && selectedRoomData.user_is_group_admin && (
+                                                        <>
+                                                            <button
+                                                                className={styles.mobileOptionsItem}
+                                                                onClick={() => {
+                                                                    setMobileOptionsOpen(false);
+                                                                    openGroupMembers();
+                                                                }}
+                                                            >
+                                                                Members
+                                                            </button>
+                                                            <button
+                                                                className={`${styles.mobileOptionsItem} ${styles.mobileOptionsDanger}`}
+                                                                onClick={() => {
+                                                                    setMobileOptionsOpen(false);
+                                                                    setDeleteGroupModalOpen(true);
+                                                                }}
+                                                            >
+                                                                Delete Group
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                    {user.user_type === 'player' && selectedRoomData.room_type === 'group' && (
+                                                        <button
+                                                            className={`${styles.mobileOptionsItem} ${styles.mobileOptionsDanger}`}
+                                                            onClick={() => {
+                                                                setMobileOptionsOpen(false);
+                                                                setLeaveGroupModalOpen(true);
+                                                            }}
+                                                        >
+                                                            Leave Group
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
                                     )}
                                     <div className={styles.status}>
                                         <span className={isConnected ? styles.connected : styles.disconnected} title={isConnected ? 'Connected' : 'Disconnected'}></span>
@@ -2239,6 +2504,125 @@ function ChatPageContent() {
             </Modal>
 
             <Modal
+                isOpen={chatSwitcherOpen}
+                onClose={() => setChatSwitcherOpen(false)}
+                title="Chats"
+            >
+                <div className={styles.mobileChatSwitcherList}>
+                    {user.user_type === 'agent' ? (
+                        <>
+                            {agentSupportRoom && renderRoomListButton(agentSupportRoom, () => setChatSwitcherOpen(false))}
+                            <div className={styles.agentChatsHeader}>Chats</div>
+                            <div className={styles.agentFilterRow}>
+                                <button
+                                    className={`${styles.agentFilterPill} ${agentChatFilter === 'all' ? styles.activeFilter : ''}`}
+                                    onClick={() => setAgentChatFilter('all')}
+                                >
+                                    All
+                                </button>
+                                <button
+                                    className={`${styles.agentFilterPill} ${agentChatFilter === 'needs_reply' ? styles.activeFilter : ''}`}
+                                    onClick={() => setAgentChatFilter('needs_reply')}
+                                >
+                                    Needs Reply
+                                </button>
+                                <button
+                                    className={`${styles.agentFilterPill} ${agentChatFilter === 'unread' ? styles.activeFilter : ''}`}
+                                    onClick={() => setAgentChatFilter('unread')}
+                                >
+                                    Unread
+                                </button>
+                            </div>
+                            {agentDirectRooms.length > 0 ? (
+                                agentDirectRooms.map((room) => renderRoomListButton(room, () => setChatSwitcherOpen(false)))
+                            ) : (
+                                <div className={styles.noRooms}>No direct chats</div>
+                            )}
+                            <div className={styles.agentChatsHeader}>Groups</div>
+                            <div className={styles.agentFilterRow}>
+                                <button
+                                    className={styles.agentFilterPill}
+                                    onClick={() => {
+                                        setChatSwitcherOpen(false);
+                                        setGroupDiscoverOpen(true);
+                                    }}
+                                >
+                                    Browse
+                                </button>
+                                <button
+                                    className={styles.agentFilterPill}
+                                    onClick={() => {
+                                        setChatSwitcherOpen(false);
+                                        setCreateGroupOpen(true);
+                                    }}
+                                >
+                                    New
+                                </button>
+                                <button
+                                    className={styles.agentFilterPill}
+                                    onClick={() => {
+                                        setChatSwitcherOpen(false);
+                                        openGroupRequests();
+                                    }}
+                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                                >
+                                    Requests
+                                    {pendingGroupRequestCount > 0 && (
+                                        <span className={styles.unreadBadge} style={{ minWidth: '16px', height: '16px', fontSize: '0.62rem', padding: '0 4px', marginTop: 0 }}>
+                                            {pendingGroupRequestCount}
+                                        </span>
+                                    )}
+                                </button>
+                            </div>
+                            {agentGroupRooms.length > 0 ? (
+                                agentGroupRooms.map((room) => renderRoomListButton(room, () => setChatSwitcherOpen(false)))
+                            ) : (
+                                <div className={styles.noRooms}>No groups</div>
+                            )}
+                        </>
+                    ) : (
+                        <>
+                            <div className={styles.agentFilterRow}>
+                                <button
+                                    className={styles.agentFilterPill}
+                                    onClick={() => {
+                                        setChatSwitcherOpen(false);
+                                        setAgentSearchOpen(true);
+                                    }}
+                                >
+                                    Find Agents
+                                </button>
+                            </div>
+                            {clientSupportRoom && renderRoomListButton(clientSupportRoom, () => setChatSwitcherOpen(false))}
+                            {clientDirectRooms.length > 0 && (
+                                <>
+                                    <div className={styles.agentChatsHeader}>Chats</div>
+                                    {clientDirectRooms.map((room) => renderRoomListButton(room, () => setChatSwitcherOpen(false)))}
+                                </>
+                            )}
+                            <div className={styles.agentChatsHeader}>Groups</div>
+                            <div className={styles.agentFilterRow}>
+                                <button
+                                    className={styles.agentFilterPill}
+                                    onClick={() => {
+                                        setChatSwitcherOpen(false);
+                                        setGroupDiscoverOpen(true);
+                                    }}
+                                >
+                                    Browse
+                                </button>
+                            </div>
+                            {clientGroupRooms.length > 0 ? (
+                                clientGroupRooms.map((room) => renderRoomListButton(room, () => setChatSwitcherOpen(false)))
+                            ) : (
+                                <div className={styles.noRooms}>No groups</div>
+                            )}
+                        </>
+                    )}
+                </div>
+            </Modal>
+
+            <Modal
                 isOpen={groupDiscoverOpen}
                 onClose={() => setGroupDiscoverOpen(false)}
                 title="Discover Groups"
@@ -2410,35 +2794,96 @@ function ChatPageContent() {
             </Modal>
 
             <Modal
+                isOpen={deleteGroupModalOpen}
+                onClose={() => setDeleteGroupModalOpen(false)}
+                title="Delete Group"
+                footer={
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                        <button
+                            onClick={() => setDeleteGroupModalOpen(false)}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                borderRadius: '6px',
+                                border: '1px solid var(--color-border)',
+                                background: 'transparent',
+                                color: 'var(--color-text-primary)',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={deleteCurrentGroup}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                borderRadius: '6px',
+                                border: 'none',
+                                background: '#ef4444',
+                                color: 'white',
+                                cursor: 'pointer',
+                                fontWeight: 600
+                            }}
+                            disabled={isDeletingGroup}
+                        >
+                            {isDeletingGroup ? 'Deleting...' : 'Delete'}
+                        </button>
+                    </div>
+                }
+            >
+                <p>This will permanently delete this group and its messages. This action cannot be undone.</p>
+            </Modal>
+
+            <Modal
+                isOpen={leaveGroupModalOpen}
+                onClose={() => setLeaveGroupModalOpen(false)}
+                title="Leave Group"
+                footer={
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                        <button
+                            onClick={() => setLeaveGroupModalOpen(false)}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                borderRadius: '6px',
+                                border: '1px solid var(--color-border)',
+                                background: 'transparent',
+                                color: 'var(--color-text-primary)',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={leaveCurrentGroup}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                borderRadius: '6px',
+                                border: 'none',
+                                background: '#ef4444',
+                                color: 'white',
+                                cursor: 'pointer',
+                                fontWeight: 600
+                            }}
+                            disabled={isLeavingGroup}
+                        >
+                            {isLeavingGroup ? 'Leaving...' : 'Leave Group'}
+                        </button>
+                    </div>
+                }
+            >
+                <p>You will no longer receive messages from this group unless you request to join again.</p>
+            </Modal>
+
+            <Modal
                 isOpen={quickRepliesOpen}
-                onClose={() => setQuickRepliesOpen(false)}
+                onClose={() => {
+                    setQuickRepliesOpen(false);
+                    setShowQuickReplyCreateForm(false);
+                    setQuickReplyTitle('');
+                    setQuickReplyContent('');
+                }}
                 title="Instant Replies"
             >
                 <div className={styles.quickRepliesModal}>
-                    <div className={styles.quickReplyCreator}>
-                        <input
-                            type="text"
-                            value={quickReplyTitle}
-                            onChange={(e) => setQuickReplyTitle(e.target.value)}
-                            placeholder="Reply title"
-                            className={styles.quickReplyInput}
-                        />
-                        <textarea
-                            value={quickReplyContent}
-                            onChange={(e) => setQuickReplyContent(e.target.value)}
-                            placeholder="Reply content"
-                            className={styles.quickReplyTextarea}
-                            rows={3}
-                        />
-                        <button
-                            className={styles.quickReplySaveBtn}
-                            onClick={createQuickReply}
-                            disabled={isSavingQuickReply || !quickReplyTitle.trim() || !quickReplyContent.trim()}
-                        >
-                            {isSavingQuickReply ? 'Saving...' : 'Save Reply'}
-                        </button>
-                    </div>
-
                     {isQuickRepliesLoading ? (
                         <div className={styles.agentSearchInfo}>Loading replies...</div>
                     ) : quickReplies.length === 0 ? (
@@ -2468,6 +2913,51 @@ function ChatPageContent() {
                                 </div>
                             ))}
                         </div>
+                    )}
+
+                    {showQuickReplyCreateForm ? (
+                        <div className={styles.quickReplyCreator}>
+                            <input
+                                type="text"
+                                value={quickReplyTitle}
+                                onChange={(e) => setQuickReplyTitle(e.target.value)}
+                                placeholder="Reply title"
+                                className={styles.quickReplyInput}
+                            />
+                            <textarea
+                                value={quickReplyContent}
+                                onChange={(e) => setQuickReplyContent(e.target.value)}
+                                placeholder="Reply content"
+                                className={styles.quickReplyTextarea}
+                                rows={3}
+                            />
+                            <div className={styles.quickReplyCreateActions}>
+                                <button
+                                    className={styles.quickReplyCancelBtn}
+                                    onClick={() => {
+                                        setShowQuickReplyCreateForm(false);
+                                        setQuickReplyTitle('');
+                                        setQuickReplyContent('');
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className={styles.quickReplySaveBtn}
+                                    onClick={createQuickReply}
+                                    disabled={isSavingQuickReply || !quickReplyTitle.trim() || !quickReplyContent.trim()}
+                                >
+                                    {isSavingQuickReply ? 'Saving...' : 'Save Reply'}
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <button
+                            className={styles.quickReplyAddBtn}
+                            onClick={() => setShowQuickReplyCreateForm(true)}
+                        >
+                            Add New
+                        </button>
                     )}
                 </div>
             </Modal>
