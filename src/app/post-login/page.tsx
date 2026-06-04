@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { hasCompletedSocialOnboarding, socialApi } from '@/lib/social';
 
-export default function PostLoginPage() {
+function PostLoginContent() {
     const { user, loading } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -50,6 +50,18 @@ export default function PostLoginPage() {
         <main style={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
             <div className="spinner" />
         </main>
+    );
+}
+
+export default function PostLoginPage() {
+    return (
+        <Suspense fallback={
+            <main style={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
+                <div className="spinner" />
+            </main>
+        }>
+            <PostLoginContent />
+        </Suspense>
     );
 }
 

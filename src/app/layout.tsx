@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { Suspense } from 'react';
 import { Inter } from 'next/font/google';
 import { AuthProvider } from '@/contexts/AuthContext';
 import '@/styles/globals.css';
@@ -67,7 +68,9 @@ export default function RootLayout({
                         <AuthProvider>
                             <NotificationProvider>
                                 <OnboardingGuard>
-                                    <RouteLoadingBar />
+                                    <Suspense fallback={null}>
+                                        <RouteLoadingBar />
+                                    </Suspense>
                                     {children}
                                     <MobileBottomNav />
                                     <Footer />
