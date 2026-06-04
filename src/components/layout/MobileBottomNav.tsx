@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useEffect, useMemo } from 'react';
 import Link from 'next/link';
@@ -56,11 +56,6 @@ export const MobileBottomNav: React.FC = () => {
                     label: 'Chats',
                     icon: <ChatIcon />,
                     badge: unreadCount,
-                },
-                {
-                    href: '/staff-dashboard',
-                    label: 'Dashboard',
-                    icon: <DashboardIcon />,
                 },
             ];
         }

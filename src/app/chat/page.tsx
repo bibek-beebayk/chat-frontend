@@ -37,7 +37,7 @@ function ChatPageContent() {
     const openParam = searchParams.get('open');
 
     useEffect(() => {
-        if (!user || user.user_type === 'staff') return;
+        if (!user) return;
         if (Number.isFinite(requestedRoomIdParam)) return;
         router.replace('/chats');
     }, [requestedRoomIdParam, router, user]);
@@ -245,7 +245,7 @@ function ChatPageContent() {
 
     useEffect(() => {
         if (!isMobileViewport) return;
-        if (!user || user.user_type === 'staff') return;
+        if (!user) return;
         if (openParam !== 'list') return;
 
         setChatSwitcherOpen(true);
@@ -645,11 +645,8 @@ function ChatPageContent() {
                     }
                 } else if (hasCurrentRoom) {
                     // Keep current selection.
-                } else if (user?.user_type === 'staff') {
-                    // Staff keeps the previous behavior of auto-picking the first available room.
-                    switchToRoom(data[0].id, false);
                 } else {
-                    // Player/agent chat page should open as a list (no forced support chat selection).
+                    // Chat page should open as a list (no forced selection).
                     setSelectedRoom(null);
                     selectedRoomRef.current = null;
                     setMessages([]);
@@ -1763,19 +1760,11 @@ function ChatPageContent() {
                         </div>
                     )}
 
-                    <div className={`${styles.chatContainer} ${user.user_type !== 'staff' ? styles.clientLayout : ''}`}>
-                        {(user.user_type === 'staff' || ((user.user_type === 'player' || user.user_type === 'agent') && !isMobileViewport)) && (
+                    <div className={`${styles.chatContainer} ${user.user_type !== 'staff' || isMobileViewport ? styles.clientLayout : ''}`}>
+                        {!isMobileViewport && (
                             <div className={`${styles.roomList} glass ${!showRoomList && user.user_type !== 'staff' ? styles.hidden : ''}`}>
                                 <div className={styles.clientRoomHeader}>
-                                    {user.user_type !== 'staff' && isMobileViewport && (
-                                        <button
-                                            className={styles.headerActionBtn}
-                                            onClick={() => setChatSwitcherOpen(true)}
-                                            style={{ marginRight: '0.5rem' }}
-                                        >
-                                            Chats
-                                        </button>
-                                    )}
+                                    
                                     <h2>
                                         {user.user_type === 'staff'
                                             ? 'Active Chats'
@@ -1935,7 +1924,7 @@ function ChatPageContent() {
 
                                 {/* Right Side: Actions & Status */}
                                 <div className={styles.chatHeaderActions}>
-                                    {user.user_type !== 'staff' && isMobileViewport && (
+                                    {isMobileViewport && (
                                         <button
                                             className={styles.headerActionBtn}
                                             onClick={() => setChatSwitcherOpen(true)}
@@ -2701,7 +2690,15 @@ function ChatPageContent() {
                 title="Chats"
             >
                 <div className={styles.mobileChatSwitcherList}>
-                    {user.user_type === 'agent' ? (
+                    {user.user_type === 'staff' ? (
+                        <>
+                            {rooms.length > 0 ? (
+                                rooms.map((room) => renderRoomListButton(room, () => setChatSwitcherOpen(false)))
+                            ) : (
+                                <div className={styles.noRooms}>No active support chats</div>
+                            )}
+                        </>
+                    ) : user.user_type === 'agent' ? (
                         <>
                             {agentSupportRoom && renderRoomListButton(agentSupportRoom, () => setChatSwitcherOpen(false))}
                             <div className={styles.agentChatsHeader}>Message Requests</div>
