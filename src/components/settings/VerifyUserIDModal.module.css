@@ -1,10 +1,7 @@
 .backdrop {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(15, 16, 20, 0.85);
+    inset: 0;
+    background: rgba(0, 0, 0, 0.62);
     backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
@@ -16,24 +13,19 @@
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .modal {
-    background: #161820;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
     border-radius: 20px;
     max-width: 500px;
     width: 100%;
     max-height: calc(100vh - 40px);
     overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--shadow-lg);
     animation: slideUp 0.3s ease;
     position: relative;
 }
@@ -43,7 +35,6 @@
         opacity: 0;
         transform: translateY(30px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -55,24 +46,21 @@
     align-items: center;
     justify-content: space-between;
     padding: 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--color-border);
 }
 
 .title {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--color-text-primary);
     margin: 0;
-    background: linear-gradient(to right, #ffffff, #a5a6a8);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
 }
 
 .closeButton {
     background: none;
     border: none;
     font-size: 2rem;
-    color: #9ca3af;
+    color: var(--color-text-muted);
     cursor: pointer;
     width: 2rem;
     height: 2rem;
@@ -84,8 +72,8 @@
 }
 
 .closeButton:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--color-text-primary);
 }
 
 .closeButton:disabled {
@@ -98,7 +86,7 @@
 }
 
 .description {
-    color: #9ca3af;
+    color: var(--color-text-secondary);
     margin-bottom: 1.5rem;
     line-height: 1.6;
 }
@@ -110,7 +98,7 @@
 .label {
     display: block;
     font-weight: 600;
-    color: #ffffff;
+    color: var(--color-text-primary);
     margin-bottom: 0.5rem;
     font-size: 0.9rem;
 }
@@ -118,25 +106,24 @@
 .input {
     width: 100%;
     padding: 0.75rem 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--color-border);
     border-radius: 12px;
     font-size: 1rem;
     transition: all 0.3s ease;
-    background: rgba(255, 255, 255, 0.03);
-    color: #ffffff;
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
 }
 
 .input:focus {
     outline: none;
-    border-color: #a855f7;
-    box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.1);
-    background: rgba(168, 85, 247, 0.05);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px rgba(var(--color-primary-rgb), 0.12);
 }
 
 .input:disabled {
     background: rgba(255, 255, 255, 0.05);
     cursor: not-allowed;
-    color: #6b7280;
+    color: var(--color-text-muted);
 }
 
 .error {
@@ -144,28 +131,18 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1rem;
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.25);
     border-radius: 10px;
-    color: #f87171;
+    color: #ef4444;
     margin-bottom: 1rem;
     animation: shake 0.4s ease;
 }
 
 @keyframes shake {
-
-    0%,
-    100% {
-        transform: translateX(0);
-    }
-
-    25% {
-        transform: translateX(-8px);
-    }
-
-    75% {
-        transform: translateX(8px);
-    }
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
 }
 
 .errorIcon {
@@ -178,10 +155,10 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1rem;
-    background: rgba(34, 197, 94, 0.1);
-    border: 1px solid rgba(34, 197, 94, 0.2);
+    background: rgba(22, 163, 74, 0.1);
+    border: 1px solid rgba(22, 163, 74, 0.25);
     border-radius: 10px;
-    color: #4ade80;
+    color: #16a34a;
     margin-bottom: 1rem;
     animation: slideIn 0.3s ease;
 }
@@ -191,7 +168,6 @@
         opacity: 0;
         transform: translateY(-10px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -201,7 +177,7 @@
 .successIcon {
     font-size: 1.1rem;
     flex-shrink: 0;
-    background: #22c55e;
+    background: #16a34a;
     color: white;
     width: 1.25rem;
     height: 1.25rem;
@@ -219,9 +195,9 @@
 
 .cancelButton {
     padding: 0.75rem 1.5rem;
-    background: rgba(255, 255, 255, 0.05);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
     border-radius: 10px;
     font-size: 1rem;
     font-weight: 600;
@@ -230,7 +206,7 @@
 }
 
 .cancelButton:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .cancelButton:disabled {
@@ -240,7 +216,7 @@
 
 .verifyButton {
     padding: 0.75rem 1.5rem;
-    background: linear-gradient(135deg, #9333ea 0%, #ec4899 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
     color: white;
     border: none;
     border-radius: 10px;
@@ -248,13 +224,13 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
+    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.3);
 }
 
 .verifyButton:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(147, 51, 234, 0.4);
-    filter: brightness(1.1);
+    box-shadow: 0 6px 16px rgba(var(--color-primary-rgb), 0.38);
+    filter: brightness(1.08);
 }
 
 .verifyButton:active:not(:disabled) {
@@ -264,7 +240,7 @@
 .verifyButton:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    background: #374151;
+    background: var(--color-text-muted);
     box-shadow: none;
 }
 

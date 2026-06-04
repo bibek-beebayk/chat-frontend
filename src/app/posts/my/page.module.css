@@ -1,0 +1,79 @@
+.pageWrap {
+    min-height: 100vh;
+}
+
+.main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.topRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.9rem;
+}
+
+.title {
+    font-size: 1.3rem;
+}
+
+.subtitle {
+    color: var(--color-text-muted);
+    margin-top: 0.2rem;
+    font-size: 0.9rem;
+}
+
+.primaryBtn {
+    border-radius: 999px;
+    padding: 0.5rem 0.9rem;
+    color: #fff;
+    background: linear-gradient(120deg, var(--color-primary), var(--color-secondary));
+}
+
+.errorBox,
+.emptyBox,
+.infoBox {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 0.7rem;
+    color: var(--color-text-secondary);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.errorBox {
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #fca5a5;
+}
+
+.infoBox {
+    color: var(--color-primary-light);
+    border-color: rgba(var(--color-primary-rgb), 0.35);
+    margin-top: 0.45rem;
+}
+
+.loadingArea {
+    min-height: 40vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.feedList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .main {
+        padding: 0.85rem;
+    }
+
+    .topRow {
+        flex-direction: column;
+    }
+}
+

@@ -119,9 +119,9 @@ function VerifyOTPContent() {
             setSuccess('Email verified successfully! Redirecting...');
             localStorage.removeItem('pendingVerificationEmail');
 
-            // Redirect to home page after a short delay
+            // Redirect after a short delay.
             setTimeout(() => {
-                router.push('/');
+                router.push('/post-login');
             }, 1500);
         } catch (err: any) {
             setError(err.message || 'Verification failed. Please try again.');

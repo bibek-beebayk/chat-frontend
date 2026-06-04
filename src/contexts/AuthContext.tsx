@@ -23,6 +23,17 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const normalizeUserType = (value: unknown): User['user_type'] => {
+    const normalized = String(value ?? '').trim().toLowerCase();
+    if (normalized === 'agent' || normalized === 'staff') return normalized;
+    return 'player';
+};
+
+const normalizeUser = (raw: User): User => ({
+    ...raw,
+    user_type: normalizeUserType(raw?.user_type),
+});
+
 // ... imports
 // (Note: interface LoginData/RegisterData likely needs no change if inputs are same)
 
@@ -33,8 +44,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const checkAuth = async () => {
         try {
             const data = await apiClient.get<User>('/api/auth/me/');
-            setUser(data);
-            localStorage.setItem('user', JSON.stringify(data));
+            const normalized = normalizeUser(data);
+            setUser(normalized);
+            localStorage.setItem('user', JSON.stringify(normalized));
         } catch (error) {
             setUser(null);
             localStorage.removeItem('user');
@@ -47,7 +59,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // Try to get user from localStorage first
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
+            try {
+                const parsed = JSON.parse(storedUser) as User;
+                setUser(normalizeUser(parsed));
+            } catch {
+                localStorage.removeItem('user');
+            }
         }
 
         // Initialize Auth
@@ -76,10 +93,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         );
 
         apiClient.setTokens(response.access, response.refresh);
-
-        setUser(response.user);
-        localStorage.setItem('user', JSON.stringify(response.user));
-        return response.user;
+        const normalized = normalizeUser(response.user);
+        setUser(normalized);
+        localStorage.setItem('user', JSON.stringify(normalized));
+        return normalized;
     };
 
     const register = async (data: RegisterData) => {
@@ -99,10 +116,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         );
 
         apiClient.setTokens(response.access, response.refresh);
-
-        setUser(response.user);
-        localStorage.setItem('user', JSON.stringify(response.user));
-        return response.user;
+        const normalized = normalizeUser(response.user);
+        setUser(normalized);
+        localStorage.setItem('user', JSON.stringify(normalized));
+        return normalized;
     };
 
     const resendOTP = async (email: string) => {

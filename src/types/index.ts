@@ -10,6 +10,46 @@ export interface User {
     email?: string;
     first_name?: string;
     last_name?: string;
+    avatar?: string | null;
+    profile_picture?: string | null;
+    profile_thumbnail?: string | null;
+    agent_availability?: 'online' | 'busy' | 'away' | 'offline' | string;
+    agent_status_note?: string;
+    joined_at?: string;
+    headline?: string;
+    connection_status?: 'self' | 'none' | 'connected' | 'pending_outgoing' | 'pending_incoming' | 'rejected' | 'blocked' | string;
+    can_connect?: boolean;
+    can_disconnect?: boolean;
+    can_chat?: boolean;
+    primary_action?: string | null;
+    secondary_action?: string | null;
+    is_connected?: boolean;
+}
+
+export interface SocialConnection {
+    id: number;
+    requester: User;
+    receiver: User;
+    connection_type: string;
+    status: 'pending' | 'accepted' | 'rejected' | 'blocked' | string;
+    initiated_from_onboarding: boolean;
+    accepted_at?: string | null;
+    rejected_at?: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ConnectionSearchMeta {
+    section: 'all' | 'connected' | 'not_connected' | string;
+    limit: number;
+    offset: number;
+    count: number;
+    has_more: boolean;
+}
+
+export interface ConnectionSearchResult {
+    results: User[];
+    meta: ConnectionSearchMeta;
 }
 
 export interface Event {
@@ -47,6 +87,10 @@ export interface Room {
     queue_name?: string;
     queue_type?: string;
     can_switch_station?: boolean;
+    is_message_request?: boolean;
+    message_request_direction?: 'incoming' | 'outgoing' | 'none' | string;
+    direct_request_status?: 'pending' | 'accepted' | 'rejected' | string;
+    direct_request_initiator?: User | null;
 }
 
 export interface SupportRoom {
@@ -67,12 +111,37 @@ export interface Post {
     id: number;
     title: string;
     content: string;
-    image?: string;
-    video?: string;
-    link?: string;
+    raw_content?: string;
+    image?: string | null;
+    video?: string | null;
+    link?: string | null;
+    visibility?: 'public' | 'private' | 'connections' | 'all' | 'players' | 'agents' | string;
+    is_pinned?: boolean;
     author: User;
+    images?: PostImage[];
+    like_count?: number;
+    comment_count?: number;
+    is_liked?: boolean;
     created_at: string;
-    is_active: boolean;
+    updated_at?: string;
+    is_active?: boolean;
+}
+
+export interface PostImage {
+    id: number;
+    image: string;
+    order: number;
+}
+
+export interface PostComment {
+    id: number;
+    post: number;
+    author: User;
+    parent: number | null;
+    content: string;
+    replies: PostComment[];
+    created_at: string;
+    updated_at: string;
 }
 
 // Message types

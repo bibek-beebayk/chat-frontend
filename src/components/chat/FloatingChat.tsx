@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { usePathname } from 'next/navigation'; // Only need pathname for context
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotification } from '@/contexts/NotificationContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useTypingThrottle } from '@/hooks/useTypingThrottle';
 import { apiClient } from '@/lib/api';
@@ -14,6 +15,7 @@ import EmojiPicker, { Theme } from 'emoji-picker-react';
 export const FloatingChat: React.FC = () => {
     const { user } = useAuth();
     const { unreadCount, clearNotifications } = useNotification();
+    const { resolvedTheme } = useTheme();
     const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(false);
     const [isMinimizing, setIsMinimizing] = useState(false); // For animation handling if needed
@@ -190,7 +192,7 @@ export const FloatingChat: React.FC = () => {
     };
 
     // Only for Players/Agents and hide on full chat page
-    if (!user || user.user_type === 'staff' || pathname?.startsWith('/chat')) return null;
+    if (!user || user.user_type === 'staff' || pathname?.startsWith('/chat') || pathname?.startsWith('/onboarding') || pathname?.startsWith('/post-login')) return null;
 
     return (
         <div className={styles.container}>
@@ -217,7 +219,10 @@ export const FloatingChat: React.FC = () => {
                                 </button>
                             )}
                             <button className={styles.iconBtn} onClick={handleToggleOpen} aria-label="Minimize">
-                                X
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
                             </button>
                         </div>
                     </div>
@@ -364,7 +369,7 @@ export const FloatingChat: React.FC = () => {
                             <div style={{ position: 'absolute', bottom: '80px', left: '1rem', zIndex: 10 }}>
                                 <EmojiPicker
                                     onEmojiClick={(e) => setMessageInput(prev => prev + e.emoji)}
-                                    theme={Theme.DARK}
+                                    theme={resolvedTheme === 'light' ? Theme.LIGHT : Theme.DARK}
                                     width={300}
                                     height={300}
                                 />

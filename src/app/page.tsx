@@ -1,33 +1,78 @@
-'use client';
+﻿'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Header } from '@/components/layout/Header';
-import { apiClient } from '@/lib/api';
 import { FeaturedEventCard } from '@/components/events/FeaturedEventCard';
+import { PostCard } from '@/components/posts/PostCard';
+import { ShareToChatModal } from '@/components/posts/ShareToChatModal';
+import { apiClient } from '@/lib/api';
+import { postApi } from '@/lib/posts';
+import { hasCompletedSocialOnboarding, socialApi } from '@/lib/social';
+import { Post } from '@/types';
 import styles from './page.module.css';
 
 export default function HomePage() {
     const { user, loading } = useAuth();
     const router = useRouter();
+
     const [events, setEvents] = useState<any[]>([]);
+    const [pinnedPosts, setPinnedPosts] = useState<Post[]>([]);
+    const [postsLoading, setPostsLoading] = useState(true);
+    const [sharingPost, setSharingPost] = useState<Post | null>(null);
+    const [postsError, setPostsError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!loading && !user) {
             router.push('/login');
-        } else if (user) {
-            const fetchData = async () => {
-                try {
-                    const eventsResponse = await apiClient.get<any[]>('/api/events/active/');
-                    setEvents(eventsResponse);
-                } catch (err) {
-                    console.error('Failed to fetch data', err);
-                }
-            };
-            fetchData();
+            return;
         }
+
+        if (!user) return;
+
+        const fetchData = async () => {
+            if (user.user_type === 'player') {
+                try {
+                    const onboardingState = await socialApi.fetchOnboardingState();
+                    if (!hasCompletedSocialOnboarding(onboardingState)) {
+                        router.replace('/onboarding');
+                        return;
+                    }
+                } catch {
+                    router.replace('/onboarding');
+                    return;
+                }
+            }
+
+            try {
+                const [eventsResponse, pinnedResponse] = await Promise.all([
+                    apiClient.get<any[]>('/api/events/active/'),
+                    postApi.listPinned(),
+                ]);
+                setEvents(eventsResponse);
+                setPinnedPosts(pinnedResponse);
+            } catch (err) {
+                console.error('Failed to fetch home data', err);
+                setPostsError('Failed to load pinned posts.');
+            } finally {
+                setPostsLoading(false);
+            }
+        };
+
+        fetchData();
     }, [user, loading, router]);
+
+    const handleLike = async (post: Post) => {
+        const result = await postApi.toggleLike(post.id);
+        setPinnedPosts((prev) =>
+            prev.map((item) =>
+                item.id === post.id
+                    ? { ...item, is_liked: result.liked, like_count: result.like_count }
+                    : item
+            )
+        );
+    };
 
     if (loading) {
         return (
@@ -46,97 +91,61 @@ export default function HomePage() {
                 <div className={styles.container}>
                     <div className={styles.mainContent}>
                         <div className={styles.hero}>
-                            <p className={styles.subtitle}>
-                                Hello, <strong>{user.username}</strong>!
-                            </p>
-                            <h1 className={styles.title}>
-                                Welcome to <span className="gradient-text">Rollin Community </span>
-                            </h1>
-
                             {events.length > 0 && (
                                 <div className={styles.eventsSection}>
                                     <h2 className="gradient-text">Current Events</h2>
                                     <div className={styles.eventGrid}>
-                                        {events.map(event => (
+                                        {events.map((event) => (
                                             <FeaturedEventCard key={event.id} event={event} />
                                         ))}
                                     </div>
                                 </div>
                             )}
 
-
-                            <div className={styles.features}>
-                                <div className={`${styles.card} glass`}>
-                                    <div className={styles.cardIcon}>💬</div>
-                                    <h3>Real-Time Chat</h3>
-                                    <p>Connect with support staff instantly through our WebSocket-powered chat system.</p>
-                                    {/* <button
-                                        className={styles.cardButton}
-                                        onClick={() => router.push('/chat')}
-                                    >
-                                        Start Chatting
-                                    </button> */}
-                                </div>
-
-                                <div className={`${styles.card} glass`}>
-                                    <div className={styles.cardIcon}>💳</div>
-                                    <h3>Payment Information</h3>
-                                    <p>View and manage your payment information and transaction history.</p>
+                            <section className={styles.pinnedSection}>
+                                <div className={styles.sectionHeader}>
+                                    <h2 className={styles.sectionTitle}>Pinned Posts</h2>
                                     <button
-                                        className={styles.cardButton}
-                                        onClick={() => router.push('/payments')}
+                                        type="button"
+                                        className={styles.sectionAction}
+                                        onClick={() => router.push('/posts')}
                                     >
-                                        View Payments
+                                        View All
                                     </button>
                                 </div>
 
-                                {user.user_type === 'staff' && (
-                                    <div className={`${styles.card} glass`}>
-                                        <div className={styles.cardIcon}>📊</div>
-                                        <h3>Staff Dashboard</h3>
-                                        <p>Access your staff dashboard to manage your assigned chat room.</p>
-                                        <button
-                                            className={styles.cardButton}
-                                            onClick={() => router.push('/staff-dashboard')}
-                                        >
-                                            Go to Dashboard
-                                        </button>
+                                {postsError && <p className={styles.emptyState}>{postsError}</p>}
+
+                                {postsLoading ? (
+                                    <div className={styles.smallLoading}>
+                                        <div className="spinner"></div>
+                                    </div>
+                                ) : pinnedPosts.length === 0 ? (
+                                    <p className={styles.emptyState}>No pinned posts available.</p>
+                                ) : (
+                                    <div className={styles.pinnedList}>
+                                        {pinnedPosts.map((post) => (
+                                            <PostCard
+                                                key={post.id}
+                                                post={post}
+                                                compact
+                                                onLike={handleLike}
+                                                onShare={setSharingPost}
+                                            />
+                                        ))}
                                     </div>
                                 )}
-
-                                <div className={`${styles.card} glass`}>
-                                    <div className={styles.cardIcon}>📱</div>
-                                    <h3>Mobile App</h3>
-                                    <p>Get the best native experience by downloading our Android app.</p>
-                                    <button
-                                        className={styles.cardButton}
-                                        onClick={() => router.push('/download')}
-                                    >
-                                        Download App
-                                    </button>
-                                </div>
-                            </div>
-
-
-
-                            <div className={styles.stats}>
-                                <div className={styles.statCard}>
-                                    <div className={styles.statValue}>24/7</div>
-                                    <div className={styles.statLabel}>Support Available</div>
-                                </div>
-                                <div className={styles.statCard}>
-                                    <div className={styles.statValue}>100%</div>
-                                    <div className={styles.statLabel}>Secure</div>
-                                </div>
-                                {/* <div className={styles.statCard}>
-                                    <div className={styles.statValue}>Real-Time</div>
-                                    <div className={styles.statLabel}>WebSocket Chat</div>
-                                </div> */}
-                            </div>
+                            </section>
                         </div>
                     </div>
                 </div>
             </main>
+
+            <ShareToChatModal
+                post={sharingPost}
+                isOpen={!!sharingPost}
+                onClose={() => setSharingPost(null)}
+            />
         </>
     );
 }

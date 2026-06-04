@@ -1,0 +1,135 @@
+.body {
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.error {
+    color: #fca5a5;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 0.65rem;
+    padding: 0.55rem 0.65rem;
+    font-size: 0.84rem;
+}
+
+.loading,
+.empty {
+    color: var(--color-text-muted);
+    padding: 0.75rem 0.2rem;
+}
+
+.list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.itemBtn {
+    width: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: 0.7rem;
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.5rem;
+    text-align: left;
+}
+
+.itemBtn.selected {
+    border-color: var(--color-primary);
+    background: rgba(var(--color-primary-rgb), 0.16);
+}
+
+.avatarWrap {
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatarFallback {
+    width: 100%;
+    height: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.itemTextWrap {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+.itemTitle {
+    color: var(--color-text-primary);
+    font-weight: 600;
+    font-size: 0.89rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.itemSubtitle {
+    font-size: 0.76rem;
+    color: var(--color-text-muted);
+}
+
+.checkbox {
+    width: 22px;
+    height: 22px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: var(--color-primary-light);
+    flex-shrink: 0;
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.cancelBtn,
+.sendBtn {
+    border-radius: 999px;
+    padding: 0.45rem 0.85rem;
+    font-size: 0.85rem;
+}
+
+.cancelBtn {
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+}
+
+.sendBtn {
+    color: white;
+    background: linear-gradient(130deg, var(--color-primary), var(--color-secondary));
+}
+
+.sendBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+

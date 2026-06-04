@@ -4,8 +4,12 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import '@/styles/globals.css';
 import { FloatingChat } from '@/components/chat/FloatingChat';
 import { Footer } from '@/components/layout/Footer';
+import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
+import { RouteLoadingBar } from '@/components/layout/RouteLoadingBar';
 import { PWAManager } from '@/components/PWAManager';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ThemeProvider } from '@/contexts/ThemeContext';
+import { OnboardingGuard } from '@/components/auth/OnboardingGuard';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -59,13 +63,19 @@ export default function RootLayout({
             <body className={inter.className} style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
                 <ErrorBoundary>
                     <PWAManager />
-                    <AuthProvider>
-                        <NotificationProvider>
-                            {children}
-                            <Footer />
-                            <FloatingChat />
-                        </NotificationProvider>
-                    </AuthProvider>
+                    <ThemeProvider>
+                        <AuthProvider>
+                            <NotificationProvider>
+                                <OnboardingGuard>
+                                    <RouteLoadingBar />
+                                    {children}
+                                    <MobileBottomNav />
+                                    <Footer />
+                                    <FloatingChat />
+                                </OnboardingGuard>
+                            </NotificationProvider>
+                        </AuthProvider>
+                    </ThemeProvider>
                 </ErrorBoundary>
             </body>
         </html>

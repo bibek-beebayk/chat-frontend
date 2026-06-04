@@ -29,6 +29,23 @@
     outline: none;
 }
 
+.inputWrap {
+    position: relative;
+}
+
+.hasRightElement {
+    padding-right: 3.4rem;
+}
+
+.rightElement {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+}
+
 .input:focus {
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);

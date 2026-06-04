@@ -214,6 +214,15 @@ class ApiClient {
         });
     }
 
+    // PATCH FormData request
+    async patchFormData<T>(endpoint: string, formData: FormData, options: RequestInit & { skipAuth?: boolean } = {}): Promise<T> {
+        return this.request<T>(endpoint, {
+            ...options,
+            method: 'PATCH',
+            body: formData,
+        });
+    }
+
     // DELETE request
     async delete<T>(endpoint: string, options: RequestInit & { skipAuth?: boolean } = {}): Promise<T> {
         return this.request<T>(endpoint, { ...options, method: 'DELETE' });

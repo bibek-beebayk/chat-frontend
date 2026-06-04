@@ -3,10 +3,12 @@
 import { Suspense, useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Header } from '@/components/layout/Header';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useTypingThrottle } from '@/hooks/useTypingThrottle';
 import { apiClient } from '@/lib/api';
+import { parsePostSharePayload } from '@/lib/posts';
 import { Room, Message, SupportRoom, GroupDiscoverItem, GroupJoinRequestItem, User } from '@/types';
 import { MessageActionMenu } from '@/components/chat/MessageActionMenu';
 import { Modal } from '@/components/ui/Modal';
@@ -26,9 +28,19 @@ interface AgentSearchResult {
 
 function ChatPageContent() {
     const { user, loading: authLoading } = useAuth();
+    const { resolvedTheme } = useTheme();
     // ... rest of component logic
 
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const requestedRoomIdParam = Number(searchParams.get('room_id'));
+    const openParam = searchParams.get('open');
+
+    useEffect(() => {
+        if (!user || user.user_type === 'staff') return;
+        if (Number.isFinite(requestedRoomIdParam)) return;
+        router.replace('/chats');
+    }, [requestedRoomIdParam, router, user]);
     const [supportRooms, setSupportRooms] = useState<any[]>([]);
     // Multi-room support
     const [mySupportRooms, setMySupportRooms] = useState<any[]>([]);
@@ -66,6 +78,8 @@ function ChatPageContent() {
     const [groupJoinRequests, setGroupJoinRequests] = useState<GroupJoinRequestItem[]>([]);
     const [isLoadingGroupRequests, setIsLoadingGroupRequests] = useState(false);
     const [pendingGroupRequestCount, setPendingGroupRequestCount] = useState(0);
+    const [messageRequestRooms, setMessageRequestRooms] = useState<Room[]>([]);
+    const [requestActionRoomId, setRequestActionRoomId] = useState<number | null>(null);
     const [createGroupOpen, setCreateGroupOpen] = useState(false);
     const [newGroupName, setNewGroupName] = useState('');
     const [newGroupDescription, setNewGroupDescription] = useState('');
@@ -228,6 +242,20 @@ function ChatPageContent() {
         }
         setMobileOptionsOpen(false);
     }, [isMobileViewport, selectedRoom]);
+
+    useEffect(() => {
+        if (!isMobileViewport) return;
+        if (!user || user.user_type === 'staff') return;
+        if (openParam !== 'list') return;
+
+        setChatSwitcherOpen(true);
+        setShowRoomList(true);
+
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete('open');
+        const query = params.toString();
+        router.replace(`/chat${query ? `?${query}` : ''}`);
+    }, [isMobileViewport, openParam, router, searchParams, user]);
 
     // Infinite Scroll State
     const [hasMore, setHasMore] = useState(true); // older
@@ -428,9 +456,6 @@ function ChatPageContent() {
         }
     }, [user, authLoading, router]);
 
-    const searchParams = useSearchParams();
-    const requestedRoomIdParam = Number(searchParams.get('room_id'));
-
     // ... (existing code)
 
     const roomDisplayName = (room: Room) => {
@@ -573,6 +598,32 @@ function ChatPageContent() {
         }
     };
 
+    const fetchMessageRequests = async () => {
+        if (!user || user.user_type === 'staff') {
+            setMessageRequestRooms([]);
+            return;
+        }
+        try {
+            const data = await apiClient.get<Room[]>('/api/rooms/message-requests/');
+            setMessageRequestRooms(data);
+        } catch (error) {
+            console.error('Error loading message requests:', error);
+        }
+    };
+
+    const respondToMessageRequest = async (roomId: number, action: 'accept' | 'reject') => {
+        setRequestActionRoomId(roomId);
+        try {
+            await apiClient.post(`/api/rooms/${roomId}/request/respond/`, { action });
+            await Promise.all([fetchRooms(), fetchMessageRequests()]);
+            showToast(action === 'accept' ? 'Message request accepted' : 'Message request rejected', 'success');
+        } catch (error: any) {
+            showToast(error?.message || 'Failed to respond to message request', 'error');
+        } finally {
+            setRequestActionRoomId(null);
+        }
+    };
+
     const fetchRooms = async () => {
         try {
             const roomType = searchParams.get('room_type');
@@ -583,13 +634,32 @@ function ChatPageContent() {
             if (data.length > 0) {
                 const currentSelectedRoom = selectedRoomRef.current;
                 const hasCurrentRoom = !!currentSelectedRoom && data.some((room) => room.id === currentSelectedRoom);
-                if (!hasCurrentRoom) {
-                    // Only auto-select on first load when nothing is selected.
+                const requestedRoomId = Number(searchParams.get('room_id'));
+                const requestedRoom = Number.isFinite(requestedRoomId)
+                    ? data.find((room) => room.id === requestedRoomId)
+                    : undefined;
+
+                if (requestedRoom) {
+                    if (currentSelectedRoom !== requestedRoom.id) {
+                        switchToRoom(requestedRoom.id, false);
+                    }
+                } else if (hasCurrentRoom) {
+                    // Keep current selection.
+                } else if (user?.user_type === 'staff') {
+                    // Staff keeps the previous behavior of auto-picking the first available room.
                     switchToRoom(data[0].id, false);
+                } else {
+                    // Player/agent chat page should open as a list (no forced support chat selection).
+                    setSelectedRoom(null);
+                    selectedRoomRef.current = null;
+                    setMessages([]);
+                    setPinnedMessages([]);
                 }
             } else {
                 setSelectedRoom(null);
                 selectedRoomRef.current = null;
+                setMessages([]);
+                setPinnedMessages([]);
             }
         } catch (error) {
             console.error('Error loading rooms:', error);
@@ -624,8 +694,12 @@ function ChatPageContent() {
         if (user) {
             if (user.user_type !== 'staff' || mySupportRooms.length > 0) {
                 fetchRooms();
+                fetchMessageRequests();
                 // set interval to refresh rooms list (new requests)
-                const interval = setInterval(fetchRooms, 5000);
+                const interval = setInterval(() => {
+                    fetchRooms();
+                    fetchMessageRequests();
+                }, 5000);
                 return () => clearInterval(interval);
             } else {
                 setLoading(false);
@@ -1334,10 +1408,14 @@ function ChatPageContent() {
         }
     };
     const selectedRoomData = rooms.find(r => r.id === selectedRoom);
-    const directAgentChatCount = rooms.filter((r) => r.room_type === 'direct_agent').length;
+    const messageRequestRoomIds = useMemo(
+        () => new Set(messageRequestRooms.map((room) => room.id)),
+        [messageRequestRooms]
+    );
+    const directAgentChatCount = rooms.filter((r) => r.room_type === 'direct_agent' && !messageRequestRoomIds.has(r.id)).length;
     const orderedClientRooms = useMemo(() => {
         const supportRoom = rooms.find((r) => r.room_type === 'support');
-        const nonSupportRooms = rooms.filter((r) => r.room_type !== 'support');
+        const nonSupportRooms = rooms.filter((r) => r.room_type !== 'support' && !messageRequestRoomIds.has(r.id));
         const directRooms = nonSupportRooms.filter((r) => r.room_type === 'direct_agent');
         const groupRooms = nonSupportRooms.filter((r) => r.room_type === 'group');
         const otherNonSupportRooms = nonSupportRooms.filter((r) => r.room_type !== 'direct_agent' && r.room_type !== 'group');
@@ -1372,7 +1450,7 @@ function ChatPageContent() {
 
         const combined = [...sortedDirectRooms, ...sortedGroupRooms, ...otherNonSupportRooms];
         return supportRoom ? [supportRoom, ...combined] : combined;
-    }, [rooms, user?.user_type, user?.id, agentChatFilter]);
+    }, [rooms, user?.user_type, user?.id, agentChatFilter, messageRequestRoomIds]);
 
     const renderRoomListButton = (room: Room, onSelect?: () => void) => {
         const displayName = user?.user_type === 'staff'
@@ -1412,6 +1490,57 @@ function ChatPageContent() {
                     ) : null}
                 </div>
             </button>
+        );
+    };
+    const renderMessageRequestItem = (room: Room, onSelect?: () => void) => {
+        const displayName = roomDisplayName(room);
+        const subtitle = room.message_request_direction === 'incoming'
+            ? 'Incoming message request'
+            : 'Pending request (outgoing)';
+
+        return (
+            <div key={`request-${room.id}`} className={styles.messageRequestCard}>
+                <button
+                    className={`${styles.roomButton} ${selectedRoom === room.id ? styles.active : ''}`}
+                    onClick={() => {
+                        switchToRoom(room.id, true);
+                        onSelect?.();
+                    }}
+                >
+                    <div className={styles.roomAvatar}>
+                        {displayName.charAt(0).toUpperCase()}
+                    </div>
+
+                    <div className={styles.roomInfo}>
+                        <div className={styles.roomName}>{displayName}</div>
+                        <div className={styles.roomSubtext}>{subtitle}</div>
+                    </div>
+
+                    <div className={styles.roomMeta}>
+                        {room.unread_count && room.unread_count > 0 ? (
+                            <span className={styles.unreadBadge}>{room.unread_count}</span>
+                        ) : null}
+                    </div>
+                </button>
+                {room.message_request_direction === 'incoming' && (
+                    <div className={styles.messageRequestActions}>
+                        <button
+                            className={styles.messageRequestRejectBtn}
+                            onClick={() => respondToMessageRequest(room.id, 'reject')}
+                            disabled={requestActionRoomId === room.id}
+                        >
+                            {requestActionRoomId === room.id ? 'Processing...' : 'Reject'}
+                        </button>
+                        <button
+                            className={styles.messageRequestAcceptBtn}
+                            onClick={() => respondToMessageRequest(room.id, 'accept')}
+                            disabled={requestActionRoomId === room.id}
+                        >
+                            {requestActionRoomId === room.id ? 'Processing...' : 'Accept'}
+                        </button>
+                    </div>
+                )}
+            </div>
         );
     };
     const agentSupportRoom = user?.user_type === 'agent'
@@ -1672,6 +1801,13 @@ function ChatPageContent() {
                                                 <div className={styles.noRooms}>Support chat unavailable</div>
                                             )}
 
+                                            <div className={styles.agentChatsHeader}>Message Requests</div>
+                                            {messageRequestRooms.length > 0 ? (
+                                                messageRequestRooms.map((room) => renderMessageRequestItem(room))
+                                            ) : (
+                                                <div className={styles.noRooms}>No message requests</div>
+                                            )}
+
                                             <div className={styles.agentChatsHeader}>Chats</div>
                                             {directAgentChatCount > 0 && (
                                                 <div className={styles.agentFilterRow}>
@@ -1736,6 +1872,12 @@ function ChatPageContent() {
                                     ) : user.user_type === 'player' ? (
                                         <>
                                             {clientSupportRoom && renderRoomListButton(clientSupportRoom)}
+                                            <div className={styles.agentChatsHeader}>Message Requests</div>
+                                            {messageRequestRooms.length > 0 ? (
+                                                messageRequestRooms.map((room) => renderMessageRequestItem(room))
+                                            ) : (
+                                                <div className={styles.noRooms}>No message requests</div>
+                                            )}
                                             {clientDirectRooms.length > 0 && (
                                                 <>
                                                     <div className={styles.agentChatsHeader}>Chats</div>
@@ -1756,7 +1898,7 @@ function ChatPageContent() {
                                             ) : (
                                                 <div className={styles.noRooms}>No groups</div>
                                             )}
-                                            {!clientSupportRoom && clientDirectRooms.length === 0 && clientGroupRooms.length === 0 && (
+                                            {!clientSupportRoom && messageRequestRooms.length === 0 && clientDirectRooms.length === 0 && clientGroupRooms.length === 0 && (
                                                 <div className={styles.noRooms}>No active chats</div>
                                             )}
                                         </>
@@ -2073,6 +2215,7 @@ function ChatPageContent() {
                                             !prevMsg.is_deleted; // Don't group if prev is deleted/placeholder
 
                                         const isEditing = editingMessageId === msg.id;
+                                        const sharedPost = parsePostSharePayload(msg.content || '');
 
                                         return (
                                             <div
@@ -2128,7 +2271,56 @@ function ChatPageContent() {
                                                                 {msg.is_broadcast && (
                                                                     <span className={styles.broadcastBadge}>Broadcast</span>
                                                                 )}
-                                                                {msg.content}
+                                                                {sharedPost ? (
+                                                                    <div
+                                                                        style={{
+                                                                            border: '1px solid var(--color-border)',
+                                                                            borderRadius: '10px',
+                                                                            padding: '0.6rem',
+                                                                            background: 'rgba(255,255,255,0.03)',
+                                                                            display: 'flex',
+                                                                            flexDirection: 'column',
+                                                                            gap: '0.45rem',
+                                                                        }}
+                                                                    >
+                                                                        {sharedPost.image_url && (
+                                                                            <img
+                                                                                src={sharedPost.image_url}
+                                                                                alt={sharedPost.title || 'Shared post image'}
+                                                                                style={{
+                                                                                    width: '100%',
+                                                                                    maxHeight: '180px',
+                                                                                    objectFit: 'cover',
+                                                                                    borderRadius: '8px',
+                                                                                }}
+                                                                            />
+                                                                        )}
+                                                                        <div style={{ fontWeight: 700 }}>
+                                                                            {sharedPost.title || 'Shared Post'}
+                                                                        </div>
+                                                                        {sharedPost.excerpt && (
+                                                                            <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.86rem' }}>
+                                                                                {sharedPost.excerpt}
+                                                                            </div>
+                                                                        )}
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => router.push(`/posts/${sharedPost.post_id}`)}
+                                                                            style={{
+                                                                                alignSelf: 'flex-start',
+                                                                                border: '1px solid var(--color-border)',
+                                                                                borderRadius: '999px',
+                                                                                padding: '0.28rem 0.7rem',
+                                                                                fontSize: '0.8rem',
+                                                                                color: 'var(--color-primary-light)',
+                                                                            }}
+                                                                        >
+                                                                            View Post
+                                                                        </button>
+                                                                    </div>
+                                                                ) : (
+                                                                    msg.content
+                                                                )}
                                                                 {msg.is_edited && <span className={styles.editedLabel}>(edited)</span>}
                                                             </div>
                                                         )}
@@ -2174,7 +2366,7 @@ function ChatPageContent() {
                                     <div ref={emojiPickerRef} style={{ position: 'absolute', bottom: '80px', left: '1rem', zIndex: 10 }}>
                                         <EmojiPicker
                                             onEmojiClick={onEmojiClick}
-                                            theme={Theme.DARK}
+                                            theme={resolvedTheme === 'light' ? Theme.LIGHT : Theme.DARK}
                                             width={300}
                                             height={400}
                                             autoFocusSearch={false}
@@ -2512,6 +2704,12 @@ function ChatPageContent() {
                     {user.user_type === 'agent' ? (
                         <>
                             {agentSupportRoom && renderRoomListButton(agentSupportRoom, () => setChatSwitcherOpen(false))}
+                            <div className={styles.agentChatsHeader}>Message Requests</div>
+                            {messageRequestRooms.length > 0 ? (
+                                messageRequestRooms.map((room) => renderMessageRequestItem(room, () => setChatSwitcherOpen(false)))
+                            ) : (
+                                <div className={styles.noRooms}>No message requests</div>
+                            )}
                             <div className={styles.agentChatsHeader}>Chats</div>
                             <div className={styles.agentFilterRow}>
                                 <button
@@ -2594,6 +2792,12 @@ function ChatPageContent() {
                                 </button>
                             </div>
                             {clientSupportRoom && renderRoomListButton(clientSupportRoom, () => setChatSwitcherOpen(false))}
+                            <div className={styles.agentChatsHeader}>Message Requests</div>
+                            {messageRequestRooms.length > 0 ? (
+                                messageRequestRooms.map((room) => renderMessageRequestItem(room, () => setChatSwitcherOpen(false)))
+                            ) : (
+                                <div className={styles.noRooms}>No message requests</div>
+                            )}
                             {clientDirectRooms.length > 0 && (
                                 <>
                                     <div className={styles.agentChatsHeader}>Chats</div>

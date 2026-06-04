@@ -1,0 +1,137 @@
+﻿.wrap {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-glass);
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+}
+
+.input,
+.textarea,
+.select {
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    padding: 0.65rem 0.75rem;
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--color-text-primary);
+}
+
+.textarea {
+    resize: vertical;
+    min-height: 140px;
+}
+
+.mediaHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.mediaHeader h3 {
+    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+    font-weight: 600;
+}
+
+.addBtn {
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 0.45rem 0.8rem;
+    color: var(--color-text-secondary);
+}
+
+.addBtn:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    color: var(--color-primary-light);
+}
+
+.addBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.sectionHint {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.45rem;
+}
+
+.mediaGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 0.6rem;
+}
+
+.thumbCard {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 0.35rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    background: rgba(0, 0, 0, 0.18);
+}
+
+.thumbCard.removed {
+    opacity: 0.5;
+}
+
+.thumb {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 0.45rem;
+}
+
+.removeBtn {
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #fca5a5;
+    border-radius: 999px;
+    padding: 0.26rem 0.5rem;
+    font-size: 0.74rem;
+}
+
+.submitRow {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.submitBtn {
+    border-radius: 999px;
+    padding: 0.6rem 1rem;
+    background: linear-gradient(120deg, var(--color-primary), var(--color-secondary));
+    color: white;
+    font-weight: 600;
+}
+
+.submitBtn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .wrap {
+        border-radius: var(--radius-md);
+        padding: 0.85rem;
+    }
+
+    .submitRow {
+        justify-content: stretch;
+    }
+
+    .submitBtn {
+        width: 100%;
+    }
+}
