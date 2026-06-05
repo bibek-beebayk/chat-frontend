@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -227,6 +227,14 @@ export function PostCard({
                     <video controls className={styles.video}>
                         <source src={post.video} />
                     </video>
+                </div>
+            )}
+
+            {post.cta_label && post.cta_link && (
+                <div className={styles.ctaWrap}>
+                    <a href={post.cta_link} target="_blank" rel="noopener noreferrer" className={styles.ctaButton}>
+                        {post.cta_label}
+                    </a>
                 </div>
             )}
 

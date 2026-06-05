@@ -106,6 +106,20 @@ export interface RoomDetail extends Room {
     recent_messages: Message[];
 }
 
+
+export interface SupportRoom {
+    id: number;
+    name: string;
+    room_type?: 'player' | 'agent' | 'all';
+    staff?: User;
+    is_active: boolean;
+}
+
+export interface RoomDetail extends Room {
+    participants: RoomParticipant[];
+    recent_messages: Message[];
+}
+
 // Feed types
 export interface Post {
     id: number;
@@ -122,6 +136,8 @@ export interface Post {
     like_count?: number;
     comment_count?: number;
     is_liked?: boolean;
+    cta_label?: string;
+    cta_link?: string;
     created_at: string;
     updated_at?: string;
     is_active?: boolean;
