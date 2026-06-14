@@ -58,14 +58,53 @@ export default function RegisterPage() {
         { value: 'agent', label: 'Agent' },
     ];
 
-    return (
+        return (
         <div className={styles.container}>
-            <div className={`${styles.loginCard} glass`}>
-                <div className={styles.header}>
-                    <h1 className="gradient-text">Create Account</h1>
+
+            <div className={styles.topLogoContainer}>
+                <img src="/logo-2.png" alt="Rollin Community Logo" className={styles.topLogoImage} />
+            </div>
+            
+            <div className={`${styles.contentWrapper} ${styles.mainCard}`}>
+                <div className={styles.leftCol}>
+                    <div className={styles.hero}>
+                        {/* <p className={styles.welcomeText}>Welcome to the official</p> */}
+                        <div className={styles.titleRow}>
+                            <img src="/logo-2.png" alt="Icon" className={styles.inlineLogo} />
+                            <h1 className={`${styles.title} gradient-text`} style={{ textTransform: 'uppercase', fontSize: '2.8rem' }}>ROLLIN COMMUNITY</h1>
+                        </div>
+                        <p className={styles.subtitle}>The official community for Hi-Rollin players!</p>
+                    </div>
+
+                    <div className={styles.featureListContainer}>
+                        <div className={styles.featureList}>
+                            {[
+                                { value: '15,000+', label: 'Active Members', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> },
+                                { value: '100+', label: 'Daily Discussions', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> },
+                                { value: 'Weekly', label: 'Community Rewards', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg> },
+                                { value: 'Events', label: '& Giveaways', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 21h8"></path><path d="M12 17v4"></path><path d="M7 4h10"></path><path d="M5 4h14a2 2 0 0 1 2 2v2a8 8 0 0 1-8 8h-2a8 8 0 0 1-8-8V6a2 2 0 0 1 2-2z"></path></svg> },
+                                { value: 'Direct Support', label: 'From Our Team', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg> }
+                            ].flatMap((feature, _, array) => [feature, feature]).map((feature, idx) => (
+                                <div key={idx} className={`${styles.featureItem} ${idx >= 5 ? styles.duplicateItem : ''}`}>
+                                    <div className={styles.featureIcon}>{feature.icon}</div>
+                                    <div className={styles.featureText}>
+                                        <h4>{feature.value}</h4>
+                                        <p>{feature.label}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div className={styles.rightCol}>
+                    <div className={`${styles.loginCard}`}>
+                <div className={styles.cardHeader}>
+                    <h2>Create Account 🚀</h2>
                     <p>Join Rollin Community today!</p>
                 </div>
 
+                
                 <form onSubmit={handleSubmit} className={styles.form}>
                     {error && (
                         <div className={styles.error}>
@@ -200,6 +239,19 @@ export default function RegisterPage() {
                         </Link>
                     </div>
                 </form>
+
+            </div>
+            </div>
+            </div>
+
+            <div className={styles.promoBanner}>
+                <div className={styles.promoContent}>
+                    <h3>Already have an account?</h3>
+                    <p>LOGIN NOW!</p>
+                </div>
+                <Link href="/login" className={styles.joinBtn}>
+                    LOGIN &rarr;
+                </Link>
             </div>
         </div>
     );
