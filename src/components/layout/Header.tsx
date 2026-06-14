@@ -113,42 +113,30 @@ export const Header: React.FC = () => {
                             href={chatHref}
                             className={isChatActive ? styles.active : ''}
                         >
-                            Chat
+                            Chats
                         </Link>
 
-                        <Link
-                            href="/posts"
-                            className={isActive('/posts') ? styles.active : ''}
-                        >
-                            Posts
-                        </Link>
+                        {user.user_type !== 'staff' && (
+                            <>
+                                <Link
+                                    href="/posts"
+                                    className={isActive('/posts') ? styles.active : ''}
+                                >
+                                    Posts
+                                </Link>
 
-                        <Link
-                            href="/connections"
-                            className={`${isActive('/connections') ? styles.active : ''} ${styles.navWithBadge}`}
-                        >
-                            Connections
-                            {pendingConnections > 0 && (
-                                <span className={styles.navBadge}>
-                                    {pendingConnections > 99 ? '99+' : pendingConnections}
-                                </span>
-                            )}
-                        </Link>
-
-                        <Link
-                            href="/payments"
-                            className={isActive('/payments') ? styles.active : ''}
-                        >
-                            Payments
-                        </Link>
-
-                        {user.user_type === 'staff' && (
-                            <Link
-                                href="/staff-dashboard"
-                                className={isActive('/staff-dashboard') ? styles.active : ''}
-                            >
-                                Dashboard
-                            </Link>
+                                <Link
+                                    href="/connections"
+                                    className={`${isActive('/connections') ? styles.active : ''} ${styles.navWithBadge}`}
+                                >
+                                    Connections
+                                    {pendingConnections > 0 && (
+                                        <span className={styles.navBadge}>
+                                            {pendingConnections > 99 ? '99+' : pendingConnections}
+                                        </span>
+                                    )}
+                                </Link>
+                            </>
                         )}
                     </nav>
 
@@ -396,9 +384,11 @@ export const Header: React.FC = () => {
                     <Link href="/settings" className={styles.mobileDrawerLink} onClick={() => setIsMobileDrawerOpen(false)}>
                         Appearance
                     </Link>
-                    <Link href="/posts/my" className={styles.mobileDrawerLink} onClick={() => setIsMobileDrawerOpen(false)}>
-                        My Posts
-                    </Link>
+                    {user.user_type !== 'staff' && (
+                        <Link href="/posts/my" className={styles.mobileDrawerLink} onClick={() => setIsMobileDrawerOpen(false)}>
+                            My Posts
+                        </Link>
+                    )}
                     <button
                         className={`${styles.mobileDrawerLink} ${styles.mobileDrawerLogout}`}
                         onClick={() => {

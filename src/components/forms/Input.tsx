@@ -6,6 +6,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     error?: string;
     fullWidth?: boolean;
     rightElement?: React.ReactNode;
+    leftElement?: React.ReactNode;
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -13,6 +14,7 @@ export const Input: React.FC<InputProps> = ({
     error,
     fullWidth = true,
     rightElement,
+    leftElement,
     className = '',
     ...props
 }) => {
@@ -20,8 +22,9 @@ export const Input: React.FC<InputProps> = ({
         <div className={`${styles.inputGroup} ${fullWidth ? styles.fullWidth : ''}`}>
             {label && <label className={styles.label}>{label}</label>}
             <div className={styles.inputWrap}>
+                {leftElement && <div className={styles.leftElement}>{leftElement}</div>}
                 <input
-                    className={`${styles.input} ${rightElement ? styles.hasRightElement : ''} ${error ? styles.error : ''} ${className}`}
+                    className={`${styles.input} ${leftElement ? styles.hasLeftElement : ''} ${rightElement ? styles.hasRightElement : ''} ${error ? styles.error : ''} ${className}`}
                     {...props}
                 />
                 {rightElement && <div className={styles.rightElement}>{rightElement}</div>}
