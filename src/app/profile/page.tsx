@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Header } from '@/components/layout/Header';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { ChangePasswordModal } from '@/components/settings/ChangePasswordModal';
 import { Toast } from '@/components/ui/Toast';
 import { Modal } from '@/components/ui/Modal';
@@ -179,8 +179,7 @@ export default function ProfilePage() {
     }
 
     return (
-        <div className={styles.pageWrap}>
-            <Header />
+        <DashboardLayout>
             <main className={styles.main}>
                 <section className={styles.panel}>
                     <h1 className={styles.title}>Profile</h1>
@@ -408,7 +407,7 @@ export default function ProfilePage() {
             </Modal>
 
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-        </div>
+        </DashboardLayout>
     );
 }
 

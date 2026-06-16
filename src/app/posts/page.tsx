@@ -1,8 +1,8 @@
-﻿'use client';
+'use client';
 
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Header } from '@/components/layout/Header';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PostCard } from '@/components/posts/PostCard';
 import { ShareToChatModal } from '@/components/posts/ShareToChatModal';
 import { useAuth } from '@/contexts/AuthContext';
@@ -76,18 +76,16 @@ export default function PostsPage() {
 
     if (authLoading || !user) {
         return (
-            <div className={styles.pageWrap}>
-                <Header />
+            <DashboardLayout>
                 <main className={styles.main}>
                     <div className="spinner"></div>
                 </main>
-            </div>
+            </DashboardLayout>
         );
     }
 
     return (
-        <div className={styles.pageWrap}>
-            <Header />
+        <DashboardLayout>
             <main className={styles.main}>
                 <section className={styles.topRow}>
                    
@@ -126,6 +124,6 @@ export default function PostsPage() {
             </main>
 
             <ShareToChatModal post={sharingPost} isOpen={!!sharingPost} onClose={() => setSharingPost(null)} />
-        </div>
+        </DashboardLayout>
     );
 }

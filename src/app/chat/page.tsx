@@ -4,7 +4,7 @@ import { Suspense, useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Header } from '@/components/layout/Header';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useTypingThrottle } from '@/hooks/useTypingThrottle';
 import { apiClient } from '@/lib/api';
@@ -1562,10 +1562,9 @@ function ChatPageContent() {
         ? orderedClientRooms.filter((room) => room.room_type === 'group')
         : [];
 
-    if (authLoading || loading) {
+    if (authLoading || !user) {
         return (
-            <div className={styles.pageWrapper}>
-                <Header />
+            <DashboardLayout>
                 <main className={styles.main}>
                     <div className={styles.container}>
                         <div className={styles.loading}>
@@ -1573,17 +1572,14 @@ function ChatPageContent() {
                         </div>
                     </div>
                 </main>
-            </div>
+            </DashboardLayout>
         );
     }
-
-    if (!user) return null;
 
     // STAFF VIEW: Selection Mode
     if (user.user_type === 'staff' && mySupportRooms.length === 0) {
         return (
-            <>
-                <Header />
+            <DashboardLayout>
                 <main className={styles.main}>
                     <div className={styles.container}>
                         <h1 className="gradient-text" style={{ marginBottom: '2rem' }}>Support Workstations</h1>
@@ -1668,15 +1664,13 @@ function ChatPageContent() {
                 >
                     <p>Are you sure you want to stop monitoring this queue? You will stop receiving new chats from it.</p>
                 </Modal>
-            </>
+            </DashboardLayout>
         );
     }
 
     return (
-        <div className={styles.pageWrapper} onClick={initAudio} onTouchStart={initAudio}>
-            {/* Hide Header for Staff in Workstation */}
-            {!(user.user_type === 'staff' && mySupportRooms.length > 0) && <Header />}
-            <main className={styles.main}>
+        <DashboardLayout>
+            <main className={styles.main} onClick={initAudio} onTouchStart={initAudio}>
                 <div className={styles.container}>
                     {/* Queue Management Menu for Staff */}
                     {user.user_type === 'staff' && (
@@ -3297,7 +3291,7 @@ function ChatPageContent() {
                     />
                 )
             }
-        </div >
+    </DashboardLayout>
     );
 }
 
@@ -3305,8 +3299,7 @@ export default function ChatPage() {
     return (
         <Suspense
             fallback={
-                <div className={styles.pageWrapper}>
-                    <Header />
+                <DashboardLayout>
                     <main className={styles.main}>
                         <div className={styles.container}>
                             <div className={styles.loading}>
@@ -3314,7 +3307,7 @@ export default function ChatPage() {
                             </div>
                         </div>
                     </main>
-                </div>
+                </DashboardLayout>
             }
         >
             <ChatPageContent />

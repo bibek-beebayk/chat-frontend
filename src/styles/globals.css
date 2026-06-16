@@ -9,11 +9,11 @@
   --color-accent: hsl(45, 100%, 55%);
 
   /* Background colors */
-  --color-bg-primary: #0A0214; /* Extremely deep space purple */
-  --color-bg-secondary: #130724;
-  --color-bg-tertiary: #1C0A33;
-  --color-bg-glass: rgba(20, 10, 35, 0.6);
-  --color-bg-glass-hover: rgba(30, 15, 50, 0.8);
+  --color-bg-primary: #0B0814; /* Deep space dark purple */
+  --color-bg-secondary: #130D26; /* Card background */
+  --color-bg-tertiary: #1C1333;
+  --color-bg-glass: rgba(19, 13, 38, 0.6);
+  --color-bg-glass-hover: rgba(28, 19, 51, 0.8);
 
   /* Text colors */
   --color-text-primary: hsl(0, 0%, 100%);

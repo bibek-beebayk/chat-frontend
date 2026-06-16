@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Header } from '@/components/layout/Header';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiClient } from '@/lib/api';
 import { resolveProfileImageUrl } from '@/lib/social';
@@ -219,10 +219,18 @@ export default function ChatsListPage() {
     };
 
     if (authLoading || !user) return null;
+    if (authLoading || loading || !user) {
+        return (
+            <DashboardLayout>
+                <main className={styles.main}>
+                    <div className="spinner"></div>
+                </main>
+            </DashboardLayout>
+        );
+    }
 
     return (
-        <div className={styles.pageWrap}>
-            <Header />
+        <DashboardLayout>
             <main className={styles.main}>
                 <section className={styles.panel}>
                     <div className={styles.headerRow}>
@@ -346,7 +354,7 @@ export default function ChatsListPage() {
                     )}
                 </section>
             </main>
-        </div>
+        </DashboardLayout>
     );
 }
 

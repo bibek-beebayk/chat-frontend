@@ -1,11 +1,10 @@
 'use client';
 
-import { Header } from '@/components/layout/Header';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
 export default function TermsPage() {
     return (
-        <>
-            <Header />
+        <DashboardLayout>
             <main style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto', color: '#fff' }}>
                 <h1 style={{ fontSize: '2.5rem', marginBottom: '1.5rem', color: '#ffd700' }}>Terms of Service</h1>
                 <div style={{ background: 'rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '12px' }}>
@@ -21,12 +20,13 @@ export default function TermsPage() {
                     <p style={{ marginBottom: '1rem' }}>
                         You are responsible for safeguarding the password that you use to access the service and for any activities or actions under your password.
                     </p>
+
                     <h2 style={{ fontSize: '1.5rem', marginTop: '1.5rem', marginBottom: '1rem' }}>3. Prohibited Activities</h2>
                     <p>
                         You may not use the service for any illegal or unauthorized purpose.
                     </p>
                 </div>
             </main>
-        </>
+        </DashboardLayout>
     );
 }

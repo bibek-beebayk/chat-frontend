@@ -1,5 +1,7 @@
 'use client';
 
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import VerifyUserIDModal from '@/components/settings/VerifyUserIDModal';
@@ -213,7 +215,8 @@ export default function EventPage({ params }: { params: { id: string } }) {
     };
 
     return (
-        <div className={styles.container}>
+        <DashboardLayout>
+            <div className={styles.container}>
             {/* ... Header and Cards ... */}
             <div className={styles.contentWrapper}>
                 <header className={styles.header}>
@@ -340,6 +343,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
                     <p style={{ color: '#e0e0e0' }}>{msgModal.message}</p>
                 </Modal>
             </div>
-        </div>
+            </div>
+        </DashboardLayout>
     );
 }

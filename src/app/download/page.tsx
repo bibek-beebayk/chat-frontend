@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Header } from '@/components/layout/Header';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { apiClient } from '@/lib/api';
 import styles from '../page.module.css';
 
@@ -37,10 +37,9 @@ export default function DownloadPage() {
     fetchAppVersion();
   }, []);
 
-  return (
-    <>
-      <Header />
-      <main className={styles.main}>
+    return (
+        <DashboardLayout>
+            <main className={styles.main}>
         <div className={styles.container}>
           <div className={styles.mainContent}>
             <div
@@ -174,7 +173,7 @@ export default function DownloadPage() {
             </div>
           </div>
         </div>
-      </main>
-    </>
-  );
+            </main>
+        </DashboardLayout>
+    );
 }

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Header } from '@/components/layout/Header';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserAvatar } from '@/components/social/UserAvatar';
 import { emitConnectionsUpdated } from '@/hooks/usePendingConnectionsCount';
@@ -119,18 +119,16 @@ export default function UserProfilePage() {
 
     if (authLoading || !user) {
         return (
-            <div className={styles.pageWrap}>
-                <Header />
+            <DashboardLayout>
                 <main className={styles.main}>
                     <div className="spinner"></div>
                 </main>
-            </div>
+            </DashboardLayout>
         );
     }
 
     return (
-        <div className={styles.pageWrap}>
-            <Header />
+        <DashboardLayout>
             <main className={styles.main}>
                 <button className={styles.backBtn} type="button" onClick={() => router.back()}>
                     Back
@@ -224,6 +222,6 @@ export default function UserProfilePage() {
                     </section>
                 )}
             </main>
-        </div>
+        </DashboardLayout>
     );
 }

@@ -1,0 +1,143 @@
+.topNav {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--spacing-md);
+    background: transparent; /* Assuming main content flows below it or it stays fixed */
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.leftSection {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.hamburgerBtn {
+    display: none; /* Hidden on desktop */
+    color: var(--color-text-primary);
+}
+
+.mobileLogo {
+    display: none;
+}
+
+.logoImage {
+    height: 30px;
+    width: auto;
+}
+
+.rightSection {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-left: auto;
+}
+
+.iconBtn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all var(--transition-fast);
+}
+
+.iconBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-text-primary);
+}
+
+.notificationBadge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: var(--color-primary);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: bold;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--color-bg-primary);
+}
+
+.profileSection {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.3rem 0.5rem 0.3rem 0.3rem;
+    border-radius: 30px;
+    transition: all var(--transition-fast);
+    text-decoration: none;
+}
+
+.profileSection:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--color-success);
+}
+
+.profileInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.username {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.level {
+    font-size: 0.65rem;
+    color: var(--color-text-muted);
+}
+
+.chevron {
+    color: var(--color-text-secondary);
+    margin-left: 0.2rem;
+}
+
+/* Mobile responsive */
+@media (max-width: 1024px) {
+    .hamburgerBtn {
+        display: block;
+    }
+    
+    .mobileLogo {
+        display: block;
+    }
+    
+    .profileInfo {
+        display: none; /* Hide username/level on mobile */
+    }
+    
+    .profileSection {
+        padding: 0;
+        background: none;
+    }
+
+    .topNav {
+        background: var(--color-bg-secondary);
+    }
+}

@@ -1,9 +1,9 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { Header } from '@/components/layout/Header';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { FeaturedEventCard } from '@/components/events/FeaturedEventCard';
 import { PostCard } from '@/components/posts/PostCard';
 import { ShareToChatModal } from '@/components/posts/ShareToChatModal';
@@ -85,8 +85,7 @@ export default function HomePage() {
     if (!user) return null;
 
     return (
-        <>
-            <Header />
+        <DashboardLayout>
             <main className={styles.main}>
                 <div className={styles.container}>
                     <div className={styles.mainContent}>
@@ -146,6 +145,6 @@ export default function HomePage() {
                 isOpen={!!sharingPost}
                 onClose={() => setSharingPost(null)}
             />
-        </>
+        </DashboardLayout>
     );
 }

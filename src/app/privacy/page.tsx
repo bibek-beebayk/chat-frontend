@@ -1,11 +1,10 @@
 'use client';
 
-import { Header } from '@/components/layout/Header';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
 export default function PrivacyPage() {
     return (
-        <>
-            <Header />
+        <DashboardLayout>
             <main style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto', color: '#fff' }}>
                 <h1 style={{ fontSize: '2.5rem', marginBottom: '1.5rem', color: '#ffd700' }}>Privacy Policy</h1>
                 <div style={{ background: 'rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '12px' }}>
@@ -21,12 +20,13 @@ export default function PrivacyPage() {
                     <p style={{ marginBottom: '1rem' }}>
                         We use your information to provide, maintain, and improve our services, process transactions, and communicate with you.
                     </p>
+
                     <h2 style={{ fontSize: '1.5rem', marginTop: '1.5rem', marginBottom: '1rem' }}>3. Contact Us</h2>
                     <p>
                         If you have any questions about this Privacy Policy, please contact our support team.
                     </p>
                 </div>
             </main>
-        </>
+        </DashboardLayout>
     );
 }

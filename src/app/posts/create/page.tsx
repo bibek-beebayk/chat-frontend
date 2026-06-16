@@ -1,8 +1,8 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Header } from '@/components/layout/Header';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PostComposerForm } from '@/components/posts/PostComposerForm';
 import { useAuth } from '@/contexts/AuthContext';
 import { postApi } from '@/lib/posts';
@@ -41,18 +41,16 @@ export default function CreatePostPage() {
 
     if (authLoading || !user) {
         return (
-            <div className={styles.pageWrap}>
-                <Header />
+            <DashboardLayout>
                 <main className={styles.main}>
                     <div className="spinner"></div>
                 </main>
-            </div>
+            </DashboardLayout>
         );
     }
 
     return (
-        <div className={styles.pageWrap}>
-            <Header />
+        <DashboardLayout>
             <main className={styles.main}>
                 <section className={styles.headRow}>
                     <button type="button" className={styles.backBtn} onClick={() => router.back()}>
@@ -81,6 +79,6 @@ export default function CreatePostPage() {
                     onSubmit={submit}
                 />
             </main>
-        </div>
+        </DashboardLayout>
     );
 }

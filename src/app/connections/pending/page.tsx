@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Header } from '@/components/layout/Header';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserAvatar } from '@/components/social/UserAvatar';
 import { emitConnectionsUpdated } from '@/hooks/usePendingConnectionsCount';
@@ -73,18 +73,16 @@ export default function PendingConnectionsPage() {
 
     if (authLoading || !user) {
         return (
-            <div className={styles.pageWrap}>
-                <Header />
+            <DashboardLayout>
                 <main className={styles.main}>
                     <div className="spinner"></div>
                 </main>
-            </div>
+            </DashboardLayout>
         );
     }
 
     return (
-        <div className={styles.pageWrap}>
-            <Header />
+        <DashboardLayout>
             <main className={styles.main}>
                 <section className={styles.headRow}>
                     <h1 className={styles.title}>Pending Connections</h1>
@@ -177,7 +175,7 @@ export default function PendingConnectionsPage() {
                     </ul>
                 )}
             </main>
-        </div>
+        </DashboardLayout>
     );
 }
 

@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { Header } from '@/components/layout/Header';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { AgentPayments } from '@/components/payments/AgentPayments';
 import { PlayerPaymentMethods } from '@/components/payments/PlayerPaymentMethods';
 import styles from './page.module.css';
@@ -34,8 +34,7 @@ export default function PaymentsPage() {
     const isPlayer = user.user_type === 'player';
 
     return (
-        <>
-            <Header />
+        <DashboardLayout>
             <main className={styles.main}>
                 {isPlayer ? (
                     <PlayerPaymentMethods />
@@ -43,6 +42,6 @@ export default function PaymentsPage() {
                     <AgentPayments />
                 )}
             </main>
-        </>
+        </DashboardLayout>
     );
 }

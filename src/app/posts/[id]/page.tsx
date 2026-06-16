@@ -1,8 +1,8 @@
-﻿'use client';
+'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Header } from '@/components/layout/Header';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PostCard } from '@/components/posts/PostCard';
 import { PostCommentThread } from '@/components/posts/PostCommentThread';
 import { ShareToChatModal } from '@/components/posts/ShareToChatModal';
@@ -268,18 +268,16 @@ export default function PostDetailsPage() {
 
     if (authLoading || !user) {
         return (
-            <div className={styles.pageWrap}>
-                <Header />
+            <DashboardLayout>
                 <main className={styles.main}>
                     <div className="spinner"></div>
                 </main>
-            </div>
+            </DashboardLayout>
         );
     }
 
     return (
-        <div className={styles.pageWrap}>
-            <Header />
+        <DashboardLayout>
             <main className={styles.main}>
                 <section className={styles.headRow}>
                     <button type="button" className={styles.backBtn} onClick={() => router.back()}>
@@ -394,6 +392,6 @@ export default function PostDetailsPage() {
                     )}
                 </div>
             )}
-        </div>
+        </DashboardLayout>
     );
 }

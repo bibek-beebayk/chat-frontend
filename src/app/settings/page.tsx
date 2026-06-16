@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Header } from '@/components/layout/Header';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { ThemeMode, useTheme } from '@/contexts/ThemeContext';
 import styles from './page.module.css';
@@ -23,8 +23,7 @@ export default function AppearancePage() {
     }
 
     return (
-        <div className={styles.pageWrap}>
-            <Header />
+        <DashboardLayout>
             <main className={styles.main}>
                 <section className={styles.panel}>
                     <h1 className={styles.title}>Appearance</h1>
@@ -67,6 +66,6 @@ export default function AppearancePage() {
                     <p className={styles.note}>Changes are saved on this device.</p>
                 </section>
             </main>
-        </div>
+        </DashboardLayout>
     );
 }
