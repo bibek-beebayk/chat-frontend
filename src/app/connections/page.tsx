@@ -3,6 +3,7 @@
 import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { PageShell } from '@/components/layout/PageShell';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserAvatar } from '@/components/social/UserAvatar';
 import { emitConnectionsUpdated, usePendingConnectionsCount } from '@/hooks/usePendingConnectionsCount';
@@ -153,7 +154,7 @@ export default function ConnectionsPage() {
     useEffect(() => {
         if (!user) return;
         loadAll();
-    }, [isAgentUser, user?.id]);
+    }, [loadAll, user]);
 
     useEffect(() => {
         if (!user) return;
@@ -231,6 +232,17 @@ export default function ConnectionsPage() {
         };
     }, [activeTab, agentConnected, agentNotConnected, agentQuery, playerConnected, playerNotConnected, playerQuery]);
 
+    const connectionStats = useMemo(() => {
+        const connectedCount = currentTabData.connected.items.length;
+        const discoverCount = currentTabData.notConnected.items.length;
+
+        return [
+            { label: activeTab === 'agents' ? 'Connected Agents' : 'Connected Players', value: connectedCount },
+            { label: activeTab === 'agents' ? 'Agents to Discover' : 'Players to Discover', value: discoverCount },
+            { label: 'Pending Requests', value: pendingIncomingCount },
+        ];
+    }, [activeTab, currentTabData.connected.items.length, currentTabData.notConnected.items.length, pendingIncomingCount]);
+
     const loadMore = async (target: TargetType, section: SectionKey) => {
         try {
             const currentState = getSectionState(target, section, {
@@ -255,58 +267,91 @@ export default function ConnectionsPage() {
     if (authLoading || !user) {
         return (
             <DashboardLayout>
-                <main className={styles.main}>
-                    <div className="spinner"></div>
-                </main>
+                <PageShell title="Connections" eyebrow="Community" description="Loading your community network.">
+                    <div className={styles.loadingArea}>
+                        <div className="spinner"></div>
+                    </div>
+                </PageShell>
             </DashboardLayout>
         );
     }
 
     return (
         <DashboardLayout>
-            <main className={styles.main}>
-                <section className={styles.topBar}>
-                    <div>
-                        <h1 className={styles.title}>My Connections</h1>
-                        {/* <p className={styles.subtitle}>Manage players and agents, and jump to chat quickly.</p> */}
+            <PageShell
+                title="Connections"
+                eyebrow="Community Network"
+                description="Find players and agents, manage requests, and jump straight into direct chats."
+                width="wide"
+            >
+                <section className={styles.heroPanel}>
+                    <div className={styles.heroCopy}>
+                        <span className={styles.heroEyebrow}>{isAgentUser ? 'Player Network' : 'Agent and Player Network'}</span>
+                        <h2>Build your trusted Rollin circle.</h2>
+                        <p>Keep useful contacts close, discover new community members, and open chats from one focused workspace.</p>
                     </div>
-                    <button className={styles.pendingBtn} onClick={() => router.push('/connections/pending')}>
-                        Pending Requests
-                        {pendingIncomingCount > 0 && <span className={styles.badge}>{pendingIncomingCount > 99 ? '99+' : pendingIncomingCount}</span>}
-                    </button>
+                    <div className={styles.statGrid}>
+                        {connectionStats.map((stat) => (
+                            <div key={stat.label} className={styles.statCard}>
+                                <span>{stat.label}</span>
+                                <strong>{stat.value}</strong>
+                            </div>
+                        ))}
+                    </div>
                 </section>
 
-                {isAgentUser ? null : (
-                    <div className={styles.tabs}>
-                        <button
-                            className={`${styles.tabBtn} ${activeTab === 'agents' ? styles.activeTab : ''}`}
-                            onClick={() => setActiveTab('agents')}
-                            type="button"
-                        >
-                            Agents
-                        </button>
-                        <button
-                            className={`${styles.tabBtn} ${activeTab === 'players' ? styles.activeTab : ''}`}
-                            onClick={() => setActiveTab('players')}
-                            type="button"
-                        >
-                            Players
+                <section className={styles.controlPanel}>
+                    <div className={styles.controlHeader}>
+                        {isAgentUser ? (
+                            <div>
+                                <h2>Players</h2>
+                                <p>Manage player connections and message requests.</p>
+                            </div>
+                        ) : (
+                            <div className={styles.tabs} role="tablist" aria-label="Connection type">
+                                <button
+                                    className={`${styles.tabBtn} ${activeTab === 'agents' ? styles.activeTab : ''}`}
+                                    onClick={() => setActiveTab('agents')}
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={activeTab === 'agents'}
+                                >
+                                    Agents
+                                </button>
+                                <button
+                                    className={`${styles.tabBtn} ${activeTab === 'players' ? styles.activeTab : ''}`}
+                                    onClick={() => setActiveTab('players')}
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={activeTab === 'players'}
+                                >
+                                    Players
+                                </button>
+                            </div>
+                        )}
+
+                        <button className={styles.pendingBtn} type="button" onClick={() => router.push('/connections/pending')}>
+                            Pending Requests
+                            {pendingIncomingCount > 0 && <span className={styles.badge}>{pendingIncomingCount > 99 ? '99+' : pendingIncomingCount}</span>}
                         </button>
                     </div>
-                )}
 
-                <div className={styles.searchRow}>
-                    <input
-                        type="text"
-                        value={currentTabData.query}
-                        onChange={(e) => currentTabData.onQueryChange(e.target.value)}
-                        placeholder={currentTabData.searchPlaceholder}
-                        className={styles.searchInput}
-                    />
-                    <button className={styles.refreshBtn} type="button" onClick={loadAll}>
-                        Refresh
-                    </button>
-                </div>
+                    <div className={styles.searchRow}>
+                        <span className={styles.searchIcon} aria-hidden="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+                        </span>
+                        <input
+                            type="text"
+                            value={currentTabData.query}
+                            onChange={(e) => currentTabData.onQueryChange(e.target.value)}
+                            placeholder={currentTabData.searchPlaceholder}
+                            className={styles.searchInput}
+                        />
+                        <button className={styles.refreshBtn} type="button" onClick={loadAll}>
+                            Refresh
+                        </button>
+                    </div>
+                </section>
 
                 {error && <p className={styles.errorBox}>{error}</p>}
 
@@ -340,7 +385,7 @@ export default function ConnectionsPage() {
                         />
                     </div>
                 )}
-            </main>
+            </PageShell>
         </DashboardLayout>
     );
 }
@@ -366,11 +411,21 @@ function ConnectionSection({
     openMenuUserId: number | null;
     setOpenMenuUserId: (id: number | null) => void;
 }) {
+    const totalCount = section.items.length;
+
     return (
         <section className={styles.sectionCard}>
-            <h2 className={styles.sectionTitle}>{title}</h2>
+            <div className={styles.sectionHeader}>
+                <div>
+                    <h2 className={styles.sectionTitle}>{title}</h2>
+                    <p>{title === 'Connected' ? 'People you can message and follow up with.' : 'Community members available to connect with.'}</p>
+                </div>
+                <span className={styles.sectionCount}>{totalCount}</span>
+            </div>
             {section.items.length === 0 ? (
-                <p className={styles.emptyText}>{emptyMessage}</p>
+                <div className={styles.emptyState}>
+                    <p>{emptyMessage}</p>
+                </div>
             ) : (
                 <ul className={styles.userList}>
                     {section.items.map((targetUser) => {
@@ -385,11 +440,30 @@ function ConnectionSection({
                         return (
                             <li key={targetUser.id} className={styles.userCard} onClick={() => onOpenProfile(targetUser)}>
                                 <div className={styles.userMain}>
-                                    <UserAvatar user={targetUser} size={38} />
+                                    <UserAvatar user={targetUser} size={46} />
                                     <div className={styles.userInfo}>
-                                        <p className={styles.userName}>{capitalizeUsername(targetUser.username)}</p>
-                                        <p className={styles.userMeta}>{targetUser.headline || targetUser.user_type}</p>
+                                        <div className={styles.userNameRow}>
+                                            <p className={styles.userName}>{capitalizeUsername(targetUser.username)}</p>
+                                            <span className={styles.userType}>{targetUser.user_type}</span>
+                                        </div>
+                                        <p className={styles.userMeta}>{targetUser.headline || getConnectionLabel(targetUser)}</p>
                                     </div>
+                                </div>
+
+                                <div className={styles.quickActions} onClick={(e) => e.stopPropagation()}>
+                                    {connected && canChat && (
+                                        <button type="button" className={styles.chatBtn} disabled={actionBusy} onClick={() => onAction(targetUser, 'chat')}>
+                                            Chat
+                                        </button>
+                                    )}
+                                    {!connected && pendingOutgoing && (
+                                        <span className={styles.pendingStatus}>Pending</span>
+                                    )}
+                                    {!connected && !pendingOutgoing && canConnect && (
+                                        <button type="button" className={styles.connectBtn} disabled={actionBusy} onClick={() => onAction(targetUser, 'connect')}>
+                                            Connect
+                                        </button>
+                                    )}
                                 </div>
 
                                 <div className={styles.menuWrap} onClick={(e) => e.stopPropagation()}>
@@ -449,6 +523,12 @@ function ConnectionSection({
             )}
         </section>
     );
+}
+
+function getConnectionLabel(targetUser: User): string {
+    if (targetUser.connection_status === 'pending_outgoing') return 'Connection request sent';
+    if (targetUser.connection_status === 'connected') return 'Connected member';
+    return targetUser.user_type;
 }
 
 function getSectionSetter(

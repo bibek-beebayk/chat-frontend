@@ -154,7 +154,8 @@
     border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.themeToggle {
+.themeToggle,
+.logoutButton {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -169,6 +170,15 @@
 .themeToggle:hover {
     background: rgba(255, 255, 255, 0.05);
     color: var(--color-text-primary);
+}
+
+.logoutButton {
+    color: var(--color-text-muted);
+}
+
+.logoutButton:hover {
+    background: rgba(239, 68, 68, 0.12);
+    color: #f87171;
 }
 
 .footerLinks {

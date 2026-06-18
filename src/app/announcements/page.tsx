@@ -1,21 +1,14 @@
 'use client';
 
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { ComingSoonPanel, PageShell } from '@/components/layout/PageShell';
 
 export default function AnnouncementsPage() {
     return (
         <DashboardLayout>
-            <main style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '50vh', textAlign: 'center' }}>
-                <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', background: 'linear-gradient(180deg, #FFFFFF 0%, #D892FF 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                    Announcements
-                </h1>
-                <p style={{ color: 'var(--color-text-secondary)', fontSize: '1.1rem', maxWidth: '500px', lineHeight: 1.6 }}>
-                    This section is currently under development. Please check back later for updates!
-                </p>
-                <div style={{ marginTop: '2rem', padding: '1rem', background: 'var(--color-bg-glass)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--color-border)' }}>
-                    <span style={{ fontSize: '2rem' }}>🚧</span>
-                </div>
-            </main>
+            <PageShell title="Announcements" eyebrow="Community" description="Official updates and notices from the Rollin team." centered>
+                <ComingSoonPanel title="Announcements" />
+            </PageShell>
         </DashboardLayout>
     );
 }

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { PageShell } from '@/components/layout/PageShell';
 import { PostComposerForm } from '@/components/posts/PostComposerForm';
 import { useAuth } from '@/contexts/AuthContext';
 import { postApi } from '@/lib/posts';
@@ -42,7 +43,7 @@ export default function CreatePostPage() {
     if (authLoading || !user) {
         return (
             <DashboardLayout>
-                <main className={styles.main}>
+                <main className={styles.loadingArea}>
                     <div className="spinner"></div>
                 </main>
             </DashboardLayout>
@@ -51,13 +52,17 @@ export default function CreatePostPage() {
 
     return (
         <DashboardLayout>
-            <main className={styles.main}>
-                <section className={styles.headRow}>
+            <PageShell
+                title="Create Post"
+                eyebrow="Community"
+                description="Publish an update for the Rollin Community feed."
+                width="standard"
+                actions={
                     <button type="button" className={styles.backBtn} onClick={() => router.back()}>
                         Back
                     </button>
-                    <h1 className={styles.title}>Create Post</h1>
-                </section>
+                }
+            >
 
                 {error && <p className={styles.errorBox}>{error}</p>}
 
@@ -78,7 +83,7 @@ export default function CreatePostPage() {
                     onToggleExistingImage={() => undefined}
                     onSubmit={submit}
                 />
-            </main>
+            </PageShell>
         </DashboardLayout>
     );
 }

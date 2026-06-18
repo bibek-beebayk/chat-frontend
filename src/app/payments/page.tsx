@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { PageShell } from '@/components/layout/PageShell';
 import { AgentPayments } from '@/components/payments/AgentPayments';
 import { PlayerPaymentMethods } from '@/components/payments/PlayerPaymentMethods';
 import styles from './page.module.css';
@@ -20,13 +21,13 @@ export default function PaymentsPage() {
 
     if (loading) {
         return (
-            <div className={styles.loading}>
-                <div className="spinner"></div>
-            </div>
+            <DashboardLayout>
+                <div className={styles.loading}>
+                    <div className="spinner"></div>
+                </div>
+            </DashboardLayout>
         );
     }
-
-    if (!user) return null;
 
     if (!user) return null;
 
@@ -35,13 +36,18 @@ export default function PaymentsPage() {
 
     return (
         <DashboardLayout>
-            <main className={styles.main}>
+            <PageShell
+                title="Payments"
+                eyebrow="Account"
+                description={isPlayer ? 'Manage your saved payment methods.' : 'Review payment information for agent operations.'}
+                width="wide"
+            >
                 {isPlayer ? (
                     <PlayerPaymentMethods />
                 ) : (
                     <AgentPayments />
                 )}
-            </main>
+            </PageShell>
         </DashboardLayout>
     );
 }

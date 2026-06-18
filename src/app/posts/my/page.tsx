@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { PageShell } from '@/components/layout/PageShell';
 import { PostCard } from '@/components/posts/PostCard';
 import { ShareToChatModal } from '@/components/posts/ShareToChatModal';
 import { useAuth } from '@/contexts/AuthContext';
@@ -64,7 +65,7 @@ export default function MyPostsPage() {
     if (authLoading || !user) {
         return (
             <DashboardLayout>
-                <main className={styles.main}>
+                <main className={styles.loadingArea}>
                     <div className="spinner"></div>
                 </main>
             </DashboardLayout>
@@ -73,16 +74,17 @@ export default function MyPostsPage() {
 
     return (
         <DashboardLayout>
-            <main className={styles.main}>
-                <section className={styles.topRow}>
-                    <div>
-                        <h1 className={styles.title}>My Posts</h1>
-                        <p className={styles.subtitle}>Manage your published posts.</p>
-                    </div>
+            <PageShell
+                title="My Posts"
+                eyebrow="Community"
+                description="Manage your published posts and drafts."
+                width="wide"
+                actions={
                     <button type="button" className={styles.primaryBtn} onClick={() => router.push('/posts/create')}>
                         Create Post
                     </button>
-                </section>
+                }
+            >
 
                 {error && <p className={styles.errorBox}>{error}</p>}
                 {deletingId && <p className={styles.infoBox}>Deleting post...</p>}
@@ -108,7 +110,7 @@ export default function MyPostsPage() {
                         ))}
                     </section>
                 )}
-            </main>
+            </PageShell>
 
             <ShareToChatModal post={sharingPost} isOpen={!!sharingPost} onClose={() => setSharingPost(null)} />
         </DashboardLayout>

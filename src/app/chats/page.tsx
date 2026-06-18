@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,7 +30,7 @@ export default function ChatsListPage() {
         }
     }, [authLoading, router, user]);
 
-    const fetchRooms = async () => {
+    const fetchRooms = useCallback(async () => {
         try {
             const data = await apiClient.get<Room[]>('/api/rooms/');
             setRooms(data);
@@ -39,9 +39,9 @@ export default function ChatsListPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
-    const fetchMessageRequests = async () => {
+    const fetchMessageRequests = useCallback(async () => {
         if (!user || user.user_type === 'staff') {
             setMessageRequestRooms([]);
             return;
@@ -52,7 +52,7 @@ export default function ChatsListPage() {
         } catch (error) {
             console.error('Failed to load message requests', error);
         }
-    };
+    }, [user]);
 
     useEffect(() => {
         if (!user) return;
@@ -63,7 +63,7 @@ export default function ChatsListPage() {
             fetchMessageRequests();
         }, 8000);
         return () => clearInterval(interval);
-    }, [user]);
+    }, [fetchMessageRequests, fetchRooms, user]);
 
     const respondToMessageRequest = async (roomId: number, action: 'accept' | 'reject') => {
         setRequestActionRoomId(roomId);
@@ -135,6 +135,8 @@ export default function ChatsListPage() {
     const filteredDirectRooms = rawDirectRooms.filter(matchesRoom);
     const filteredGroupRooms = rawGroupRooms.filter(matchesRoom);
     const unreadRequestCount = messageRequestRooms.reduce((total, room) => total + (room.unread_count || 0), 0);
+    const unreadChatCount = orderedClientRooms.reduce((total, room) => total + (room.unread_count || 0), 0);
+    const totalConversationCount = rawDirectRooms.length + rawGroupRooms.length + (supportRoom ? 1 : 0);
     const hasAnyResults = filteredRequestRooms.length > 0 || filteredDirectRooms.length > 0 || filteredGroupRooms.length > 0;
 
     const openRoom = (roomId: number) => {
@@ -235,7 +237,10 @@ export default function ChatsListPage() {
                 <section className={styles.panel}>
                     <div className={styles.headerRow}>
                         <div className={styles.topRow}>
-                            <h1 className={styles.title}>Chats</h1>
+                            <div>
+                                <p className={styles.eyebrow}>Messages</p>
+                                <h1 className={styles.title}>Chats</h1>
+                            </div>
                             {supportRoom && (
                                 <button
                                     type="button"
@@ -246,13 +251,32 @@ export default function ChatsListPage() {
                                 </button>
                             )}
                         </div>
-                        <input
-                            type="text"
-                            className={styles.searchInput}
-                            placeholder="Search chats"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
+                        <div className={styles.summaryGrid} aria-label="Chat summary">
+                            <div>
+                                <strong>{totalConversationCount}</strong>
+                                <span>Conversations</span>
+                            </div>
+                            <div>
+                                <strong>{messageRequestRooms.length}</strong>
+                                <span>Requests</span>
+                            </div>
+                            <div>
+                                <strong>{unreadChatCount}</strong>
+                                <span>Unread</span>
+                            </div>
+                        </div>
+                        <label className={styles.searchBox}>
+                            <span aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+                            </span>
+                            <input
+                                type="text"
+                                className={styles.searchInput}
+                                placeholder="Search chats"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </label>
                     </div>
 
                     {loading ? (

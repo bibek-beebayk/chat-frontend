@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { PageShell } from '@/components/layout/PageShell';
 import { PostCard } from '@/components/posts/PostCard';
 import { ShareToChatModal } from '@/components/posts/ShareToChatModal';
 import { useAuth } from '@/contexts/AuthContext';
@@ -77,7 +78,7 @@ export default function PostsPage() {
     if (authLoading || !user) {
         return (
             <DashboardLayout>
-                <main className={styles.main}>
+                <main className={styles.loadingArea}>
                     <div className="spinner"></div>
                 </main>
             </DashboardLayout>
@@ -86,9 +87,12 @@ export default function PostsPage() {
 
     return (
         <DashboardLayout>
-            <main className={styles.main}>
-                <section className={styles.topRow}>
-                   
+            <PageShell
+                title="Posts"
+                eyebrow="Community"
+                description="Read updates, share ideas, and keep up with the latest community posts."
+                width="wide"
+                actions={
                     <div className={styles.topActions}>
                         <button type="button" className={styles.secondaryBtn} onClick={() => router.push('/posts/my')}>
                             My Posts
@@ -97,7 +101,8 @@ export default function PostsPage() {
                             Create Post
                         </button>
                     </div>
-                </section>
+                }
+            >
 
                 {error && <p className={styles.errorBox}>{error}</p>}
 
@@ -121,7 +126,7 @@ export default function PostsPage() {
                         ))}
                     </section>
                 )}
-            </main>
+            </PageShell>
 
             <ShareToChatModal post={sharingPost} isOpen={!!sharingPost} onClose={() => setSharingPost(null)} />
         </DashboardLayout>
