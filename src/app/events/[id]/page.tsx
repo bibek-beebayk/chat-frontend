@@ -243,7 +243,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
                     )}
 
                     <p className={styles.description}>
-                        This Valentine's season, Rollin Community is hosting a limited-time appreciation
+                        This Valentine&apos;s season, Rollin Community is hosting a limited-time appreciation
                         event created to celebrate and reward active community members.
                     </p>
                 </header>

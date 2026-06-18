@@ -165,7 +165,7 @@ function VerifyOTPContent() {
                 <div className={styles.header}>
                     <h1 className={styles.title}>📧 Verify Your Email</h1>
                     <p className={styles.description}>
-                        We've sent a 6-digit code to <strong>{email}</strong>
+                        We&apos;ve sent a 6-digit code to <strong>{email}</strong>
                     </p>
                 </div>
 
@@ -220,7 +220,7 @@ function VerifyOTPContent() {
                     </div>
 
                     <div className={styles.resend}>
-                        <p>Didn't receive the code?</p>
+                        <p>Didn&apos;t receive the code?</p>
                         <button
                             onClick={handleResend}
                             disabled={loading || resendCooldown > 0}

@@ -45,7 +45,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 }}>
                     <h1 style={{ fontSize: '24px', marginBottom: '16px' }}>Something went wrong</h1>
                     <p style={{ marginBottom: '24px', textAlign: 'center', maxWidth: '500px' }}>
-                        We're having trouble loading this page. Please try opening this link in your default browser.
+                        We&apos;re having trouble loading this page. Please try opening this link in your default browser.
                     </p>
                     <button
                         onClick={() => window.location.reload()}

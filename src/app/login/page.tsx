@@ -156,7 +156,7 @@ function LoginPageContent() {
                     </div>
 
                     <div style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.9rem' }}>
-                        <span style={{ color: 'var(--color-text-secondary)' }}>Don't have an account? </span>
+                        <span style={{ color: 'var(--color-text-secondary)' }}>Don&apos;t have an account? </span>
                         <Link href="/register" className={styles.link}>
                             Create Account &rarr;
                         </Link>

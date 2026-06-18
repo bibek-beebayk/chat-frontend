@@ -348,7 +348,7 @@ export default function ChatsListPage() {
                             )}
 
                             {normalizedQuery && !hasAnyResults && (
-                                <div className={styles.empty}>No chats matched "{searchQuery.trim()}"</div>
+                                <div className={styles.empty}>No chats matched &quot;{searchQuery.trim()}&quot;</div>
                             )}
                         </div>
                     )}
@@ -357,4 +357,3 @@ export default function ChatsListPage() {
         </DashboardLayout>
     );
 }
-
