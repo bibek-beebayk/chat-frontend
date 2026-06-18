@@ -160,6 +160,29 @@ export interface PostComment {
     updated_at: string;
 }
 
+export type AnnouncementCategory = 'general' | 'event' | 'reward' | 'maintenance' | 'security' | 'vip' | string;
+export type AnnouncementAudience = 'all' | 'players' | 'agents' | 'staff' | string;
+export type AnnouncementPriority = 'normal' | 'important' | 'urgent' | string;
+
+export interface Announcement {
+    id: number;
+    title: string;
+    summary: string;
+    content: string;
+    cover_image?: string | null;
+    category: AnnouncementCategory;
+    category_label?: string;
+    audience: AnnouncementAudience;
+    audience_label?: string;
+    priority: AnnouncementPriority;
+    priority_label?: string;
+    is_pinned: boolean;
+    published_at?: string | null;
+    created_by?: User | null;
+    created_at: string;
+    updated_at: string;
+}
+
 // Message types
 export interface Message {
     id: number;

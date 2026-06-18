@@ -1,0 +1,386 @@
+.heroPanel {
+    background:
+        radial-gradient(circle at 12% 0%, rgba(153, 51, 255, 0.2), transparent 32%),
+        radial-gradient(circle at 92% 18%, rgba(255, 215, 0, 0.08), transparent 28%),
+        linear-gradient(135deg, rgba(20, 10, 35, 0.94), rgba(10, 7, 18, 0.96));
+    border: 1px solid rgba(153, 51, 255, 0.2);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    display: grid;
+    gap: var(--spacing-lg);
+    overflow: hidden;
+    padding: var(--spacing-lg);
+}
+
+.heroEyebrow {
+    background: rgba(153, 51, 255, 0.14);
+    border: 1px solid rgba(153, 51, 255, 0.28);
+    border-radius: 999px;
+    color: var(--color-primary-light);
+    display: inline-flex;
+    font-size: 0.74rem;
+    font-weight: 850;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.85rem;
+    padding: 0.26rem 0.62rem;
+    text-transform: uppercase;
+}
+
+.heroCopy h2 {
+    color: var(--color-text-primary);
+    font-size: clamp(1.35rem, 4vw, 2.35rem);
+    line-height: 1.08;
+    margin: 0 0 0.65rem;
+}
+
+.heroCopy p {
+    color: var(--color-text-secondary);
+    font-size: 0.94rem;
+    line-height: 1.6;
+    margin: 0;
+    max-width: 640px;
+}
+
+.statGrid {
+    display: grid;
+    gap: 0.65rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.statCard,
+.filterPanel,
+.featuredCard,
+.announcementCard,
+.emptyBox {
+    background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
+    border: 1px solid rgba(153, 51, 255, 0.16);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.statCard {
+    background: rgba(255, 255, 255, 0.045);
+    border-color: rgba(255, 255, 255, 0.08);
+    min-width: 0;
+    padding: 0.85rem;
+}
+
+.statCard span {
+    color: var(--color-text-muted);
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1.35;
+    margin-bottom: 0.45rem;
+}
+
+.statCard strong {
+    color: var(--color-text-primary);
+    display: block;
+    font-size: 1.35rem;
+    line-height: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: capitalize;
+    white-space: nowrap;
+}
+
+.filterPanel {
+    align-items: center;
+    display: grid;
+    gap: 0.7rem;
+    padding: var(--spacing-md);
+}
+
+.filterTabs {
+    display: flex;
+    gap: 0.45rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.filterTabs::-webkit-scrollbar {
+    display: none;
+}
+
+.filterBtn,
+.refreshBtn {
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 850;
+    min-height: 40px;
+    padding: 0.58rem 0.82rem;
+    white-space: nowrap;
+}
+
+.filterBtn {
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--color-text-secondary);
+}
+
+.activeFilter {
+    background: linear-gradient(135deg, rgba(153, 51, 255, 0.86), rgba(99, 102, 241, 0.72));
+    color: #fff;
+}
+
+.refreshBtn {
+    background: rgba(153, 51, 255, 0.12);
+    border: 1px solid rgba(153, 51, 255, 0.3);
+    color: var(--color-text-primary);
+}
+
+.errorBox {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    border-radius: var(--radius-md);
+    color: #fda4af;
+    font-size: 0.86rem;
+    margin: 0;
+    padding: 0.72rem 0.8rem;
+}
+
+.loadingArea {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    min-height: 260px;
+}
+
+.emptyBox {
+    display: grid;
+    justify-items: center;
+    min-height: 220px;
+    padding: var(--spacing-xl);
+    text-align: center;
+}
+
+.emptyBox span {
+    color: var(--color-text-primary);
+    font-size: 1.05rem;
+    font-weight: 950;
+    margin-bottom: 0.4rem;
+}
+
+.emptyBox p {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.55;
+    margin: 0;
+}
+
+.featuredCard,
+.announcementCard {
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color var(--transition-fast), transform var(--transition-fast), background var(--transition-fast);
+}
+
+.featuredCard:hover,
+.announcementCard:hover {
+    border-color: rgba(153, 51, 255, 0.28);
+    transform: translateY(-1px);
+}
+
+.featuredCard {
+    display: grid;
+}
+
+.featuredContent,
+.cardBody {
+    display: grid;
+    gap: 0.72rem;
+    padding: var(--spacing-md);
+}
+
+.featuredContent h2,
+.cardBody h2 {
+    color: var(--color-text-primary);
+    font-size: clamp(1.1rem, 3vw, 1.55rem);
+    line-height: 1.12;
+    margin: 0;
+}
+
+.featuredContent p,
+.cardBody p {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.58;
+    margin: 0;
+}
+
+.gridList {
+    display: grid;
+    gap: var(--spacing-md);
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.mediaWrap {
+    align-items: center;
+    aspect-ratio: 16 / 9;
+    background:
+        radial-gradient(circle at 70% 22%, rgba(255, 215, 0, 0.14), transparent 28%),
+        linear-gradient(135deg, rgba(153, 51, 255, 0.24), rgba(10, 7, 20, 0.92));
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.coverImage {
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+}
+
+.generatedMedia span {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.09);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+    color: var(--color-primary-light);
+    display: inline-flex;
+    font-size: 2.5rem;
+    font-weight: 950;
+    height: 88px;
+    justify-content: center;
+    width: 88px;
+}
+
+.badgeRow,
+.cardMeta {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.pinnedBadge,
+.priorityBadge,
+.cardMeta span {
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 850;
+    padding: 0.3rem 0.52rem;
+    text-transform: capitalize;
+}
+
+.pinnedBadge {
+    background: rgba(153, 51, 255, 0.14);
+    border: 1px solid rgba(153, 51, 255, 0.24);
+    color: var(--color-primary-light);
+}
+
+.priorityBadge {
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    color: var(--color-text-secondary);
+}
+
+.important {
+    background: rgba(251, 191, 36, 0.12);
+    border-color: rgba(251, 191, 36, 0.28);
+    color: #fcd34d;
+}
+
+.urgent {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.28);
+    color: #fca5a5;
+}
+
+.cardMeta {
+    color: var(--color-text-muted);
+    justify-content: space-between;
+    margin-top: 0.15rem;
+}
+
+.cardMeta span {
+    background: transparent;
+    color: var(--color-text-muted);
+    padding: 0;
+}
+
+:global(html[data-theme='light']) .heroPanel,
+:global(html[data-theme='light']) .filterPanel,
+:global(html[data-theme='light']) .featuredCard,
+:global(html[data-theme='light']) .announcementCard,
+:global(html[data-theme='light']) .emptyBox {
+    background: linear-gradient(180deg, #ffffff, #fbf8ff);
+    border-color: rgba(153, 51, 255, 0.14);
+    box-shadow: 0 10px 28px rgba(86, 42, 145, 0.08);
+}
+
+:global(html[data-theme='light']) .statCard,
+:global(html[data-theme='light']) .filterBtn {
+    background: rgba(248, 244, 255, 0.82);
+    border-color: rgba(153, 51, 255, 0.12);
+}
+
+@media (min-width: 720px) {
+    .heroPanel {
+        align-items: center;
+        grid-template-columns: minmax(0, 1fr) minmax(300px, 0.58fr);
+    }
+
+    .filterPanel {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .featuredCard {
+        grid-template-columns: minmax(280px, 0.45fr) minmax(0, 1fr);
+    }
+
+    .featuredCard .mediaWrap {
+        height: 100%;
+        min-height: 280px;
+    }
+
+    .gridList {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1080px) {
+    .gridList {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .heroPanel,
+    .filterPanel,
+    .featuredCard,
+    .announcementCard,
+    .emptyBox {
+        border-radius: var(--radius-md);
+    }
+
+    .heroPanel,
+    .filterPanel,
+    .featuredContent,
+    .cardBody {
+        padding: 0.9rem;
+    }
+
+    .statGrid {
+        gap: 0.45rem;
+    }
+
+    .statCard {
+        padding: 0.65rem 0.5rem;
+        text-align: center;
+    }
+
+    .statCard span {
+        font-size: 0.62rem;
+        min-height: 2.1em;
+    }
+
+    .statCard strong {
+        font-size: 1.1rem;
+    }
+
+    .refreshBtn {
+        width: 100%;
+    }
+}
