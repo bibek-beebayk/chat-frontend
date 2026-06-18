@@ -1,35 +1,24 @@
 .backBtn {
-    border: 1px solid var(--color-border);
+    border: 1px solid rgba(153, 51, 255, 0.22);
     border-radius: var(--radius-md);
-    color: var(--color-text-secondary);
-    background: rgba(255, 255, 255, 0.05);
-    padding: 0.5rem 1rem;
-    transition: all 0.2s ease;
-    cursor: pointer;
+    color: var(--color-text-primary);
+    background: rgba(153, 51, 255, 0.1);
+    min-height: 40px;
+    padding: 0.55rem 0.95rem;
+    font-weight: 800;
 }
 
 .backBtn:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(153, 51, 255, 0.16);
     transform: translateY(-1px);
 }
 
-.errorBox,
-.infoBox {
-    border-radius: var(--radius-md);
-    padding: 0.7rem;
-    border: 1px solid var(--color-border);
-}
-
 .errorBox {
+    border-radius: var(--radius-md);
+    padding: 0.75rem 0.85rem;
     color: #fca5a5;
-    border-color: rgba(239, 68, 68, 0.45);
+    border: 1px solid rgba(239, 68, 68, 0.45);
     background: rgba(239, 68, 68, 0.1);
-}
-
-.infoBox {
-    color: var(--color-primary-light);
-    border-color: rgba(var(--color-primary-rgb), 0.35);
-    background: rgba(var(--color-primary-rgb), 0.08);
 }
 
 .loadingArea {
@@ -39,200 +28,169 @@
     justify-content: center;
 }
 
-.commentsSection {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    background: var(--color-bg-glass);
-    padding: var(--spacing-md);
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+.composeLayout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--spacing-md);
+    align-items: start;
 }
 
-.commentsHeader {
+.composerColumn {
+    display: grid;
+    gap: var(--spacing-md);
+    min-width: 0;
+}
+
+.authorStrip,
+.publishCard {
+    background:
+        radial-gradient(circle at 12% 0%, rgba(153, 51, 255, 0.14), transparent 30%),
+        linear-gradient(180deg, rgba(20, 10, 35, 0.9), rgba(12, 8, 24, 0.94));
+    border: 1px solid rgba(153, 51, 255, 0.18);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.authorStrip {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 0.85rem;
+    padding: 0.9rem;
 }
 
-.commentsHeader h2 {
-    font-size: 1rem;
-}
-
-.commentsHeader span {
+.authorStrip span,
+.publishHeader span,
+.publishMeta span {
+    display: block;
     color: var(--color-text-muted);
-    font-size: 0.85rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
 }
 
-.commentComposer {
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 0.88rem;
-    background: rgba(255, 255, 255, 0.04);
-    padding: 0.38rem 0.42rem;
-    display: flex;
-    align-items: flex-end;
-    gap: 0.42rem;
-}
-
-.commentInput {
-    border-radius: 0.72rem;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.02);
+.authorStrip strong {
     color: var(--color-text-primary);
-    padding: 0.62rem 0.72rem;
-    resize: none;
-    min-height: 42px;
-    max-height: 120px;
-    flex: 1;
+    display: block;
+    font-size: 1rem;
+    margin-top: 0.2rem;
 }
 
-.commentSendBtn {
+.publishCard {
+    display: grid;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+}
+
+.publishHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.publishHeader strong {
+    color: var(--color-primary-light);
+    font-size: 0.95rem;
+    text-align: right;
+}
+
+.checkList {
+    display: grid;
+    gap: 0.7rem;
+}
+
+.checkList div {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: var(--color-text-secondary);
+    font-size: 0.88rem;
+}
+
+.checkList span {
+    width: 18px;
+    height: 18px;
     border-radius: 999px;
-    min-width: 40px;
-    height: 40px;
-    padding: 0 0.75rem;
-    background: var(--color-accent);
-    color: white;
-    font-size: 0.78rem;
-    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.05);
+    flex-shrink: 0;
+}
+
+.checkList .complete {
+    color: var(--color-text-primary);
+}
+
+.checkList .complete span {
+    border-color: rgba(34, 197, 94, 0.38);
+    background: radial-gradient(circle, #86efac 35%, rgba(34, 197, 94, 0.18) 38%);
+}
+
+.publishMeta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.6rem;
+}
+
+.publishMeta div {
+    min-width: 0;
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    padding: 0.65rem;
+}
+
+.publishMeta strong {
+    color: var(--color-text-primary);
+    display: block;
+    font-size: 0.95rem;
+    margin-top: 0.28rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: capitalize;
     white-space: nowrap;
 }
 
-.commentSendBtn:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
+:global(html[data-theme='light']) .authorStrip,
+:global(html[data-theme='light']) .publishCard {
+    background: linear-gradient(180deg, #ffffff, #f8fafc);
+    border-color: rgba(99, 102, 241, 0.16);
 }
 
-.loadingComments {
-    color: var(--color-text-muted);
-    padding: 0.4rem;
+:global(html[data-theme='light']) .publishHeader {
+    border-color: rgba(15, 23, 42, 0.08);
 }
 
-.imageLightbox {
-    position: fixed;
-    inset: 0;
-    z-index: 2200;
-    background: rgba(2, 6, 23, 0.9);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
+:global(html[data-theme='light']) .publishMeta div {
+    background: rgba(99, 102, 241, 0.06);
+    border-color: rgba(99, 102, 241, 0.12);
 }
 
-.lightboxImage {
-    max-width: min(96vw, 1400px);
-    max-height: 92vh;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    border-radius: 0.5rem;
-    transition: transform 0.16s ease;
-}
-
-.lightboxClose {
-    position: absolute;
-    top: 0.85rem;
-    right: 0.85rem;
-    width: 36px;
-    height: 36px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.24);
-    color: #fff;
-    background: rgba(15, 23, 42, 0.5);
-    font-size: 1.3rem;
-    line-height: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.lightboxNavBtn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 38px;
-    height: 38px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.24);
-    color: #fff;
-    background: rgba(15, 23, 42, 0.5);
-    font-size: 1.5rem;
-    line-height: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.lightboxNavPrev {
-    left: 0.85rem;
-}
-
-.lightboxNavNext {
-    right: 0.85rem;
-}
-
-.lightboxToolbar {
-    position: absolute;
-    bottom: 0.9rem;
-    left: 50%;
-    transform: translateX(-50%);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    background: rgba(15, 23, 42, 0.56);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 999px;
-    padding: 0.35rem;
-}
-
-.lightboxToolBtn {
-    min-width: 34px;
-    height: 34px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
-    font-size: 0.86rem;
-    font-weight: 700;
-    padding: 0 0.55rem;
-}
-
-.lightboxCounter {
-    position: absolute;
-    top: 0.95rem;
-    left: 50%;
-    transform: translateX(-50%);
-    border-radius: 999px;
-    padding: 0.2rem 0.55rem;
-    font-size: 0.76rem;
-    color: #fff;
-    background: rgba(15, 23, 42, 0.56);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-@media (max-width: 768px) {
-    .main {
-        padding: 0.85rem;
+@media (min-width: 980px) {
+    .composeLayout {
+        grid-template-columns: minmax(0, 1fr) 320px;
     }
 
-    .commentsSection {
-        padding: 0.8rem;
+    .publishCard {
+        position: sticky;
+        top: 88px;
+    }
+}
+
+@media (max-width: 560px) {
+    .backBtn {
+        width: 100%;
+    }
+
+    .authorStrip,
+    .publishCard {
         border-radius: var(--radius-md);
     }
 
-    .commentComposer {
-        gap: 0.34rem;
-        padding: 0.34rem 0.38rem;
-    }
-
-    .commentInput {
-        min-height: 40px;
-        padding: 0.56rem 0.64rem;
-    }
-
-    .commentSendBtn {
-        min-width: 38px;
-        height: 38px;
-        font-size: 0.74rem;
+    .publishMeta {
+        grid-template-columns: 1fr;
     }
 }

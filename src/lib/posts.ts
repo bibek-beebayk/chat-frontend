@@ -48,6 +48,12 @@ export const postApi = {
         return Array.isArray(data) ? data : data.results || [];
     },
 
+    async listByUser(userId: number): Promise<Post[]> {
+        const data = await apiClient.get<Post[] | { results: Post[] }>(`/api/posts/feed/?author=${userId}`);
+        const posts = Array.isArray(data) ? data : data.results || [];
+        return posts.filter((post) => post.author?.id === userId);
+    },
+
     async getById(id: number): Promise<Post> {
         return apiClient.get<Post>(`/api/posts/${id}/`);
     },

@@ -65,7 +65,10 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             </div>
 
             <div className={styles.createPostBtnWrapper}>
-                <button className={styles.createPostBtn}>
+                <button className={styles.createPostBtn} onClick={() => {
+                    router.push('/posts/create');
+                    onClose?.();
+                }}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     Create Post
                 </button>
@@ -95,13 +98,13 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                 ))}
             </nav>
 
-            <div className={styles.promoAd}>
+            {/* <div className={styles.promoAd}>
                 <img src="/shark_character_1781349162629.png" alt="Try Hi-Rollin Demo" className={styles.promoImage} />
                 <div className={styles.promoText}>
                     <h5>Try Hi-Rollin Demo</h5>
                     <p>Play the latest games in demo mode!</p>
                 </div>
-            </div>
+            </div> */}
 
             <div className={styles.sidebarFooter}>
                 <button type="button" className={styles.themeToggle} onClick={() => setThemeMode(themeMode === 'dark' ? 'light' : 'dark')}>
@@ -112,14 +115,14 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                     <span>Logout</span>
                 </button>
-                <div className={styles.footerLinks}>
+                {/* <div className={styles.footerLinks}>
                     <p>&copy; 2026 Rollin Community. All rights reserved.</p>
                     <div>
                         <Link href="/privacy">Privacy Policy</Link>
                         <span>•</span>
                         <Link href="/terms">Terms of Service</Link>
                     </div>
-                </div>
+                </div> */}
             </div>
         </div>
     );

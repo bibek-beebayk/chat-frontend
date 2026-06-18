@@ -144,6 +144,47 @@ textarea,
 select {
   font-family: inherit;
   color: inherit;
+  color-scheme: dark;
+}
+
+select option,
+select optgroup {
+  background-color: #130D26;
+  color: #fff;
+}
+
+select option:checked {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-text-primary);
+  caret-color: var(--color-text-primary);
+}
+
+html[data-theme='light'] input,
+html[data-theme='light'] textarea,
+html[data-theme='light'] select {
+  color-scheme: light;
+}
+
+html[data-theme='light'] select option,
+html[data-theme='light'] select optgroup {
+  background-color: #fff;
+  color: #111827;
+}
+
+html[data-theme='light'] select option:checked {
+  background-color: var(--color-primary);
+  color: #fff;
 }
 
 /* Utility Classes */

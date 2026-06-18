@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PageShell } from '@/components/layout/PageShell';
 import { PostComposerForm } from '@/components/posts/PostComposerForm';
+import { UserAvatar } from '@/components/social/UserAvatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { postApi } from '@/lib/posts';
 import styles from './page.module.css';
@@ -66,23 +67,70 @@ export default function CreatePostPage() {
 
                 {error && <p className={styles.errorBox}>{error}</p>}
 
-                <PostComposerForm
-                    title={title}
-                    content={content}
-                    visibility={visibility}
-                    selectedImages={selectedImages}
-                    submitLabel="Publish"
-                    loading={saving}
-                    onTitleChange={setTitle}
-                    onContentChange={setContent}
-                    onVisibilityChange={setVisibility}
-                    onAddImages={addImages}
-                    onRemoveSelectedImage={(index) =>
-                        setSelectedImages((prev) => prev.filter((_, itemIndex) => itemIndex !== index))
-                    }
-                    onToggleExistingImage={() => undefined}
-                    onSubmit={submit}
-                />
+                <div className={styles.composeLayout}>
+                    <div className={styles.composerColumn}>
+                        <div className={styles.authorStrip}>
+                            <UserAvatar user={user} size={48} />
+                            <div>
+                                <span>Posting as</span>
+                                <strong>{user.username}</strong>
+                            </div>
+                        </div>
+
+                        <PostComposerForm
+                            title={title}
+                            content={content}
+                            visibility={visibility}
+                            selectedImages={selectedImages}
+                            submitLabel="Publish"
+                            loading={saving}
+                            onTitleChange={setTitle}
+                            onContentChange={setContent}
+                            onVisibilityChange={setVisibility}
+                            onAddImages={addImages}
+                            onRemoveSelectedImage={(index) =>
+                                setSelectedImages((prev) => prev.filter((_, itemIndex) => itemIndex !== index))
+                            }
+                            onToggleExistingImage={() => undefined}
+                            onSubmit={submit}
+                        />
+                    </div>
+
+                    <aside className={styles.publishCard}>
+                        <div className={styles.publishHeader}>
+                            <span>Ready Check</span>
+                            <strong>{content.trim() ? 'Draft ready' : 'Drafting'}</strong>
+                        </div>
+                        <div className={styles.checkList}>
+                            <div className={content.trim() ? styles.complete : ''}>
+                                <span></span>
+                                <p>Write post content</p>
+                            </div>
+                            <div className={title.trim() ? styles.complete : ''}>
+                                <span></span>
+                                <p>Add a clear title</p>
+                            </div>
+                            <div className={selectedImages.length > 0 ? styles.complete : ''}>
+                                <span></span>
+                                <p>Attach images</p>
+                            </div>
+                        </div>
+                        <div className={styles.publishMeta}>
+                            <div>
+                                <span>Audience</span>
+                                <strong>{visibility}</strong>
+                            </div>
+                            <div>
+                                <span>Images</span>
+                                <strong>{selectedImages.length}/5</strong>
+                            </div>
+                            <div>
+                                <span>Words</span>
+                                <strong>{content.trim() ? content.trim().split(/\s+/).length : 0}</strong>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
             </PageShell>
         </DashboardLayout>
     );

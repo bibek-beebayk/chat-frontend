@@ -6,6 +6,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PostCard } from '@/components/posts/PostCard';
 import { PostCommentThread } from '@/components/posts/PostCommentThread';
 import { ShareToChatModal } from '@/components/posts/ShareToChatModal';
+import { UserAvatar } from '@/components/social/UserAvatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { postApi } from '@/lib/posts';
 import { Post, PostComment } from '@/types';
@@ -266,6 +267,11 @@ export default function PostDetailsPage() {
         setPost((prev) => (prev ? { ...prev, is_liked: result.liked, like_count: result.like_count } : prev));
     };
 
+    const postCreatedAt = post?.created_at ? new Date(post.created_at) : null;
+    const postDateLabel = postCreatedAt && !Number.isNaN(postCreatedAt.getTime())
+        ? postCreatedAt.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+        : 'Recently';
+
     if (authLoading || !user) {
         return (
             <DashboardLayout>
@@ -281,9 +287,13 @@ export default function PostDetailsPage() {
             <main className={styles.main}>
                 <section className={styles.headRow}>
                     <button type="button" className={styles.backBtn} onClick={() => router.back()}>
+                        <span aria-hidden="true">‹</span>
                         Back
                     </button>
-                    <h1 className={styles.title}>Post Details</h1>
+                    <div>
+                        <p className={styles.eyebrow}>Community Post</p>
+                        <h1 className={styles.title}>Post Details</h1>
+                    </div>
                 </section>
 
                 {error && <p className={styles.errorBox}>{error}</p>}
@@ -296,57 +306,97 @@ export default function PostDetailsPage() {
                 ) : !post ? (
                     <section className={styles.errorBox}>Post not found.</section>
                 ) : (
-                    <>
-                        <PostCard
-                            post={post}
-                            fullAspectImage
-                            showAllImages
-                            onImageClick={openPreview}
-                            onLike={likePost}
-                            onShare={setSharingPost}
-                            showFooterActions
-                            showOwnerActions={post.author.id === user.id}
-                            onEdit={() => router.push(`/posts/${post.id}/edit`)}
-                            onDelete={async () => {
-                                const ok = window.confirm('Delete this post?');
-                                if (!ok) return;
-                                await postApi.delete(post.id);
-                                router.push('/posts/my');
-                            }}
-                        />
-
-                        <section className={styles.commentsSection}>
-                            <header className={styles.commentsHeader}>
-                                <h2>Comments</h2>
-                                <span>{post.comment_count || comments.length}</span>
-                            </header>
-
-                            <div className={styles.commentComposer}>
-                                <textarea
-                                    value={commentInput}
-                                    onChange={(event) => setCommentInput(event.target.value)}
-                                    placeholder="Write a comment"
-                                    rows={3}
-                                    className={styles.commentInput}
+                    <div className={styles.detailLayout}>
+                        <div className={styles.contentColumn}>
+                            <section className={styles.postShell}>
+                                <PostCard
+                                    post={post}
+                                    fullAspectImage
+                                    showAllImages
+                                    onImageClick={openPreview}
+                                    onLike={likePost}
+                                    onShare={setSharingPost}
+                                    showFooterActions
+                                    showOwnerActions={post.author.id === user.id}
+                                    onEdit={() => router.push(`/posts/${post.id}/edit`)}
+                                    onDelete={async () => {
+                                        const ok = window.confirm('Delete this post?');
+                                        if (!ok) return;
+                                        await postApi.delete(post.id);
+                                        router.push('/posts/my');
+                                    }}
                                 />
-                                <button type="button" className={styles.commentSendBtn} disabled={submittingComment || !commentInput.trim()} onClick={submitComment}>
-                                    {submittingComment ? '...' : 'Send'}
-                                </button>
+                            </section>
+
+                            <section className={styles.commentsSection}>
+                                <header className={styles.commentsHeader}>
+                                    <div>
+                                        <p className={styles.sectionEyebrow}>Discussion</p>
+                                        <h2>Comments</h2>
+                                    </div>
+                                    <span>{post.comment_count || comments.length}</span>
+                                </header>
+
+                                <div className={styles.commentComposer}>
+                                    <UserAvatar user={user} size={38} />
+                                    <textarea
+                                        value={commentInput}
+                                        onChange={(event) => setCommentInput(event.target.value)}
+                                        placeholder="Write a thoughtful comment"
+                                        rows={3}
+                                        className={styles.commentInput}
+                                    />
+                                    <button type="button" className={styles.commentSendBtn} disabled={submittingComment || !commentInput.trim()} onClick={submitComment}>
+                                        {submittingComment ? '...' : 'Send'}
+                                    </button>
+                                </div>
+
+                                {commentsLoading ? (
+                                    <div className={styles.loadingComments}>Loading comments...</div>
+                                ) : (
+                                    <PostCommentThread
+                                        comments={comments}
+                                        currentUser={user}
+                                        onReply={replyComment}
+                                        onUpdate={updateComment}
+                                        onDelete={deleteComment}
+                                    />
+                                )}
+                            </section>
+                        </div>
+
+                        <aside className={styles.sidePanel}>
+                            <div className={styles.authorCard}>
+                                <UserAvatar user={post.author} size={54} />
+                                <div>
+                                    <span>Posted by</span>
+                                    <strong>{post.author.username}</strong>
+                                    <p>{post.author.user_type}</p>
+                                </div>
                             </div>
-
-                            {commentsLoading ? (
-                                <div className={styles.loadingComments}>Loading comments...</div>
-                            ) : (
-                                <PostCommentThread
-                                    comments={comments}
-                                    currentUser={user}
-                                    onReply={replyComment}
-                                    onUpdate={updateComment}
-                                    onDelete={deleteComment}
-                                />
-                            )}
-                        </section>
-                    </>
+                            <div className={styles.metricGrid}>
+                                <div>
+                                    <span>Likes</span>
+                                    <strong>{post.like_count || 0}</strong>
+                                </div>
+                                <div>
+                                    <span>Comments</span>
+                                    <strong>{post.comment_count || comments.length}</strong>
+                                </div>
+                                <div>
+                                    <span>Visibility</span>
+                                    <strong>{post.visibility || 'public'}</strong>
+                                </div>
+                                <div>
+                                    <span>Date</span>
+                                    <strong>{postDateLabel}</strong>
+                                </div>
+                            </div>
+                            <button type="button" className={styles.shareBtn} onClick={() => setSharingPost(post)}>
+                                Share to Chat
+                            </button>
+                        </aside>
+                    </div>
                 )}
             </main>
 

@@ -1,0 +1,529 @@
+.main {
+    display: grid;
+    gap: var(--spacing-md);
+    margin: 0 auto;
+    max-width: 1120px;
+    padding: 0.5rem;
+    width: 100%;
+}
+
+.hero {
+    align-items: center;
+    background:
+        radial-gradient(circle at 84% 18%, rgba(255, 215, 0, 0.18), transparent 24%),
+        radial-gradient(circle at 18% 12%, rgba(var(--color-primary-rgb), 0.28), transparent 34%),
+        linear-gradient(135deg, rgba(24, 11, 45, 0.98), rgba(8, 6, 18, 0.98));
+    border: 1px solid rgba(var(--color-primary-rgb), 0.28);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28), inset 0 0 60px rgba(var(--color-primary-rgb), 0.08);
+    display: grid;
+    gap: var(--spacing-lg);
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 310px;
+    overflow: hidden;
+    padding: clamp(1.25rem, 4vw, 2.25rem);
+    position: relative;
+}
+
+.hero::before {
+    background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 46px 46px;
+    content: "";
+    inset: 0;
+    opacity: 0.2;
+    pointer-events: none;
+    position: absolute;
+}
+
+.heroCopy,
+.heroVisual {
+    position: relative;
+    z-index: 1;
+}
+
+.heroCopy {
+    display: grid;
+    gap: 0.85rem;
+    max-width: 660px;
+}
+
+.eyebrow,
+.cardEyebrow {
+    color: var(--color-primary-light);
+    font-size: 0.72rem;
+    font-weight: 950;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.hero h1 {
+    background: linear-gradient(180deg, #ffffff 8%, #d8afff 50%, #8f35ff 100%);
+    background-clip: text;
+    color: transparent;
+    font-size: clamp(2.1rem, 7vw, 4.35rem);
+    font-weight: 950;
+    letter-spacing: 0;
+    line-height: 0.96;
+    margin: 0;
+    max-width: 720px;
+    text-transform: uppercase;
+}
+
+.hero p {
+    color: rgba(255, 255, 255, 0.76);
+    font-size: clamp(0.95rem, 2vw, 1.1rem);
+    line-height: 1.55;
+    margin: 0;
+    max-width: 620px;
+}
+
+.heroMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-top: 0.25rem;
+}
+
+.heroMeta span {
+    background: rgba(255, 255, 255, 0.075);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.78rem;
+    font-weight: 850;
+    padding: 0.45rem 0.68rem;
+}
+
+.heroVisual {
+    display: flex;
+    justify-content: center;
+}
+
+.phoneMockup {
+    align-items: center;
+    aspect-ratio: 0.62;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)),
+        linear-gradient(160deg, rgba(25, 12, 51, 0.98), rgba(8, 6, 18, 0.98));
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 34px;
+    box-shadow: 0 26px 55px rgba(0, 0, 0, 0.36), 0 0 42px rgba(var(--color-primary-rgb), 0.18);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 218px;
+    min-height: 260px;
+    overflow: hidden;
+    padding: 1.4rem 1rem 1rem;
+    position: relative;
+    width: min(62vw, 218px);
+}
+
+.phoneMockup::after {
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.18), transparent 62%);
+    content: "";
+    height: 180px;
+    position: absolute;
+    right: -80px;
+    top: 28px;
+    width: 180px;
+}
+
+.phoneTop {
+    background: rgba(0, 0, 0, 0.45);
+    border-radius: 999px;
+    height: 7px;
+    position: absolute;
+    top: 14px;
+    width: 56px;
+}
+
+.heroLogo {
+    display: block;
+    filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.36));
+    height: auto;
+    max-width: 170px;
+    object-fit: contain;
+    position: relative;
+    width: 86%;
+    z-index: 1;
+}
+
+.phoneContent {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    color: white;
+    display: grid;
+    gap: 0.2rem;
+    margin-top: auto;
+    padding: 0.72rem;
+    position: relative;
+    text-align: center;
+    width: 100%;
+    z-index: 1;
+}
+
+.phoneContent span {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.phoneContent strong {
+    font-size: 0.92rem;
+    font-weight: 950;
+}
+
+.stateCard,
+.errorCard,
+.downloadCard,
+.notesCard,
+.guideCard {
+    background:
+        radial-gradient(circle at 92% 0%, rgba(255, 215, 0, 0.07), transparent 34%),
+        linear-gradient(180deg, rgba(20, 10, 35, 0.94), rgba(10, 7, 20, 0.97));
+    border: 1px solid rgba(var(--color-primary-rgb), 0.18);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.stateCard,
+.errorCard {
+    align-items: center;
+    display: grid;
+    gap: 0.85rem;
+    justify-items: center;
+    min-height: 220px;
+    padding: var(--spacing-xl);
+    text-align: center;
+}
+
+.stateCard p,
+.errorCard p {
+    color: var(--color-text-secondary);
+    line-height: 1.55;
+    margin: 0;
+}
+
+.errorCard span {
+    color: #ff6b7d;
+    font-size: 1rem;
+    font-weight: 950;
+}
+
+.contentGrid {
+    display: grid;
+    gap: var(--spacing-md);
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.downloadCard,
+.notesCard,
+.guideCard {
+    display: grid;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+}
+
+.downloadCard {
+    overflow: hidden;
+    position: relative;
+}
+
+.downloadCard::before {
+    background: linear-gradient(180deg, rgba(var(--color-primary-rgb), 0.28), transparent);
+    content: "";
+    height: 100%;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 6px;
+}
+
+.cardHeader {
+    align-items: flex-start;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.cardHeader h2,
+.guideCard h2 {
+    color: var(--color-text-primary);
+    font-size: clamp(1.18rem, 3vw, 1.55rem);
+    font-weight: 950;
+    line-height: 1.08;
+    margin: 0.35rem 0 0;
+}
+
+.requiredBadge {
+    background: rgba(255, 193, 7, 0.13);
+    border: 1px solid rgba(255, 193, 7, 0.32);
+    border-radius: 999px;
+    color: #ffd15e;
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    font-weight: 950;
+    padding: 0.42rem 0.62rem;
+}
+
+.versionPanel {
+    display: grid;
+    gap: 0.65rem;
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.versionPanel div {
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    min-width: 0;
+    padding: 0.85rem;
+}
+
+.versionPanel span {
+    color: var(--color-text-muted);
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 950;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.versionPanel strong {
+    color: var(--color-text-primary);
+    display: block;
+    font-size: 1rem;
+    font-weight: 950;
+    margin-top: 0.28rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.downloadButton {
+    align-items: center;
+    background: linear-gradient(135deg, #8f35ff, #5c16d9);
+    border-radius: var(--radius-md);
+    box-shadow: 0 14px 32px rgba(102, 32, 214, 0.34);
+    color: white;
+    display: inline-flex;
+    font-size: 0.95rem;
+    font-weight: 950;
+    gap: 0.55rem;
+    justify-content: center;
+    min-height: 50px;
+    padding: 0.86rem 1rem;
+    text-decoration: none;
+    width: 100%;
+}
+
+.downloadButton:hover {
+    transform: translateY(-1px);
+}
+
+.downloadButton svg,
+.guideIcon svg {
+    flex-shrink: 0;
+    height: 19px;
+    width: 19px;
+}
+
+.helperText,
+.releaseNotes,
+.stepList {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.65;
+    margin: 0;
+}
+
+.releaseNotes {
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    white-space: pre-wrap;
+}
+
+.guideIcon {
+    align-items: center;
+    background: rgba(var(--color-primary-rgb), 0.14);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.24);
+    border-radius: 14px;
+    color: var(--color-primary-light);
+    display: inline-flex;
+    height: 44px;
+    justify-content: center;
+    width: 44px;
+}
+
+.stepList {
+    display: grid;
+    gap: 0.6rem;
+    list-style: none;
+    padding: 0;
+}
+
+.stepList li {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.075);
+    border-radius: var(--radius-md);
+    counter-increment: download-step;
+    min-height: 44px;
+    padding: 0.72rem 0.78rem 0.72rem 2.65rem;
+    position: relative;
+}
+
+.stepList li::before {
+    align-items: center;
+    background: rgba(var(--color-primary-rgb), 0.18);
+    border-radius: 999px;
+    color: var(--color-primary-light);
+    content: counter(download-step);
+    display: inline-flex;
+    font-size: 0.72rem;
+    font-weight: 950;
+    height: 24px;
+    justify-content: center;
+    left: 0.75rem;
+    position: absolute;
+    top: 0.7rem;
+    width: 24px;
+}
+
+:global(html[data-theme='light']) .hero {
+    background:
+        radial-gradient(circle at 84% 18%, rgba(255, 193, 7, 0.22), transparent 24%),
+        radial-gradient(circle at 12% 8%, rgba(var(--color-primary-rgb), 0.16), transparent 32%),
+        linear-gradient(135deg, #ffffff, #f6efff 58%, #fff8df);
+    border-color: rgba(var(--color-primary-rgb), 0.2);
+    box-shadow: 0 16px 42px rgba(86, 42, 145, 0.12);
+}
+
+:global(html[data-theme='light']) .hero::before {
+    background:
+        linear-gradient(90deg, rgba(98, 62, 148, 0.08) 1px, transparent 1px),
+        linear-gradient(rgba(98, 62, 148, 0.06) 1px, transparent 1px);
+    opacity: 0.55;
+}
+
+:global(html[data-theme='light']) .hero h1 {
+    background: linear-gradient(180deg, #2b1747 8%, #7331d4 58%, #9b58ff 100%);
+    background-clip: text;
+    color: transparent;
+}
+
+:global(html[data-theme='light']) .hero p,
+:global(html[data-theme='light']) .heroMeta span {
+    color: rgba(43, 23, 71, 0.72);
+}
+
+:global(html[data-theme='light']) .heroMeta span {
+    background: rgba(255, 255, 255, 0.68);
+    border-color: rgba(var(--color-primary-rgb), 0.16);
+}
+
+:global(html[data-theme='light']) .phoneMockup {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(245, 237, 255, 0.98)),
+        linear-gradient(160deg, #ffffff, #f4ecff);
+    border-color: rgba(var(--color-primary-rgb), 0.2);
+    box-shadow: 0 22px 45px rgba(86, 42, 145, 0.18), 0 0 32px rgba(var(--color-primary-rgb), 0.12);
+}
+
+:global(html[data-theme='light']) .phoneTop {
+    background: rgba(43, 23, 71, 0.18);
+}
+
+:global(html[data-theme='light']) .phoneContent {
+    background: rgba(255, 255, 255, 0.76);
+    border-color: rgba(var(--color-primary-rgb), 0.16);
+    color: #2b1747;
+}
+
+:global(html[data-theme='light']) .phoneContent span {
+    color: rgba(43, 23, 71, 0.58);
+}
+
+:global(html[data-theme='light']) .stateCard,
+:global(html[data-theme='light']) .errorCard,
+:global(html[data-theme='light']) .downloadCard,
+:global(html[data-theme='light']) .notesCard,
+:global(html[data-theme='light']) .guideCard {
+    background:
+        radial-gradient(circle at 92% 0%, rgba(255, 193, 7, 0.1), transparent 34%),
+        linear-gradient(180deg, #ffffff, #fbf8ff);
+    border-color: rgba(var(--color-primary-rgb), 0.16);
+    box-shadow: 0 10px 28px rgba(86, 42, 145, 0.08);
+}
+
+:global(html[data-theme='light']) .versionPanel div,
+:global(html[data-theme='light']) .releaseNotes,
+:global(html[data-theme='light']) .stepList li {
+    background: rgba(248, 244, 255, 0.82);
+    border-color: rgba(var(--color-primary-rgb), 0.12);
+}
+
+:global(html[data-theme='light']) .helperText,
+:global(html[data-theme='light']) .releaseNotes,
+:global(html[data-theme='light']) .stepList,
+:global(html[data-theme='light']) .stateCard p,
+:global(html[data-theme='light']) .errorCard p {
+    color: var(--color-text-secondary);
+}
+
+@media (min-width: 680px) {
+    .main {
+        padding: 1rem;
+    }
+
+    .versionPanel {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .downloadButton {
+        justify-self: start;
+        width: auto;
+        min-width: 210px;
+    }
+}
+
+@media (min-width: 920px) {
+    .hero {
+        grid-template-columns: minmax(0, 1fr) minmax(240px, 0.42fr);
+    }
+
+    .heroVisual {
+        justify-content: flex-end;
+    }
+
+    .contentGrid {
+        grid-template-columns: minmax(0, 1.12fr) minmax(300px, 0.88fr);
+    }
+
+    .downloadCard {
+        grid-row: span 2;
+        padding: var(--spacing-lg);
+    }
+}
+
+@media (max-width: 520px) {
+    .cardHeader {
+        display: grid;
+    }
+
+    .requiredBadge {
+        width: fit-content;
+    }
+
+    .phoneMockup {
+        max-width: 190px;
+        min-height: 236px;
+    }
+}

@@ -182,15 +182,24 @@ export default function ProfilePage() {
         <DashboardLayout>
             <main className={styles.main}>
                 <section className={styles.panel}>
-                    <h1 className={styles.title}>Profile</h1>
+                    <header className={styles.pageHeader}>
+                        <p className={styles.eyebrow}>Account Center</p>
+                        <h1 className={styles.title}>Edit Profile</h1>
+                        <p className={styles.subtitle}>Manage your identity, login details, availability, and account safety.</p>
+                    </header>
 
-                    <div className={styles.profileCard}>
-                        <UserAvatar user={user} size={74} />
+                    <div className={styles.profileHero}>
+                        <div className={styles.avatarFrame}>
+                            <UserAvatar user={user} size={92} />
+                        </div>
                         <div className={styles.identity}>
+                            <span className={styles.rolePill}>{user.user_type}</span>
                             <h2 className={styles.username}>{user.username}</h2>
                             <p className={styles.email}>{user.email || 'No email set'}</p>
-                            <p className={styles.userType}>{user.user_type}</p>
                         </div>
+                        <button type="button" className={styles.avatarBtn} onClick={onPickAvatar} disabled={isUploadingAvatar}>
+                            {isUploadingAvatar ? 'Uploading...' : 'Change Photo'}
+                        </button>
                     </div>
 
                     <input
@@ -201,63 +210,104 @@ export default function ProfilePage() {
                         className={styles.hiddenFileInput}
                     />
 
-                    <div className={styles.section}>
-                        <h3 className={styles.sectionTitle}>Account</h3>
-                        <div className={styles.actionsList}>
-                            <button type="button" className={styles.actionBtn} onClick={onPickAvatar} disabled={isUploadingAvatar}>
-                                {isUploadingAvatar ? 'Uploading picture...' : 'Change Profile Picture'}
-                            </button>
-                            <button type="button" className={styles.actionBtn} onClick={() => setIsVerifyPasswordModalOpen(true)}>
-                                Change Email
-                            </button>
-                            <button type="button" className={styles.actionBtn} onClick={() => setIsPasswordModalOpen(true)}>
-                                Change Password
-                            </button>
-                        </div>
-                    </div>
-
-                    {user.user_type === 'agent' && (
-                        <div className={styles.section}>
-                            <h3 className={styles.sectionTitle}>Agent Availability</h3>
-                            <div className={styles.fieldGroup}>
-                                <label className={styles.label}>Availability</label>
-                                <select
-                                    className={styles.input}
-                                    value={agentAvailability}
-                                    onChange={(e) => setAgentAvailability(e.target.value)}
-                                >
-                                    <option value="online">Online</option>
-                                    <option value="busy">Busy</option>
-                                    <option value="away">Away</option>
-                                    <option value="offline">Offline</option>
-                                </select>
+                    <div className={styles.contentGrid}>
+                        <section className={styles.card}>
+                            <div className={styles.cardHeader}>
+                                <div>
+                                    <h3 className={styles.sectionTitle}>Account</h3>
+                                    <p>Update contact details and how your profile appears.</p>
+                                </div>
                             </div>
-                            <div className={styles.fieldGroup}>
-                                <label className={styles.label}>Status note</label>
-                                <input
-                                    className={styles.input}
-                                    value={agentStatusNote}
-                                    onChange={(e) => setAgentStatusNote(e.target.value)}
-                                    placeholder="Add quick status note"
-                                    maxLength={120}
-                                />
+                            <div className={styles.metaGrid}>
+                                <div>
+                                    <span>Username</span>
+                                    <strong>{user.username}</strong>
+                                </div>
+                                <div>
+                                    <span>Email</span>
+                                    <strong>{user.email || 'Not set'}</strong>
+                                </div>
+                                <div>
+                                    <span>Role</span>
+                                    <strong>{user.user_type}</strong>
+                                </div>
                             </div>
-                            <button type="button" className={styles.primaryBtn} onClick={updateAvailability} disabled={isUpdatingAvailability}>
-                                {isUpdatingAvailability ? 'Saving...' : 'Save Availability'}
-                            </button>
-                        </div>
-                    )}
+                            <div className={styles.actionsList}>
+                                <button type="button" className={styles.actionBtn} onClick={() => setIsVerifyPasswordModalOpen(true)}>
+                                    Change Email
+                                </button>
+                            </div>
+                        </section>
 
-                    <div className={styles.section}>
-                        <h3 className={styles.sectionTitle}>Danger Zone</h3>
-                        <button
-                            type="button"
-                            className={styles.dangerBtn}
-                            onClick={() => setIsDeleteConfirmOpen(true)}
-                            disabled={isDeletingAccount}
-                        >
-                            {isDeletingAccount ? 'Deleting Account...' : 'Delete Account'}
-                        </button>
+                        <section className={styles.card}>
+                            <div className={styles.cardHeader}>
+                                <div>
+                                    <h3 className={styles.sectionTitle}>Security</h3>
+                                    <p>Keep your password current and protect access to your account.</p>
+                                </div>
+                            </div>
+                            <div className={styles.actionsList}>
+                                <button type="button" className={styles.actionBtn} onClick={() => setIsPasswordModalOpen(true)}>
+                                    Change Password
+                                </button>
+                            </div>
+                        </section>
+
+                        {user.user_type === 'agent' && (
+                            <section className={`${styles.card} ${styles.wideCard}`}>
+                                <div className={styles.cardHeader}>
+                                    <div>
+                                        <h3 className={styles.sectionTitle}>Agent Availability</h3>
+                                        <p>Set your visible support presence for community members.</p>
+                                    </div>
+                                </div>
+                                <div className={styles.fieldGrid}>
+                                    <div className={styles.fieldGroup}>
+                                        <label className={styles.label}>Availability</label>
+                                        <select
+                                            className={styles.input}
+                                            value={agentAvailability}
+                                            onChange={(e) => setAgentAvailability(e.target.value)}
+                                        >
+                                            <option value="online">Online</option>
+                                            <option value="busy">Busy</option>
+                                            <option value="away">Away</option>
+                                            <option value="offline">Offline</option>
+                                        </select>
+                                    </div>
+                                    <div className={styles.fieldGroup}>
+                                        <label className={styles.label}>Status note</label>
+                                        <input
+                                            className={styles.input}
+                                            value={agentStatusNote}
+                                            onChange={(e) => setAgentStatusNote(e.target.value)}
+                                            placeholder="Add quick status note"
+                                            maxLength={120}
+                                        />
+                                    </div>
+                                </div>
+                                <button type="button" className={styles.primaryBtn} onClick={updateAvailability} disabled={isUpdatingAvailability}>
+                                    {isUpdatingAvailability ? 'Saving...' : 'Save Availability'}
+                                </button>
+                            </section>
+                        )}
+
+                        <section className={`${styles.card} ${styles.dangerCard}`}>
+                            <div className={styles.cardHeader}>
+                                <div>
+                                    <h3 className={styles.sectionTitle}>Danger Zone</h3>
+                                    <p>Permanently remove your account and related access.</p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                className={styles.dangerBtn}
+                                onClick={() => setIsDeleteConfirmOpen(true)}
+                                disabled={isDeletingAccount}
+                            >
+                                {isDeletingAccount ? 'Deleting Account...' : 'Delete Account'}
+                            </button>
+                        </section>
                     </div>
                 </section>
             </main>
@@ -410,4 +460,3 @@ export default function ProfilePage() {
         </DashboardLayout>
     );
 }
-

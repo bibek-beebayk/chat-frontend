@@ -86,29 +86,32 @@ export function PostComposerForm({
     return (
         <section className={styles.wrap}>
             <label className={styles.label}>
-                Title (optional)
+                <span className={styles.labelText}>Title</span>
+                <span className={styles.labelHint}>Optional, but useful for pinned or announcement-style posts.</span>
                 <input
                     type="text"
                     value={title}
                     onChange={(event) => onTitleChange(event.target.value)}
                     className={styles.input}
-                    placeholder="Write a title"
+                    placeholder="Give your post a sharp headline"
                 />
             </label>
 
             <label className={styles.label}>
-                Content
+                <span className={styles.labelText}>Post Content</span>
+                <span className={styles.labelHint}>Share an update, ask a question, or start a community discussion.</span>
                 <textarea
                     value={content}
                     onChange={(event) => onContentChange(event.target.value)}
                     className={styles.textarea}
                     rows={8}
-                    placeholder="Share your update"
+                    placeholder="What do you want to share with Rollin Community?"
                 />
             </label>
 
             <label className={styles.label}>
-                Visibility
+                <span className={styles.labelText}>Audience</span>
+                <span className={styles.labelHint}>Control who can see this post after publishing.</span>
                 <select
                     value={visibility}
                     className={styles.select}
@@ -120,11 +123,25 @@ export function PostComposerForm({
                 </select>
             </label>
 
-            <div className={styles.mediaHeader}>
-                <h3>Photos ({currentCount}/{MAX_IMAGES})</h3>
-                <button type="button" className={styles.addBtn} onClick={openPicker} disabled={!canAddMore}>
-                    Add Photos
-                </button>
+            <div className={styles.mediaPanel}>
+                <div className={styles.mediaHeader}>
+                    <div>
+                        <h3>Photos</h3>
+                        <p>{currentCount}/{MAX_IMAGES} images attached</p>
+                    </div>
+                    <button type="button" className={styles.addBtn} onClick={openPicker} disabled={!canAddMore}>
+                        Add Photos
+                    </button>
+                </div>
+                {currentCount === 0 && (
+                    <button type="button" className={styles.dropzone} onClick={openPicker} disabled={!canAddMore}>
+                        <span className={styles.dropIcon}>+</span>
+                        <span>
+                            <strong>Add visuals to your post</strong>
+                            <small>Upload up to {MAX_IMAGES} images. Square or landscape images work best.</small>
+                        </span>
+                    </button>
+                )}
                 <input
                     ref={inputRef}
                     type="file"

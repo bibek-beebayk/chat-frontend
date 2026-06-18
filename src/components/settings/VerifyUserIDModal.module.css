@@ -110,8 +110,9 @@
     border-radius: 12px;
     font-size: 1rem;
     transition: all 0.3s ease;
-    background: var(--color-bg-tertiary);
+    background: rgba(255, 255, 255, 0.04);
     color: var(--color-text-primary);
+    color-scheme: dark;
 }
 
 .input:focus {
@@ -124,6 +125,20 @@
     background: rgba(255, 255, 255, 0.05);
     cursor: not-allowed;
     color: var(--color-text-muted);
+}
+
+:global(html[data-theme='light']) .input {
+    background: rgba(99, 102, 241, 0.045);
+    border-color: rgba(15, 23, 42, 0.14);
+    color-scheme: light;
+}
+
+:global(html[data-theme='light']) .input:focus {
+    background: #fff;
+}
+
+:global(html[data-theme='light']) .input:disabled {
+    background: rgba(15, 23, 42, 0.04);
 }
 
 .error {

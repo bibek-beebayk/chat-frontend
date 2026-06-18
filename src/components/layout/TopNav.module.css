@@ -40,6 +40,33 @@
     margin-left: auto;
 }
 
+.downloadLink {
+    align-items: center;
+    background: rgba(153, 51, 255, 0.12);
+    border: 1px solid rgba(153, 51, 255, 0.25);
+    border-radius: 999px;
+    color: var(--color-text-primary);
+    display: inline-flex;
+    font-size: 0.84rem;
+    font-weight: 800;
+    gap: 0.45rem;
+    min-height: 40px;
+    padding: 0.5rem 0.78rem;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.downloadLink:hover {
+    background: rgba(153, 51, 255, 0.18);
+    border-color: rgba(153, 51, 255, 0.42);
+    color: var(--color-primary-light);
+}
+
+.downloadLink svg {
+    flex-shrink: 0;
+}
+
 .iconBtn {
     width: 40px;
     height: 40px;
@@ -139,5 +166,21 @@
 
     .topNav {
         background: var(--color-bg-secondary);
+    }
+}
+
+@media (max-width: 560px) {
+    .rightSection {
+        gap: 0.55rem;
+    }
+
+    .downloadLink {
+        width: 40px;
+        padding: 0;
+        justify-content: center;
+    }
+
+    .downloadLink span {
+        display: none;
     }
 }

@@ -21,7 +21,7 @@ const featureLinks = [
     { title: 'Weekly', label: 'Rewards', icon: <GiftIcon /> },
     { title: 'Exclusive', label: 'Events', icon: <CalendarIcon /> },
     { title: 'Direct', label: 'Support', icon: <ChatIcon /> },
-    { title: 'VIP', label: 'Access', icon: <CrownIcon /> },
+    // { title: 'VIP', label: 'Access', icon: <CrownIcon /> },
 ];
 
 export default function HomePage() {
@@ -145,28 +145,15 @@ export default function HomePage() {
                                 <ChatIcon />
                                 Join Community Chat
                             </button>
-                            <button type="button" className={styles.secondaryAction} onClick={() => router.push('/games')}>
+                            {/* <button type="button" className={styles.secondaryAction} onClick={() => router.push('/games')}>
                                 <GamepadIcon />
                                 Play Demo
-                            </button>
+                            </button> */}
                         </div>
                     </div>
 
                     <div className={styles.heroArt} aria-hidden="true">
-                        <div className={`${styles.spark} ${styles.sparkOne}`}></div>
-                        <div className={`${styles.spark} ${styles.sparkTwo}`}></div>
-                        <div className={`${styles.coin} ${styles.coinOne}`}>R</div>
-                        <div className={`${styles.coin} ${styles.coinTwo}`}>R</div>
-                        <div className={`${styles.gem} ${styles.gemOne}`}></div>
-                        <div className={`${styles.gem} ${styles.gemTwo}`}></div>
-                        <div className={styles.shield}>
-                            <div className={styles.crown}>
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </div>
-                            <span className={styles.shieldLetter}>R</span>
-                        </div>
+                        <img src="/logo-3.png" alt="" className={styles.heroLogo} />
                     </div>
                 </section>
 
