@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { hasCompletedSocialOnboarding, socialApi } from '@/lib/social';
 import { User } from '@/types';
-import { resolveProfileImageUrl } from '@/lib/social';
+import { UserAvatar } from '@/components/social/UserAvatar';
 import styles from './page.module.css';
 
 type Step = 1 | 2;
@@ -28,6 +29,8 @@ export default function OnboardingPage() {
         ? 'Find trusted agents to chat with and start building your gaming network.'
         : 'Build your circle, discover shared interests, and open direct conversations.';
     const stepLabel = step === 1 ? 'Step 1 of 2' : 'Step 2 of 2';
+    const progress = step === 1 ? 50 : 100;
+    const connectedCount = sentRequestIds.length;
 
     const loadStepData = async (targetStep: Step) => {
         if (targetStep === 1) {
@@ -127,81 +130,131 @@ export default function OnboardingPage() {
 
     return (
         <main className={styles.page}>
-            <section className={styles.panel}>
-                <header className={styles.hero}>
-                    <p className={styles.stepLabel}>{stepLabel}</p>
-                    <h1 className={styles.title}>{currentTitle}</h1>
-                    <p className={styles.subtitle}>{currentSubtitle}</p>
-                </header>
-
-                {error && <p className={styles.error}>{error}</p>}
-
-                {loading ? (
-                    <div className={styles.loadingWrap}>
-                        <div className="spinner" />
+            <section className={styles.shell}>
+                <aside className={styles.sidePanel} aria-label="Onboarding progress">
+                    <div className={styles.brandMark}>
+                        <Image src="/logo-3.png" alt="Rollin Community" width={260} height={180} priority />
                     </div>
-                ) : (
-                    <>
-                        {currentList.length === 0 ? (
-                            <p className={styles.empty}>{emptyMessage}</p>
-                        ) : (
-                            <ul className={styles.list}>
-                                {currentList.map((target) => {
-                                    const imageUrl = resolveProfileImageUrl(target);
-                                    const fallback = target.username?.charAt(0)?.toUpperCase() || 'U';
-                                    const requestSent = sentRequestIds.includes(target.id) || target.connection_status === 'pending_outgoing';
-
-                                    return (
-                                        <li key={target.id} className={styles.card}>
-                                            <div className={styles.userMain}>
-                                                <div className={styles.avatar}>
-                                                    {imageUrl ? <img src={imageUrl} alt={`${target.username} profile`} /> : <span>{fallback}</span>}
-                                                </div>
-                                                <p className={styles.username}>{target.username}</p>
-                                            </div>
-                                            <div className={styles.cardActions}>
-                                                <button type="button" className={styles.secondaryBtn} onClick={() => openProfile(target)}>
-                                                    Profile
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    className={styles.primaryBtn}
-                                                    onClick={() => connectUser(target)}
-                                                    disabled={actionBusyId === target.id || requestSent}
-                                                >
-                                                    {requestSent ? 'Requested' : actionBusyId === target.id ? '...' : 'Connect'}
-                                                </button>
-                                            </div>
-                                        </li>
-                                    );
-                                })}
-                            </ul>
-                        )}
-
-                        <div className={styles.footerActions}>
-                            {step === 1 ? (
-                                <>
-                                    <button type="button" className={styles.secondaryBtn} onClick={goToStepTwo}>
-                                        Skip for now
-                                    </button>
-                                    <button type="button" className={styles.primaryBtn} onClick={goToStepTwo}>
-                                        Continue
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    <button type="button" className={styles.secondaryBtn} onClick={finishOnboarding}>
-                                        Skip for now
-                                    </button>
-                                    <button type="button" className={styles.primaryBtn} onClick={finishOnboarding}>
-                                        Finish
-                                    </button>
-                                </>
-                            )}
+                    <div className={styles.sideCopy}>
+                        <span className={styles.sideEyebrow}>Welcome to Rollin</span>
+                        <h1>Set up your community circle.</h1>
+                        <p>Connect with useful people now so your feed, chats, and profile start with real momentum.</p>
+                    </div>
+                    <div className={styles.progressCard}>
+                        <div className={styles.progressHeader}>
+                            <span>{stepLabel}</span>
+                            <strong>{progress}%</strong>
                         </div>
-                    </>
-                )}
+                        <div className={styles.progressTrack}>
+                            <span style={{ width: `${progress}%` }}></span>
+                        </div>
+                    </div>
+                    <div className={styles.sideStats}>
+                        <div>
+                            <span>Suggestions</span>
+                            <strong>{currentList.length}</strong>
+                        </div>
+                        <div>
+                            <span>Requests Sent</span>
+                            <strong>{connectedCount}</strong>
+                        </div>
+                    </div>
+                </aside>
+
+                <section className={styles.panel}>
+                    <header className={styles.hero}>
+                        <div>
+                            <p className={styles.stepLabel}>{stepLabel}</p>
+                            <h2 className={styles.title}>{currentTitle}</h2>
+                            <p className={styles.subtitle}>{currentSubtitle}</p>
+                        </div>
+                        <div className={styles.stepPills} aria-label="Onboarding steps">
+                            <span className={step === 1 ? styles.activeStep : ''}>Agents</span>
+                            <span className={step === 2 ? styles.activeStep : ''}>Players</span>
+                        </div>
+                    </header>
+
+                    {error && <p className={styles.error}>{error}</p>}
+
+                    {loading ? (
+                        <div className={styles.loadingWrap}>
+                            <div className="spinner" />
+                            <p>Preparing suggestions...</p>
+                        </div>
+                    ) : (
+                        <>
+                            {currentList.length === 0 ? (
+                                <div className={styles.empty}>
+                                    <span>No suggestions available</span>
+                                    <p>{emptyMessage}</p>
+                                </div>
+                            ) : (
+                                <ul className={styles.list}>
+                                    {currentList.map((target) => {
+                                        const requestSent = sentRequestIds.includes(target.id) || target.connection_status === 'pending_outgoing';
+
+                                        return (
+                                            <li key={target.id} className={styles.card}>
+                                                <button type="button" className={styles.userMain} onClick={() => openProfile(target)}>
+                                                    <UserAvatar user={target} size={50} />
+                                                    <div className={styles.userInfo}>
+                                                        <div className={styles.nameRow}>
+                                                            <p className={styles.username}>{target.username}</p>
+                                                            <span>{target.user_type}</span>
+                                                        </div>
+                                                        <p className={styles.userMeta}>{target.headline || getSuggestionLabel(target)}</p>
+                                                    </div>
+                                                </button>
+                                                <div className={styles.cardActions}>
+                                                    <button type="button" className={styles.secondaryBtn} onClick={() => openProfile(target)}>
+                                                        Profile
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className={styles.primaryBtn}
+                                                        onClick={() => connectUser(target)}
+                                                        disabled={actionBusyId === target.id || requestSent}
+                                                    >
+                                                        {requestSent ? 'Requested' : actionBusyId === target.id ? 'Sending...' : 'Connect'}
+                                                    </button>
+                                                </div>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            )}
+
+                            <div className={styles.footerActions}>
+                                {step === 1 ? (
+                                    <>
+                                        <button type="button" className={styles.secondaryBtn} onClick={goToStepTwo}>
+                                            Skip for now
+                                        </button>
+                                        <button type="button" className={styles.primaryBtn} onClick={goToStepTwo}>
+                                            Continue
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <button type="button" className={styles.secondaryBtn} onClick={finishOnboarding}>
+                                            Skip for now
+                                        </button>
+                                        <button type="button" className={styles.primaryBtn} onClick={finishOnboarding}>
+                                            Finish
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        </>
+                    )}
+                </section>
             </section>
         </main>
     );
+}
+
+function getSuggestionLabel(target: User): string {
+    if (target.user_type === 'agent') return 'Trusted agent suggestion';
+    if (target.user_type === 'player') return 'Player in the Rollin community';
+    return 'Community member';
 }
