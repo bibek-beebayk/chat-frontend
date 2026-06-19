@@ -1,0 +1,395 @@
+.heroPanel {
+    background:
+        radial-gradient(circle at 12% 8%, rgba(153, 51, 255, 0.2), transparent 34%),
+        radial-gradient(circle at 88% 18%, rgba(255, 215, 0, 0.1), transparent 28%),
+        linear-gradient(135deg, rgba(20, 10, 35, 0.94), rgba(10, 7, 18, 0.97));
+    border: 1px solid rgba(153, 51, 255, 0.2);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    display: grid;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-lg);
+}
+
+.heroEyebrow {
+    background: rgba(153, 51, 255, 0.14);
+    border: 1px solid rgba(153, 51, 255, 0.28);
+    border-radius: 999px;
+    color: var(--color-primary-light);
+    display: inline-flex;
+    font-size: 0.74rem;
+    font-weight: 850;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.85rem;
+    padding: 0.26rem 0.62rem;
+    text-transform: uppercase;
+}
+
+.heroCopy h2 {
+    color: var(--color-text-primary);
+    font-size: clamp(1.35rem, 4vw, 2.35rem);
+    line-height: 1.08;
+    margin: 0 0 0.65rem;
+}
+
+.heroCopy p {
+    color: var(--color-text-secondary);
+    font-size: 0.94rem;
+    line-height: 1.6;
+    margin: 0;
+    max-width: 660px;
+}
+
+.statGrid {
+    display: grid;
+    gap: 0.65rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.statCard,
+.toolsPanel,
+.featuredCard,
+.faqCard,
+.emptyBox {
+    background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
+    border: 1px solid rgba(153, 51, 255, 0.16);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.statCard {
+    background: rgba(255, 255, 255, 0.045);
+    border-color: rgba(255, 255, 255, 0.08);
+    min-width: 0;
+    padding: 0.85rem;
+}
+
+.statCard span {
+    color: var(--color-text-muted);
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1.35;
+    margin-bottom: 0.45rem;
+}
+
+.statCard strong {
+    color: var(--color-text-primary);
+    display: block;
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.toolsPanel {
+    display: grid;
+    gap: 0.8rem;
+    padding: var(--spacing-md);
+}
+
+.searchBox {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.searchBox span {
+    color: var(--color-text-muted);
+    font-size: 0.72rem;
+    font-weight: 850;
+    text-transform: uppercase;
+}
+
+.searchBox input {
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-size: 0.95rem;
+    min-height: 46px;
+    outline: none;
+    padding: 0 0.9rem;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+    width: 100%;
+}
+
+.searchBox input:focus {
+    border-color: rgba(153, 51, 255, 0.45);
+    box-shadow: 0 0 0 3px rgba(153, 51, 255, 0.14);
+}
+
+.searchBox input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.filterTabs {
+    display: flex;
+    gap: 0.45rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.filterTabs::-webkit-scrollbar {
+    display: none;
+}
+
+.filterBtn {
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    font-weight: 850;
+    min-height: 40px;
+    padding: 0.58rem 0.82rem;
+    white-space: nowrap;
+}
+
+.activeFilter {
+    background: linear-gradient(135deg, rgba(153, 51, 255, 0.86), rgba(99, 102, 241, 0.72));
+    color: #fff;
+}
+
+.featuredGrid,
+.faqList {
+    display: grid;
+    gap: var(--spacing-md);
+}
+
+.featuredCard {
+    cursor: pointer;
+    display: grid;
+    gap: 0.55rem;
+    padding: var(--spacing-md);
+    text-align: left;
+    transition: border-color var(--transition-fast), transform var(--transition-fast), background var(--transition-fast);
+}
+
+.featuredCard:hover,
+.faqCard:hover {
+    border-color: rgba(153, 51, 255, 0.28);
+    transform: translateY(-1px);
+}
+
+.featuredCard span,
+.categoryBadge {
+    background: rgba(153, 51, 255, 0.14);
+    border: 1px solid rgba(153, 51, 255, 0.24);
+    border-radius: 999px;
+    color: var(--color-primary-light);
+    display: inline-flex;
+    font-size: 0.72rem;
+    font-weight: 850;
+    justify-self: start;
+    padding: 0.3rem 0.55rem;
+    text-transform: capitalize;
+}
+
+.featuredCard strong {
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    line-height: 1.35;
+}
+
+.faqCard {
+    overflow: hidden;
+    transition: border-color var(--transition-fast), transform var(--transition-fast), background var(--transition-fast);
+}
+
+.openCard {
+    border-color: rgba(153, 51, 255, 0.32);
+}
+
+.questionButton {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: var(--spacing-md);
+    text-align: left;
+    width: 100%;
+}
+
+.questionButton strong {
+    font-size: 1rem;
+    grid-column: 1 / 2;
+    line-height: 1.35;
+}
+
+.toggleMark {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    color: var(--color-text-primary);
+    display: inline-flex;
+    font-size: 1rem;
+    font-weight: 900;
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    height: 34px;
+    justify-content: center;
+    width: 34px;
+}
+
+.answer {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--color-text-secondary);
+    font-size: 0.94rem;
+    line-height: 1.65;
+    padding: 0 var(--spacing-md) var(--spacing-md);
+}
+
+.answer :global(p) {
+    margin: 0.9rem 0 0;
+}
+
+.answer :global(a) {
+    color: var(--color-primary-light);
+    font-weight: 800;
+}
+
+.answer :global(ul),
+.answer :global(ol) {
+    margin: 0.8rem 0 0;
+    padding-left: 1.2rem;
+}
+
+.errorBox {
+    align-items: center;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    border-radius: var(--radius-md);
+    color: #fca5a5;
+    display: flex;
+    gap: 0.8rem;
+    justify-content: space-between;
+    padding: 0.8rem;
+}
+
+.errorBox button {
+    background: rgba(239, 68, 68, 0.14);
+    border: 1px solid rgba(239, 68, 68, 0.28);
+    border-radius: 999px;
+    color: #fff;
+    font-weight: 850;
+    min-height: 36px;
+    padding: 0 0.85rem;
+}
+
+.loadingArea {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    min-height: 260px;
+}
+
+.emptyBox {
+    display: grid;
+    justify-items: center;
+    min-height: 220px;
+    padding: var(--spacing-xl);
+    text-align: center;
+}
+
+.emptyBox span {
+    color: var(--color-text-primary);
+    font-size: 1.05rem;
+    font-weight: 950;
+    margin-bottom: 0.4rem;
+}
+
+.emptyBox p {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.55;
+    margin: 0;
+}
+
+:global(html[data-theme='light']) .heroPanel,
+:global(html[data-theme='light']) .toolsPanel,
+:global(html[data-theme='light']) .featuredCard,
+:global(html[data-theme='light']) .faqCard,
+:global(html[data-theme='light']) .emptyBox {
+    background: linear-gradient(180deg, #ffffff, #fbf8ff);
+    border-color: rgba(153, 51, 255, 0.14);
+    box-shadow: 0 10px 28px rgba(86, 42, 145, 0.08);
+}
+
+:global(html[data-theme='light']) .statCard,
+:global(html[data-theme='light']) .filterBtn,
+:global(html[data-theme='light']) .searchBox input,
+:global(html[data-theme='light']) .toggleMark {
+    background: rgba(248, 244, 255, 0.82);
+    border-color: rgba(153, 51, 255, 0.12);
+}
+
+:global(html[data-theme='light']) .answer {
+    border-top-color: rgba(153, 51, 255, 0.12);
+}
+
+@media (min-width: 720px) {
+    .heroPanel {
+        align-items: center;
+        grid-template-columns: minmax(0, 1fr) minmax(300px, 0.58fr);
+    }
+
+    .toolsPanel {
+        grid-template-columns: minmax(280px, 0.42fr) minmax(0, 1fr);
+    }
+
+    .filterTabs {
+        align-self: end;
+        justify-content: flex-end;
+    }
+
+    .featuredGrid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .heroPanel,
+    .toolsPanel,
+    .featuredCard,
+    .faqCard,
+    .emptyBox {
+        border-radius: var(--radius-md);
+    }
+
+    .heroPanel,
+    .toolsPanel,
+    .questionButton,
+    .featuredCard {
+        padding: 0.9rem;
+    }
+
+    .statGrid {
+        gap: 0.45rem;
+    }
+
+    .statCard {
+        padding: 0.65rem 0.5rem;
+        text-align: center;
+    }
+
+    .statCard span {
+        font-size: 0.62rem;
+        min-height: 2.1em;
+    }
+
+    .statCard strong {
+        font-size: 1.1rem;
+    }
+
+    .answer {
+        padding: 0 0.9rem 0.9rem;
+    }
+
+    .errorBox {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}

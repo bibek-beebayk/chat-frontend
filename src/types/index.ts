@@ -183,6 +183,24 @@ export interface Announcement {
     updated_at: string;
 }
 
+export type FAQCategory = 'account' | 'community' | 'rewards' | 'events' | 'security' | 'technical' | string;
+export type FAQAudience = 'all' | 'players' | 'agents' | 'staff' | string;
+
+export interface FAQ {
+    id: number;
+    question: string;
+    answer: string;
+    category: FAQCategory;
+    category_label?: string;
+    audience: FAQAudience;
+    audience_label?: string;
+    sort_order: number;
+    is_featured: boolean;
+    published_at?: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
 // Message types
 export interface Message {
     id: number;
