@@ -11,6 +11,8 @@ import styles from './page.module.css';
 import ForgotPasswordModal from '@/components/auth/ForgotPasswordModal';
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+const REMEMBER_LOGIN_KEY = 'rollinRememberLogin';
+const REMEMBERED_IDENTIFIER_KEY = 'rollinRememberedIdentifier';
 
 function LoginPageContent() {
     const [usernameOrEmail, setUsernameOrEmail] = useState('');
@@ -32,13 +34,31 @@ function LoginPageContent() {
         router.push(redirect);
     }, [router, searchParams]);
 
+    useEffect(() => {
+        const remembered = localStorage.getItem(REMEMBER_LOGIN_KEY) === 'true';
+        const rememberedIdentifier = localStorage.getItem(REMEMBERED_IDENTIFIER_KEY) || '';
+
+        setRememberMe(remembered);
+        if (rememberedIdentifier) {
+            setUsernameOrEmail(rememberedIdentifier);
+        }
+    }, []);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setLoading(true);
+        const identifier = usernameOrEmail.trim();
 
         try {
-            await login({ username: usernameOrEmail.trim(), password });
+            await login({ username: identifier, password });
+            if (rememberMe) {
+                localStorage.setItem(REMEMBER_LOGIN_KEY, 'true');
+                localStorage.setItem(REMEMBERED_IDENTIFIER_KEY, identifier);
+            } else {
+                localStorage.removeItem(REMEMBER_LOGIN_KEY);
+                localStorage.removeItem(REMEMBERED_IDENTIFIER_KEY);
+            }
             finishLoginRedirect();
         } catch (err: any) {
             setError(err.message || 'Login failed. Please check your credentials.');
@@ -142,6 +162,7 @@ function LoginPageContent() {
 
                     <Input
                         label="Username or email"
+                        name="username"
                         type="text"
                         value={usernameOrEmail}
                         onChange={(e) => setUsernameOrEmail(e.target.value)}
@@ -155,10 +176,12 @@ function LoginPageContent() {
 
                     <Input
                         label="Password"
+                        name="password"
                         type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Enter your password"
+                        autoComplete="current-password"
                         leftElement={
                             <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                         }
@@ -183,7 +206,14 @@ function LoginPageContent() {
                             <input 
                                 type="checkbox" 
                                 checked={rememberMe}
-                                onChange={(e) => setRememberMe(e.target.checked)}
+                                onChange={(e) => {
+                                    const checked = e.target.checked;
+                                    setRememberMe(checked);
+                                    if (!checked) {
+                                        localStorage.removeItem(REMEMBER_LOGIN_KEY);
+                                        localStorage.removeItem(REMEMBERED_IDENTIFIER_KEY);
+                                    }
+                                }}
                             />
                             Remember me
                         </label>
