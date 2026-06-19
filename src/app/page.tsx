@@ -5,17 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { RightSidebar } from '@/components/layout/RightSidebar';
+import { analyticsApi } from '@/lib/analytics';
 import { postApi } from '@/lib/posts';
 import { hasCompletedSocialOnboarding, socialApi } from '@/lib/social';
-import { Post } from '@/types';
+import { HomeStats, Post } from '@/types';
 import styles from './page.module.css';
-
-const stats = [
-    { label: 'Community Members', value: '15,000+', detail: 'Total Members', tone: 'purple', icon: <MembersIcon /> },
-    { label: 'Online Now', value: '238', detail: 'Active Members', tone: 'green', icon: <SignalIcon /> },
-    { label: 'Weekly Rewards', value: 'Active', detail: 'Claim Your Rewards', tone: 'gold', icon: <GiftIcon /> },
-    { label: 'Upcoming Events', value: '3', detail: 'This Week', tone: 'blue', icon: <CalendarIcon /> },
-];
 
 const featureLinks = [
     { title: 'Weekly', label: 'Rewards', icon: <GiftIcon /> },
@@ -28,6 +22,8 @@ export default function HomePage() {
     const { user, loading } = useAuth();
     const router = useRouter();
     const [pinnedPosts, setPinnedPosts] = useState<Post[]>([]);
+    const [homeStats, setHomeStats] = useState<HomeStats | null>(null);
+    const [statsLoading, setStatsLoading] = useState(true);
     const [postsLoading, setPostsLoading] = useState(true);
     const [postsError, setPostsError] = useState<string | null>(null);
 
@@ -41,6 +37,7 @@ export default function HomePage() {
 
         const loadHomeData = async () => {
             setPostsLoading(true);
+            setStatsLoading(true);
             setPostsError(null);
 
             if (user.user_type === 'player') {
@@ -54,6 +51,15 @@ export default function HomePage() {
                     router.replace('/onboarding');
                     return;
                 }
+            }
+
+            try {
+                const stats = await analyticsApi.getHomeStats();
+                setHomeStats(stats);
+            } catch {
+                setHomeStats(null);
+            } finally {
+                setStatsLoading(false);
             }
 
             try {
@@ -118,6 +124,7 @@ export default function HomePage() {
     }
 
     if (!user) return null;
+    const stats = buildStats(homeStats, statsLoading);
 
     return (
         <DashboardLayout rightSidebar={<RightSidebar />}>
@@ -196,7 +203,7 @@ export default function HomePage() {
                             ))
                         )}
 
-                        <article className={styles.pollCard}>
+                        {/* <article className={styles.pollCard}>
                             <div className={styles.feedAvatar}>CP</div>
                             <div className={styles.feedBody}>
                                 <div className={styles.feedMetaRow}>
@@ -214,12 +221,53 @@ export default function HomePage() {
                                     <button type="button" className={styles.viewPostButton}>Vote Now</button>
                                 </footer>
                             </div>
-                        </article>
+                        </article> */}
                     </div>
                 </section>
             </div>
         </DashboardLayout>
     );
+}
+
+function buildStats(homeStats: HomeStats | null, loading: boolean) {
+    const fallback = loading ? '...' : '0';
+    return [
+        {
+            label: 'Community Members',
+            value: homeStats ? formatCount(homeStats.active_members) : fallback,
+            detail: 'Active Accounts',
+            tone: 'purple',
+            icon: <MembersIcon />,
+        },
+        {
+            label: 'Online Now',
+            value: homeStats ? formatCount(homeStats.online_now) : fallback,
+            detail: 'Seen in 15 Minutes',
+            tone: 'green',
+            icon: <SignalIcon />,
+        },
+        {
+            label: 'Redeemable Bonuses',
+            value: homeStats ? formatCount(homeStats.redeemable_bonuses) : fallback,
+            detail: 'Streak Rewards Ready',
+            tone: 'gold',
+            icon: <GiftIcon />,
+        },
+        {
+            label: 'Active Events',
+            value: homeStats ? formatCount(homeStats.active_events) : fallback,
+            detail: 'Running Now',
+            tone: 'blue',
+            icon: <CalendarIcon />,
+        },
+    ];
+}
+
+function formatCount(value: number): string {
+    if (value >= 1000) {
+        return new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(value);
+    }
+    return new Intl.NumberFormat('en').format(value);
 }
 
 function PinnedPostCard({ post, onLike, onOpen }: { post: Post; onLike: (post: Post) => void; onOpen: () => void }) {

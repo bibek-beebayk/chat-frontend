@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { apiClient } from '@/lib/api';
+import { rewardsApi } from '@/lib/rewards';
 import { User, LoginData, RegisterData } from '@/types';
 
 interface AuthContextType {
@@ -35,6 +36,13 @@ const normalizeUser = (raw: User): User => ({
     user_type: normalizeUserType(raw?.user_type),
 });
 
+const recordPlayerVisit = (currentUser: User) => {
+    if (currentUser.user_type !== 'player') return;
+    rewardsApi.recordVisit().catch(() => {
+        // Streak recording should never block normal app navigation.
+    });
+};
+
 // ... imports
 // (Note: interface LoginData/RegisterData likely needs no change if inputs are same)
 
@@ -48,6 +56,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const normalized = normalizeUser(data);
             setUser(normalized);
             localStorage.setItem('user', JSON.stringify(normalized));
+            recordPlayerVisit(normalized);
         } catch (error) {
             setUser(null);
             localStorage.removeItem('user');
@@ -97,6 +106,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const normalized = normalizeUser(response.user);
         setUser(normalized);
         localStorage.setItem('user', JSON.stringify(normalized));
+        recordPlayerVisit(normalized);
         return normalized;
     };
 
@@ -111,6 +121,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const normalized = normalizeUser(response.user);
         setUser(normalized);
         localStorage.setItem('user', JSON.stringify(normalized));
+        recordPlayerVisit(normalized);
         return normalized;
     };
 
@@ -134,6 +145,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const normalized = normalizeUser(response.user);
         setUser(normalized);
         localStorage.setItem('user', JSON.stringify(normalized));
+        recordPlayerVisit(normalized);
         return normalized;
     };
 

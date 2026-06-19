@@ -261,6 +261,52 @@ export interface GroupJoinRequestItem {
     room: Room;
 }
 
+export type StreakRedemptionStatus = 'pending' | 'approved' | 'completed' | 'rejected' | string;
+
+export interface StreakRedemptionRequest {
+    id: number;
+    user: User;
+    amount: string;
+    status: StreakRedemptionStatus;
+    status_label?: string;
+    note?: string;
+    staff_note?: string;
+    reviewed_by?: User | null;
+    reviewed_at?: string | null;
+    completed_at?: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface LoginStreakStatus {
+    current_streak: number;
+    last_login_date?: string | null;
+    receivable_bonus: string;
+    last_awarded_at?: string | null;
+    target_days: number;
+    reward_amount: string;
+    days_remaining: number;
+    reward_available: boolean;
+    active_redemption_request?: StreakRedemptionRequest | null;
+}
+
+export interface HomeStats {
+    active_members: number;
+    online_now: number;
+    redeemable_bonuses: number;
+    active_events: number;
+}
+
+export interface ActivityEvent {
+    id: number;
+    kind: 'account' | 'post' | 'comment' | 'event' | 'reward' | string;
+    actor: Pick<User, 'id' | 'username'> & { avatar?: string | null } | null;
+    action: string;
+    target_title: string;
+    target_url: string;
+    created_at: string;
+}
+
 // Auth types
 export interface LoginData {
     username: string;

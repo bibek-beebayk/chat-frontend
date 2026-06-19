@@ -8,7 +8,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 export function Sidebar({ onClose }: { onClose?: () => void }) {
     const pathname = usePathname();
     const router = useRouter();
-    const { logout } = useAuth();
+    const { user, logout } = useAuth();
     const { themeMode, setThemeMode } = useTheme();
 
     const handleLogout = async () => {
@@ -54,6 +54,9 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             title: 'ACCOUNT',
             items: [
                 { href: '/settings', label: 'Settings', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"></circle><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.52a2 2 0 0 1-1 1.73l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.73v-.52a2 2 0 0 1 1-1.72l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path></svg> },
+                ...(user?.user_type === 'staff'
+                    ? [{ href: '/rewards/redemptions', label: 'Redemptions', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="8" width="18" height="13" rx="2"></rect><path d="M12 8v13"></path><path d="M3 12h18"></path><path d="M12 8H8.5a2.5 2.5 0 1 1 0-5C11 3 12 8 12 8z"></path><path d="M12 8h3.5a2.5 2.5 0 1 0 0-5C13 3 12 8 12 8z"></path></svg> }]
+                    : []),
             ]
         }
     ];
