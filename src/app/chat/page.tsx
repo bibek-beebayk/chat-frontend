@@ -1764,7 +1764,7 @@ function ChatPageContent() {
                                             ? 'Active Chats'
                                             : 'Chats'}
                                     </h2>
-                                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                                    {/* <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
                                         {user.user_type === 'player' && (
                                             <button
                                                 className={styles.findAgentsBtn}
@@ -1773,7 +1773,7 @@ function ChatPageContent() {
                                                 Find Agents
                                             </button>
                                         )}
-                                    </div>
+                                    </div> */}
                                 </div>
                                 <div className={styles.rooms}>
                                     {user.user_type === 'agent' ? (
