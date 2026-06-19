@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './DashboardLayout.module.css';
 import { Sidebar } from './Sidebar';
 import { TopNav } from './TopNav';
@@ -12,6 +12,17 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children, rightSidebar, hideSidebar }: DashboardLayoutProps) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    useEffect(() => {
+        if (typeof document === 'undefined') return;
+        const shouldMarkOpen = isMobileMenuOpen && !hideSidebar;
+
+        document.body.classList.toggle('mobile-sidebar-open', shouldMarkOpen);
+
+        return () => {
+            document.body.classList.remove('mobile-sidebar-open');
+        };
+    }, [hideSidebar, isMobileMenuOpen]);
 
     return (
         <div className={styles.layoutContainer}>

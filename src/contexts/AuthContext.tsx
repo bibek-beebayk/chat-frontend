@@ -8,6 +8,7 @@ interface AuthContextType {
     user: User | null;
     loading: boolean;
     login: (data: LoginData) => Promise<User>;
+    googleLogin: (credential: string) => Promise<User>;
     register: (data: RegisterData) => Promise<{ email: string; email_sent: boolean }>;
     logout: () => Promise<void>;
     deleteAccount: () => Promise<void>;
@@ -89,6 +90,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const response = await apiClient.post<{ user: User; access: string; refresh: string }>(
             '/api/auth/login/',
             data,
+            { skipAuth: true }
+        );
+
+        apiClient.setTokens(response.access, response.refresh);
+        const normalized = normalizeUser(response.user);
+        setUser(normalized);
+        localStorage.setItem('user', JSON.stringify(normalized));
+        return normalized;
+    };
+
+    const googleLogin = async (credential: string) => {
+        const response = await apiClient.post<{ user: User; access: string; refresh: string }>(
+            '/api/auth/google-login/',
+            { credential },
             { skipAuth: true }
         );
 
@@ -209,6 +224,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             user,
             loading,
             login,
+            googleLogin,
             register,
             logout,
             deleteAccount,
