@@ -263,6 +263,7 @@ export interface GroupJoinRequestItem {
 }
 
 export type StreakRedemptionStatus = 'pending' | 'approved' | 'completed' | 'rejected' | string;
+export type RedemptionSource = 'login_streak' | 'scratch_bonus' | 'win_bonus' | string;
 
 export interface LoginStreakEntry {
     id: number;
@@ -281,12 +282,15 @@ export interface StreakVerificationSummary {
 export interface StreakRedemptionRequest {
     id: number;
     user: User;
+    source: RedemptionSource;
+    source_label?: string;
     amount: string;
     hi_rollin_username?: string;
     status: StreakRedemptionStatus;
     status_label?: string;
     note?: string;
     staff_note?: string;
+    source_payload?: Record<string, unknown>;
     reviewed_by?: User | null;
     reviewed_at?: string | null;
     completed_at?: string | null;
@@ -307,6 +311,8 @@ export interface LoginStreakStatus {
     reward_available: boolean;
     active_redemption_request?: StreakRedemptionRequest | null;
     last_redemption_request?: StreakRedemptionRequest | null;
+    last_scratch_redemption_request?: StreakRedemptionRequest | null;
+    last_win_redemption_request?: StreakRedemptionRequest | null;
 }
 
 export interface HomeStats {

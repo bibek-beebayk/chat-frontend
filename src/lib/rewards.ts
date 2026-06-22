@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/api';
-import { LoginStreakStatus, StreakRedemptionRequest, StreakRedemptionStatus } from '@/types';
+import { LoginStreakStatus, RedemptionSource, StreakRedemptionRequest, StreakRedemptionStatus } from '@/types';
 
 function unwrapList(data: StreakRedemptionRequest[] | { results: StreakRedemptionRequest[] }): StreakRedemptionRequest[] {
     return Array.isArray(data) ? data : data.results || [];
@@ -18,8 +18,15 @@ export const rewardsApi = {
         return apiClient.post<StreakRedemptionRequest>('/api/rewards/streak/redeem/', payload);
     },
 
-    async listRedemptions(status?: StreakRedemptionStatus): Promise<StreakRedemptionRequest[]> {
-        const suffix = status ? `?status=${encodeURIComponent(status)}` : '';
+    async listRedemptions(status?: StreakRedemptionStatus, source?: RedemptionSource): Promise<StreakRedemptionRequest[]> {
+        const params = new URLSearchParams();
+        if (status) {
+            params.set('status', status);
+        }
+        if (source) {
+            params.set('source', source);
+        }
+        const suffix = params.toString() ? `?${params.toString()}` : '';
         const data = await apiClient.get<StreakRedemptionRequest[] | { results: StreakRedemptionRequest[] }>(`/api/rewards/streak/redemptions/${suffix}`);
         return unwrapList(data);
     },

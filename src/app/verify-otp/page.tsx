@@ -11,6 +11,7 @@ function VerifyOTPContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { verifyOTP, resendOTP } = useAuth();
+    const nextUrl = searchParams.get('next');
 
     const [email, setEmail] = useState('');
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -121,7 +122,8 @@ function VerifyOTPContent() {
 
             // Redirect after a short delay.
             setTimeout(() => {
-                router.push('/post-login');
+                const redirect = nextUrl ? `/post-login?next=${encodeURIComponent(nextUrl)}` : '/post-login';
+                router.push(redirect);
             }, 1500);
         } catch (err: any) {
             setError(err.message || 'Verification failed. Please try again.');

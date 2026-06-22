@@ -31,6 +31,11 @@ function PostLoginContent() {
                 return;
             }
 
+            if (nextUrl?.startsWith('/redeem') || nextUrl?.startsWith('/scratch-redeem')) {
+                router.replace(nextUrl);
+                return;
+            }
+
             try {
                 const state = await socialApi.fetchOnboardingState();
                 if (!hasCompletedSocialOnboarding(state)) {
@@ -64,4 +69,3 @@ export default function PostLoginPage() {
         </Suspense>
     );
 }
-

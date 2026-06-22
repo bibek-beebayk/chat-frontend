@@ -6,15 +6,22 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PageShell } from '@/components/layout/PageShell';
 import { useAuth } from '@/contexts/AuthContext';
 import { rewardsApi } from '@/lib/rewards';
-import { StreakRedemptionRequest, StreakRedemptionStatus } from '@/types';
+import { RedemptionSource, StreakRedemptionRequest, StreakRedemptionStatus } from '@/types';
 import styles from './page.module.css';
 
-const filters = [
+const statusFilters = [
     { label: 'Active', value: '' },
     { label: 'Pending', value: 'pending' },
     { label: 'Approved', value: 'approved' },
     { label: 'Completed', value: 'completed' },
     { label: 'Rejected', value: 'rejected' },
+];
+
+const sourceFilters: Array<{ label: string; value: RedemptionSource | '' }> = [
+    { label: 'All Sources', value: '' },
+    { label: 'Login Streak', value: 'login_streak' },
+    { label: 'Scratch Bonus', value: 'scratch_bonus' },
+    { label: 'Win Bonus', value: 'win_bonus' },
 ];
 
 const actionCopy: Record<string, { title: string; message: string; button: string }> = {
@@ -30,7 +37,7 @@ const actionCopy: Record<string, { title: string; message: string; button: strin
     },
     completed: {
         title: 'Complete redemption?',
-        message: 'This marks the credit as paid and resets the player streak so a fresh streak can begin.',
+        message: 'This marks the credit as paid. Streak-based requests reset the player streak after completion.',
         button: 'Complete Request',
     },
 };
@@ -40,9 +47,11 @@ export default function RewardRedemptionsPage() {
     const router = useRouter();
     const [requests, setRequests] = useState<StreakRedemptionRequest[]>([]);
     const [activeFilter, setActiveFilter] = useState('');
+    const [activeSourceFilter, setActiveSourceFilter] = useState<RedemptionSource | ''>('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [updatingId, setUpdatingId] = useState<number | null>(null);
+    const [expandedRequestIds, setExpandedRequestIds] = useState<Set<number>>(() => new Set());
     const [confirmAction, setConfirmAction] = useState<{
         request: StreakRedemptionRequest;
         status: StreakRedemptionStatus;
@@ -58,14 +67,17 @@ export default function RewardRedemptionsPage() {
         setLoading(true);
         setError('');
         try {
-            const list = await rewardsApi.listRedemptions(activeFilter || undefined);
+            const list = await rewardsApi.listRedemptions(
+                activeFilter || undefined,
+                activeSourceFilter || undefined,
+            );
             setRequests(activeFilter ? list : list.filter((item) => item.status === 'pending' || item.status === 'approved'));
         } catch (err: any) {
             setError(err?.message || 'Failed to load redemption requests.');
         } finally {
             setLoading(false);
         }
-    }, [activeFilter]);
+    }, [activeFilter, activeSourceFilter]);
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -112,6 +124,18 @@ export default function RewardRedemptionsPage() {
         setConfirmAction({ request, status });
     };
 
+    const toggleRequest = (requestId: number) => {
+        setExpandedRequestIds((current) => {
+            const next = new Set(current);
+            if (next.has(requestId)) {
+                next.delete(requestId);
+            } else {
+                next.add(requestId);
+            }
+            return next;
+        });
+    };
+
     const updateRejectReason = (reason: string) => {
         setRejectReasonAction((current) => current ? { ...current, reason, error: '' } : current);
     };
@@ -147,9 +171,9 @@ export default function RewardRedemptionsPage() {
     return (
         <DashboardLayout>
             <PageShell
-                title="Streak Redemptions"
+                title="Redemption Requests"
                 eyebrow="Rewards"
-                description="Review and complete $5 Hi-Rollin credit requests from player login streaks."
+                description="Review and complete Hi-Rollin credit requests from login streaks and scratch bonuses."
                 width="wide"
             >
                 <section className={styles.summaryGrid}>
@@ -168,16 +192,36 @@ export default function RewardRedemptionsPage() {
                 </section>
 
                 <section className={styles.filterPanel}>
-                    {filters.map((filter) => (
-                        <button
-                            key={filter.label}
-                            type="button"
-                            className={`${styles.filterBtn} ${activeFilter === filter.value ? styles.activeFilter : ''}`}
-                            onClick={() => setActiveFilter(filter.value)}
-                        >
-                            {filter.label}
-                        </button>
-                    ))}
+                    <div className={styles.filterGroup}>
+                        <span>Status</span>
+                        <div className={styles.filterButtons}>
+                            {statusFilters.map((filter) => (
+                                <button
+                                    key={filter.label}
+                                    type="button"
+                                    className={`${styles.filterBtn} ${activeFilter === filter.value ? styles.activeFilter : ''}`}
+                                    onClick={() => setActiveFilter(filter.value)}
+                                >
+                                    {filter.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                    <div className={styles.filterGroup}>
+                        <span>Source</span>
+                        <div className={styles.filterButtons}>
+                            {sourceFilters.map((filter) => (
+                                <button
+                                    key={filter.label}
+                                    type="button"
+                                    className={`${styles.filterBtn} ${activeSourceFilter === filter.value ? styles.activeFilter : ''}`}
+                                    onClick={() => setActiveSourceFilter(filter.value)}
+                                >
+                                    {filter.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                     <button type="button" className={styles.refreshBtn} onClick={loadRequests}>Refresh</button>
                 </section>
 
@@ -189,67 +233,89 @@ export default function RewardRedemptionsPage() {
                     ) : requests.length === 0 ? (
                         <div className={styles.emptyState}>No redemption requests found.</div>
                     ) : (
-                        requests.map((request) => (
-                            <article key={request.id} className={styles.requestCard}>
-                                <div className={styles.requestMain}>
-                                    <div>
+                        requests.map((request) => {
+                            const isExpanded = expandedRequestIds.has(request.id);
+
+                            return (
+                                <article key={request.id} className={styles.requestCard}>
+                                    <button
+                                        type="button"
+                                        className={styles.requestSummary}
+                                        onClick={() => toggleRequest(request.id)}
+                                        aria-expanded={isExpanded}
+                                    >
+                                        <div className={styles.summaryPlayer}>
+                                            <strong>{request.user.username}</strong>
+                                            <span>{request.user.email || 'No email provided'}</span>
+                                        </div>
+                                        <span className={`${styles.sourceBadge} ${styles[`source_${request.source}`] || ''}`}>
+                                            {request.source_label || formatSource(request.source)}
+                                        </span>
+                                        <strong className={styles.summaryAmount}>${Number(request.amount).toFixed(2)}</strong>
                                         <span className={`${styles.statusBadge} ${styles[`status_${request.status}`] || ''}`}>
                                             {request.status_label || request.status}
                                         </span>
-                                        <h2>{request.user.username}</h2>
-                                        <p>{request.user.email || 'No email provided'}</p>
-                                    </div>
-                                    <strong>${Number(request.amount).toFixed(2)}</strong>
-                                </div>
-                                <div className={styles.requestMeta}>
-                                    <span>Requested {formatDate(request.created_at)}</span>
-                                    {request.reviewed_by && <span>Reviewed by {request.reviewed_by.username}</span>}
-                                </div>
-                                <div className={styles.hiRollinAccount}>
-                                    <span>Hi-Rollin account username</span>
-                                    <strong>{request.hi_rollin_username || 'Not provided'}</strong>
-                                </div>
-                                {request.staff_note && (
-                                    <div className={styles.staffNote}>
-                                        <span>Staff note</span>
-                                        <p>{request.staff_note}</p>
-                                    </div>
-                                )}
-                                <VerificationRecords request={request} />
-                                {request.note && <p className={styles.note}>{request.note}</p>}
-                                {request.status === 'pending' && (
-                                    <div className={styles.actions}>
-                                        <button
-                                            type="button"
-                                            onClick={() => promptAction(request, 'approved')}
-                                            disabled={updatingId === request.id}
-                                        >
-                                            Approve
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className={styles.rejectBtn}
-                                            onClick={() => promptAction(request, 'rejected')}
-                                            disabled={updatingId === request.id}
-                                        >
-                                            Reject
-                                        </button>
-                                    </div>
-                                )}
-                                {request.status === 'approved' && (
-                                    <div className={styles.actions}>
-                                        <button
-                                            type="button"
-                                            className={styles.completeBtn}
-                                            onClick={() => promptAction(request, 'completed')}
-                                            disabled={updatingId === request.id}
-                                        >
-                                            Complete
-                                        </button>
-                                    </div>
-                                )}
-                            </article>
-                        ))
+                                        <span className={`${styles.expandIcon} ${isExpanded ? styles.expandedIcon : ''}`} aria-hidden="true">⌄</span>
+                                    </button>
+
+                                    {isExpanded && (
+                                        <div className={styles.requestDetails}>
+                                            <div className={styles.requestMeta}>
+                                                <span>Requested {formatDate(request.created_at)}</span>
+                                                {request.reviewed_by && <span>Reviewed by {request.reviewed_by.username}</span>}
+                                            </div>
+                                            <div className={styles.hiRollinAccount}>
+                                                <span>Hi-Rollin account username</span>
+                                                <strong>{request.hi_rollin_username || 'Not provided'}</strong>
+                                            </div>
+                                            {request.staff_note && (
+                                                <div className={styles.staffNote}>
+                                                    <span>Staff note</span>
+                                                    <p>{request.staff_note}</p>
+                                                </div>
+                                            )}
+                                            {request.source === 'login_streak' ? (
+                                                <VerificationRecords request={request} />
+                                            ) : (
+                                                <SourceDetails request={request} />
+                                            )}
+                                            {request.note && <p className={styles.note}>{request.note}</p>}
+                                            {request.status === 'pending' && (
+                                                <div className={styles.actions}>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => promptAction(request, 'approved')}
+                                                        disabled={updatingId === request.id}
+                                                    >
+                                                        Approve
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className={styles.rejectBtn}
+                                                        onClick={() => promptAction(request, 'rejected')}
+                                                        disabled={updatingId === request.id}
+                                                    >
+                                                        Reject
+                                                    </button>
+                                                </div>
+                                            )}
+                                            {request.status === 'approved' && (
+                                                <div className={styles.actions}>
+                                                    <button
+                                                        type="button"
+                                                        className={styles.completeBtn}
+                                                        onClick={() => promptAction(request, 'completed')}
+                                                        disabled={updatingId === request.id}
+                                                    >
+                                                        Complete
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </article>
+                            );
+                        })
                     )}
                 </section>
                 {rejectReasonAction && (
@@ -317,6 +383,10 @@ export default function RewardRedemptionsPage() {
                                 <div>
                                     <span>Player</span>
                                     <strong>{confirmAction.request.user.username}</strong>
+                                </div>
+                                <div>
+                                    <span>Source</span>
+                                    <strong>{confirmAction.request.source_label || formatSource(confirmAction.request.source)}</strong>
                                 </div>
                                 <div>
                                     <span>Hi-Rollin Username</span>
@@ -404,10 +474,35 @@ function VerificationRecords({ request }: { request: StreakRedemptionRequest }) 
     );
 }
 
+function SourceDetails({ request }: { request: StreakRedemptionRequest }) {
+    const payload = request.source_payload || {};
+    const originalSource = typeof payload.source === 'string' ? payload.source : null;
+
+    return (
+        <section className={styles.sourcePanel}>
+            <div>
+                <span>Redemption Source</span>
+                <strong>{request.source_label || formatSource(request.source)}</strong>
+            </div>
+            {originalSource && (
+                <p>Original redirect source: {formatSource(originalSource)}</p>
+            )}
+        </section>
+    );
+}
+
 function formatDate(value: string) {
     return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(value));
 }
 
 function formatDateOnly(value: string) {
     return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value}T00:00:00Z`));
+}
+
+function formatSource(value: string) {
+    return value
+        .split('_')
+        .filter(Boolean)
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(' ');
 }

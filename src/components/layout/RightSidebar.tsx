@@ -147,22 +147,40 @@ export function RightSidebar() {
                                 <div className={`${styles.requestStatus} ${styles[`redemptionStatus_${streak.active_redemption_request.status}`] || ''}`}>
                                     Redeem request: <strong>{streak.active_redemption_request.status_label || streak.active_redemption_request.status}</strong>
                                 </div>
-                            ) : (
+                            ) : streak.reward_available ? (
                                 <button
                                     type="button"
                                     className={styles.completeBtn}
                                     onClick={openRedeemModal}
-                                    disabled={!streak.reward_available || redeeming}
+                                    disabled={redeeming}
                                 >
                                     {redeeming ? 'Requesting...' : 'Request Redeem'}
                                 </button>
-                            )}
+                            ) : null}
                             {streak.last_redemption_request && !streak.active_redemption_request && (
                                 <div className={`${styles.lastRedemptionStatus} ${styles[`redemptionStatus_${streak.last_redemption_request.status}`] || ''}`}>
-                                    <span>Last Redemption Status</span>
+                                    <span>Last Login Streak Bonus Status</span>
                                     <strong>{streak.last_redemption_request.status_label || streak.last_redemption_request.status}</strong>
                                     {streak.last_redemption_request.status === 'rejected' && streak.last_redemption_request.staff_note && (
                                         <p>{streak.last_redemption_request.staff_note}</p>
+                                    )}
+                                </div>
+                            )}
+                            {streak.last_scratch_redemption_request && (
+                                <div className={`${styles.lastRedemptionStatus} ${styles[`redemptionStatus_${streak.last_scratch_redemption_request.status}`] || ''}`}>
+                                    <span>Last Scratch Bonus Status</span>
+                                    <strong>{streak.last_scratch_redemption_request.status_label || streak.last_scratch_redemption_request.status}</strong>
+                                    {streak.last_scratch_redemption_request.status === 'rejected' && streak.last_scratch_redemption_request.staff_note && (
+                                        <p>{streak.last_scratch_redemption_request.staff_note}</p>
+                                    )}
+                                </div>
+                            )}
+                            {streak.last_win_redemption_request && (
+                                <div className={`${styles.lastRedemptionStatus} ${styles[`redemptionStatus_${streak.last_win_redemption_request.status}`] || ''}`}>
+                                    <span>Last Win Bonus Status</span>
+                                    <strong>{streak.last_win_redemption_request.status_label || streak.last_win_redemption_request.status}</strong>
+                                    {streak.last_win_redemption_request.status === 'rejected' && streak.last_win_redemption_request.staff_note && (
+                                        <p>{streak.last_win_redemption_request.staff_note}</p>
                                     )}
                                 </div>
                             )}

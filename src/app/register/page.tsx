@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/forms/Input';
@@ -9,7 +9,7 @@ import { Button } from '@/components/forms/Button';
 import { UserType } from '@/types';
 import styles from './page.module.css';
 
-export default function RegisterPage() {
+function RegisterPageContent() {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [userType, setUserType] = useState<UserType>('player');
@@ -21,6 +21,9 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(false);
     const { register } = useAuth();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const nextUrl = searchParams.get('next');
+    const loginHref = nextUrl ? `/login?next=${encodeURIComponent(nextUrl)}` : '/login';
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -45,7 +48,10 @@ export default function RegisterPage() {
             localStorage.setItem('pendingVerificationEmail', response.email);
 
             // Redirect to OTP verification page
-            router.push(`/verify-otp?email=${encodeURIComponent(response.email)}`);
+            const verifyUrl = nextUrl
+                ? `/verify-otp?email=${encodeURIComponent(response.email)}&next=${encodeURIComponent(nextUrl)}`
+                : `/verify-otp?email=${encodeURIComponent(response.email)}`;
+            router.push(verifyUrl);
         } catch (err: any) {
             setError(err.message || 'Registration failed. Please try again.');
         } finally {
@@ -228,7 +234,7 @@ export default function RegisterPage() {
 
                     <div className={styles.footer}>
                         <span>Already have an account?</span>
-                        <Link href="/login" className={styles.link}>
+                        <Link href={loginHref} className={styles.link}>
                             Sign In
                         </Link>
                     </div>
@@ -249,10 +255,18 @@ export default function RegisterPage() {
                     <h3>Already have an account?</h3>
                     <p>LOGIN NOW!</p>
                 </div>
-                <Link href="/login" className={styles.joinBtn}>
+                <Link href={loginHref} className={styles.joinBtn}>
                     LOGIN &rarr;
                 </Link>
             </div>
         </div>
+    );
+}
+
+export default function RegisterPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <RegisterPageContent />
+        </Suspense>
     );
 }

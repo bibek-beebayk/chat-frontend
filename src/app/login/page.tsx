@@ -27,12 +27,13 @@ function LoginPageContent() {
     const { login, googleLogin } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
+    const nextUrl = searchParams.get('next');
+    const registerHref = nextUrl ? `/register?next=${encodeURIComponent(nextUrl)}` : '/register';
 
     const finishLoginRedirect = useCallback(() => {
-        const nextUrl = searchParams.get('next');
         const redirect = nextUrl ? `/post-login?next=${encodeURIComponent(nextUrl)}` : '/post-login';
         router.push(redirect);
-    }, [router, searchParams]);
+    }, [nextUrl, router]);
 
     useEffect(() => {
         const remembered = localStorage.getItem(REMEMBER_LOGIN_KEY) === 'true';
@@ -246,7 +247,7 @@ function LoginPageContent() {
 
                     <div style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.9rem' }}>
                         <span style={{ color: 'var(--color-text-secondary)' }}>Don&apos;t have an account? </span>
-                        <Link href="/register" className={styles.link}>
+                        <Link href={registerHref} className={styles.link}>
                             Create Account &rarr;
                         </Link>
                     </div>
@@ -260,7 +261,7 @@ function LoginPageContent() {
                     <h3>Join the community and unlock</h3>
                     <p>EXCLUSIVE REWARDS!</p>
                 </div>
-                <Link href="/register" className={styles.joinBtn}>
+                <Link href={registerHref} className={styles.joinBtn}>
                     JOIN NOW &rarr;
                 </Link>
             </div>
