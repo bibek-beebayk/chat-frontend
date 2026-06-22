@@ -7,6 +7,7 @@ interface ModalProps {
     title: string;
     children: React.ReactNode;
     footer?: React.ReactNode;
+    backdropDecorations?: React.ReactNode;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -14,7 +15,8 @@ export const Modal: React.FC<ModalProps> = ({
     onClose,
     title,
     children,
-    footer
+    footer,
+    backdropDecorations
 }) => {
     const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -48,6 +50,7 @@ export const Modal: React.FC<ModalProps> = ({
             ref={overlayRef}
             onClick={handleOverlayClick}
         >
+            {backdropDecorations}
             <div className={styles.modal} role="dialog" aria-modal="true">
                 <div className={styles.header}>
                     <h2 className={styles.title}>{title}</h2>
