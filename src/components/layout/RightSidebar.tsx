@@ -7,7 +7,10 @@ import { analyticsApi } from '@/lib/analytics';
 import { eventsApi } from '@/lib/events';
 import { rewardsApi } from '@/lib/rewards';
 import { ActivityEvent, Event, LoginStreakStatus } from '@/types';
+import { Toast } from '@/components/ui/Toast';
 import styles from './RightSidebar.module.css';
+
+type ToastState = { message: string; type: 'success' | 'error' } | null;
 
 export function RightSidebar() {
     const { user } = useAuth();
@@ -19,6 +22,9 @@ export function RightSidebar() {
     const [streakLoading, setStreakLoading] = useState(false);
     const [streakError, setStreakError] = useState('');
     const [redeeming, setRedeeming] = useState(false);
+    const [redeemModalOpen, setRedeemModalOpen] = useState(false);
+    const [hiRollinUsername, setHiRollinUsername] = useState('');
+    const [toast, setToast] = useState<ToastState>(null);
 
     const loadStreak = async () => {
         if (!user || user.user_type !== 'player') return;
@@ -69,12 +75,27 @@ export function RightSidebar() {
         loadSidebarData();
     }, [user]);
 
-    const requestRedemption = async () => {
+    const openRedeemModal = () => {
+        setStreakError('');
+        setHiRollinUsername((user?.external_user_id || '').trim());
+        setRedeemModalOpen(true);
+    };
+
+    const requestRedemption = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const username = hiRollinUsername.trim();
+        if (!username) {
+            setStreakError('Hi-Rollin account username is required.');
+            return;
+        }
+
         setRedeeming(true);
         setStreakError('');
         try {
-            await rewardsApi.requestRedemption();
+            await rewardsApi.requestRedemption({ hi_rollin_username: username });
+            setRedeemModalOpen(false);
             await loadStreak();
+            setToast({ message: 'Redeem request submitted successfully.', type: 'success' });
         } catch (error: any) {
             setStreakError(error?.message || 'Unable to create redeem request.');
         } finally {
@@ -87,7 +108,16 @@ export function RightSidebar() {
             {user?.user_type === 'player' && (
                 <div className={`${styles.widget} ${styles.streakWidget}`}>
                     <div className={styles.widgetHeader}>
-                        <h3>Login Streak</h3>
+                        <div className={styles.streakTitle}>
+                            <h3>Login Streak</h3>
+                            <span
+                                className={styles.streakInfo}
+                                tabIndex={0}
+                                aria-label="Login for consecutive 7 days to get the bonus. The streak will reset if you miss to visit the site during the streak. The redeem button will unlock after the streak is complete."
+                            >
+                                i
+                            </span>
+                        </div>
                         <span className={styles.streakReward}>$5 Credit</span>
                     </div>
 
@@ -114,18 +144,27 @@ export function RightSidebar() {
                                 ></div>
                             </div>
                             {streak.active_redemption_request ? (
-                                <div className={styles.requestStatus}>
+                                <div className={`${styles.requestStatus} ${styles[`redemptionStatus_${streak.active_redemption_request.status}`] || ''}`}>
                                     Redeem request: <strong>{streak.active_redemption_request.status_label || streak.active_redemption_request.status}</strong>
                                 </div>
                             ) : (
                                 <button
                                     type="button"
                                     className={styles.completeBtn}
-                                    onClick={requestRedemption}
+                                    onClick={openRedeemModal}
                                     disabled={!streak.reward_available || redeeming}
                                 >
                                     {redeeming ? 'Requesting...' : 'Request Redeem'}
                                 </button>
+                            )}
+                            {streak.last_redemption_request && !streak.active_redemption_request && (
+                                <div className={`${styles.lastRedemptionStatus} ${styles[`redemptionStatus_${streak.last_redemption_request.status}`] || ''}`}>
+                                    <span>Last Redemption Status</span>
+                                    <strong>{streak.last_redemption_request.status_label || streak.last_redemption_request.status}</strong>
+                                    {streak.last_redemption_request.status === 'rejected' && streak.last_redemption_request.staff_note && (
+                                        <p>{streak.last_redemption_request.staff_note}</p>
+                                    )}
+                                </div>
                             )}
                         </div>
                     ) : (
@@ -133,6 +172,44 @@ export function RightSidebar() {
                     )}
                     {streakError && <p className={styles.streakError}>{streakError}</p>}
                 </div>
+            )}
+            {redeemModalOpen && (
+                <div className={styles.redeemModalBackdrop} role="presentation" onMouseDown={() => !redeeming && setRedeemModalOpen(false)}>
+                    <form className={styles.redeemModal} onSubmit={requestRedemption} onMouseDown={(event) => event.stopPropagation()}>
+                        <div className={styles.redeemModalHeader}>
+                            <div>
+                                <span>Redeem Bonus</span>
+                                <h3>Hi-Rollin account</h3>
+                            </div>
+                            <button type="button" onClick={() => setRedeemModalOpen(false)} disabled={redeeming} aria-label="Close redeem request dialog">×</button>
+                        </div>
+                        <p>Enter the Hi-Rollin account username where the $5 streak credit should be applied.</p>
+                        <label className={styles.redeemField}>
+                            <span>Hi-Rollin username</span>
+                            <input
+                                type="text"
+                                value={hiRollinUsername}
+                                onChange={(event) => setHiRollinUsername(event.target.value)}
+                                placeholder="Enter account username"
+                                autoFocus
+                                disabled={redeeming}
+                            />
+                        </label>
+                        <div className={styles.redeemActions}>
+                            <button type="button" onClick={() => setRedeemModalOpen(false)} disabled={redeeming}>Cancel</button>
+                            <button type="submit" disabled={redeeming || !hiRollinUsername.trim()}>
+                                {redeeming ? 'Submitting...' : 'Submit Request'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
             )}
             
             {/* Online Members */}

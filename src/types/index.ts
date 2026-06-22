@@ -8,6 +8,7 @@ export interface User {
     is_verified?: boolean;
     verification_status?: 'pending' | 'approved' | 'rejected' | 'none';
     email?: string;
+    external_user_id?: string | null;
     first_name?: string;
     last_name?: string;
     avatar?: string | null;
@@ -263,10 +264,25 @@ export interface GroupJoinRequestItem {
 
 export type StreakRedemptionStatus = 'pending' | 'approved' | 'completed' | 'rejected' | string;
 
+export interface LoginStreakEntry {
+    id: number;
+    login_date: string;
+    created_at: string;
+}
+
+export interface StreakVerificationSummary {
+    target_days: number;
+    record_count: number;
+    is_consecutive: boolean;
+    start_date?: string | null;
+    end_date?: string | null;
+}
+
 export interface StreakRedemptionRequest {
     id: number;
     user: User;
     amount: string;
+    hi_rollin_username?: string;
     status: StreakRedemptionStatus;
     status_label?: string;
     note?: string;
@@ -276,6 +292,8 @@ export interface StreakRedemptionRequest {
     completed_at?: string | null;
     created_at: string;
     updated_at: string;
+    verification_entries?: LoginStreakEntry[];
+    verification_summary?: StreakVerificationSummary;
 }
 
 export interface LoginStreakStatus {
@@ -288,6 +306,7 @@ export interface LoginStreakStatus {
     days_remaining: number;
     reward_available: boolean;
     active_redemption_request?: StreakRedemptionRequest | null;
+    last_redemption_request?: StreakRedemptionRequest | null;
 }
 
 export interface HomeStats {

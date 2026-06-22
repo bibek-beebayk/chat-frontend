@@ -14,8 +14,8 @@ export const rewardsApi = {
         return apiClient.post<LoginStreakStatus>('/api/rewards/streak/visit/', {});
     },
 
-    requestRedemption(note = ''): Promise<StreakRedemptionRequest> {
-        return apiClient.post<StreakRedemptionRequest>('/api/rewards/streak/redeem/', { note });
+    requestRedemption(payload: { hi_rollin_username: string; note?: string }): Promise<StreakRedemptionRequest> {
+        return apiClient.post<StreakRedemptionRequest>('/api/rewards/streak/redeem/', payload);
     },
 
     async listRedemptions(status?: StreakRedemptionStatus): Promise<StreakRedemptionRequest[]> {
