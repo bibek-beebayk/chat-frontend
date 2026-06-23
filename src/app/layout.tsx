@@ -11,6 +11,7 @@ import { PWAManager } from '@/components/PWAManager';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { OnboardingGuard } from '@/components/auth/OnboardingGuard';
+import { AnalyticsTracker } from '@/components/analytics/AnalyticsTracker';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -70,6 +71,7 @@ export default function RootLayout({
                                 <OnboardingGuard>
                                     <Suspense fallback={null}>
                                         <RouteLoadingBar />
+                                        <AnalyticsTracker />
                                     </Suspense>
                                     {children}
                                     <MobileBottomNav />

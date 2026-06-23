@@ -1,0 +1,338 @@
+.filters,
+.kpiCard,
+.chartPanel,
+.bucketPanel,
+.eventsPanel,
+.errorBox {
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    background: rgba(12, 7, 22, 0.72);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+    border-radius: 8px;
+}
+
+.filters {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.filterGroup {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.filterGroup > span,
+.kpiCard span,
+.panelHeader span {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.filterButtons {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+}
+
+.filterBtn {
+    flex: 0 0 auto;
+    min-height: 38px;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text-secondary);
+    padding: 0 0.8rem;
+    font-weight: 800;
+}
+
+.filterBtn:hover,
+.activeFilter {
+    border-color: rgba(168, 85, 247, 0.75);
+    background: rgba(168, 85, 247, 0.16);
+    color: var(--color-text-primary);
+}
+
+.kpiGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.kpiCard {
+    min-height: 116px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.kpiCard strong {
+    color: var(--color-text-primary);
+    font-size: clamp(1.7rem, 6vw, 2.55rem);
+    line-height: 1;
+}
+
+.kpiCard small {
+    color: var(--color-text-secondary);
+    font-weight: 700;
+}
+
+.chartPanel,
+.eventsPanel,
+.bucketPanel {
+    padding: 1rem;
+}
+
+.chartPanel {
+    margin-bottom: 1rem;
+}
+
+.panelHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.panelHeader h2,
+.bucketPanel h2 {
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    margin: 0;
+}
+
+.panelHeader button,
+.errorBox button {
+    min-height: 38px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: #fff;
+    padding: 0 0.95rem;
+    font-weight: 800;
+}
+
+.trendChart {
+    height: 230px;
+    display: flex;
+    align-items: end;
+    gap: 0.32rem;
+    padding: 1rem 0.5rem 0;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.035);
+    overflow-x: auto;
+}
+
+.trendColumn {
+    min-width: 18px;
+    height: 100%;
+    display: flex;
+    align-items: end;
+    justify-content: center;
+    gap: 2px;
+}
+
+.trendColumn span {
+    width: 5px;
+    min-height: 0;
+    border-radius: 999px 999px 0 0;
+}
+
+.visitBar,
+.visitDot {
+    background: #a855f7;
+}
+
+.registerBar,
+.registerDot {
+    background: #22c55e;
+}
+
+.loginBar,
+.loginDot {
+    background: #38bdf8;
+}
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    margin-top: 0.85rem;
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.legend i {
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 999px;
+}
+
+.gridPanels {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.bucketList {
+    display: grid;
+    gap: 0.85rem;
+    margin-top: 1rem;
+}
+
+.bucketRow {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.bucketRow div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.bucketRow span {
+    min-width: 0;
+    color: var(--color-text-secondary);
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-transform: capitalize;
+}
+
+.bucketRow strong {
+    color: var(--color-text-primary);
+}
+
+.bucketRow i {
+    display: block;
+    height: 7px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+}
+
+.eventList {
+    display: grid;
+    gap: 0.65rem;
+}
+
+.eventRow {
+    display: grid;
+    gap: 0.45rem;
+    padding: 0.8rem;
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.eventRow div {
+    min-width: 0;
+    display: grid;
+    gap: 0.18rem;
+}
+
+.eventRow strong {
+    color: var(--color-text-primary);
+    text-transform: capitalize;
+}
+
+.eventRow span,
+.eventRow time,
+.emptyText {
+    color: var(--color-text-secondary);
+    font-size: 0.88rem;
+}
+
+.eventRow time {
+    white-space: nowrap;
+}
+
+.loadingArea {
+    min-height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.errorBox {
+    display: grid;
+    gap: 0.75rem;
+    color: #fca5a5;
+    border-color: rgba(239, 68, 68, 0.3);
+    background: rgba(127, 29, 29, 0.16);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+:global(html[data-theme='light']) .filters,
+:global(html[data-theme='light']) .kpiCard,
+:global(html[data-theme='light']) .chartPanel,
+:global(html[data-theme='light']) .bucketPanel,
+:global(html[data-theme='light']) .eventsPanel,
+:global(html[data-theme='light']) .errorBox {
+    background: rgba(255, 255, 255, 0.94);
+    border-color: rgba(15, 23, 42, 0.1);
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
+}
+
+:global(html[data-theme='light']) .filterBtn,
+:global(html[data-theme='light']) .trendChart,
+:global(html[data-theme='light']) .eventRow {
+    background: rgba(248, 250, 252, 0.92);
+    border-color: rgba(15, 23, 42, 0.1);
+}
+
+@media (min-width: 760px) {
+    .filters {
+        grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+        align-items: end;
+    }
+
+    .kpiGrid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .gridPanels {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .eventRow {
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+    }
+}
+
+@media (min-width: 1180px) {
+    .gridPanels {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 560px) {
+    .kpiGrid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .panelHeader {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .panelHeader button {
+        width: 100%;
+    }
+}

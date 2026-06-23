@@ -363,6 +363,74 @@ export interface ActivityEvent {
     created_at: string;
 }
 
+export type AnalyticsEventType = 'page_view' | 'register' | 'login' | 'logout' | 'redemption' | 'event_registration' | 'custom' | string;
+
+export interface AnalyticsTrackInput {
+    event_type: AnalyticsEventType;
+    event_name?: string;
+    path?: string;
+    full_path?: string;
+    referrer?: string;
+    anonymous_id?: string;
+    session_id?: string;
+    source?: string;
+    medium?: string;
+    campaign?: string;
+    metadata?: Record<string, unknown>;
+}
+
+export interface AnalyticsBucket {
+    label: string;
+    count: number;
+}
+
+export interface AnalyticsTrendPoint {
+    date: string;
+    visits: number;
+    registrations: number;
+    logins: number;
+}
+
+export interface AnalyticsRecentEvent {
+    id: number;
+    event_type: AnalyticsEventType;
+    event_name: string;
+    user: Pick<User, 'id' | 'username' | 'user_type'> | null;
+    user_type: string;
+    path: string;
+    source: string;
+    device_type: string;
+    browser: string;
+    country: string;
+    metadata: Record<string, unknown>;
+    created_at: string;
+}
+
+export interface AnalyticsDashboard {
+    range: {
+        start: string;
+        end: string;
+        days: number;
+    };
+    kpis: {
+        visits: number;
+        unique_visitors: number;
+        registrations: number;
+        logins: number;
+        registration_rate: number;
+        visit_change_percent: number;
+    };
+    trends: AnalyticsTrendPoint[];
+    user_types: AnalyticsBucket[];
+    event_types: AnalyticsBucket[];
+    top_pages: AnalyticsBucket[];
+    traffic_sources: AnalyticsBucket[];
+    devices: AnalyticsBucket[];
+    browsers: AnalyticsBucket[];
+    locations: AnalyticsBucket[];
+    recent_events: AnalyticsRecentEvent[];
+}
+
 // Auth types
 export interface LoginData {
     username: string;
