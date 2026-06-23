@@ -160,7 +160,7 @@ export default function HomePage() {
                     </div>
 
                     <div className={styles.heroArt} aria-hidden="true">
-                        <img src="/logo-3.png" alt="" className={styles.heroLogo} />
+                        <img src="/logo-2.png" alt="" className={styles.heroLogo} />
                     </div>
                 </section>
 
