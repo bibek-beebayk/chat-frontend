@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { analyticsApi } from '@/lib/analytics';
 import { eventsApi } from '@/lib/events';
 import { rewardsApi } from '@/lib/rewards';
+import { resolveProfileImageUrl } from '@/lib/social';
 import { ActivityEvent, Event, LoginStreakStatus } from '@/types';
 import { Toast } from '@/components/ui/Toast';
 import styles from './RightSidebar.module.css';
@@ -295,21 +296,26 @@ export function RightSidebar() {
                     ) : recentActivity.length === 0 ? (
                         <div className={styles.emptyState}>No recent activity yet.</div>
                     ) : (
-                        recentActivity.map((activity) => (
-                            <div key={activity.id} className={styles.activityItem}>
-                                {activity.actor?.avatar ? (
-                                    <img src={activity.actor.avatar} alt={activity.actor.username} className={styles.activityAvatar} />
-                                ) : (
-                                    <div className={styles.activityAvatarFallback}>
-                                        {getInitials(activity.actor?.username || 'RC')}
+                        recentActivity.map((activity) => {
+                            const avatarUrl = resolveProfileImageUrl(activity.actor);
+                            const actorName = activity.actor?.username || 'Community';
+
+                            return (
+                                <div key={activity.id} className={styles.activityItem}>
+                                    {avatarUrl ? (
+                                        <img src={avatarUrl} alt={`${actorName} profile`} className={styles.activityAvatar} />
+                                    ) : (
+                                        <div className={styles.activityAvatarFallback}>
+                                            {getInitials(activity.actor?.username || 'RC')}
+                                        </div>
+                                    )}
+                                    <div className={styles.activityInfo}>
+                                        <p><strong>{actorName}</strong> {activity.action}</p>
+                                        <span className={styles.activityTime}>{formatRelativeTime(activity.created_at)}</span>
                                     </div>
-                                )}
-                                <div className={styles.activityInfo}>
-                                    <p><strong>{activity.actor?.username || 'Community'}</strong> {activity.action}</p>
-                                    <span className={styles.activityTime}>{formatRelativeTime(activity.created_at)}</span>
                                 </div>
-                            </div>
-                        ))
+                            );
+                        })
                     )}
                 </div>
                 <Link href="/activity" className={styles.viewAllBtn}>View All Activity</Link>

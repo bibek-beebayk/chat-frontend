@@ -25,6 +25,34 @@ export interface User {
     primary_action?: string | null;
     secondary_action?: string | null;
     is_connected?: boolean;
+    is_active?: boolean;
+    is_staff?: boolean;
+    is_superuser?: boolean;
+    is_test_user?: boolean;
+    last_login?: string | null;
+}
+
+export interface StaffUsersMeta {
+    count: number;
+    limit: number;
+    offset: number;
+    has_more: boolean;
+}
+
+export interface StaffUsersStats {
+    total: number;
+    players: number;
+    agents: number;
+    staff: number;
+    active: number;
+    verified: number;
+    test: number;
+}
+
+export interface StaffUsersResponse {
+    results: User[];
+    meta: StaffUsersMeta;
+    stats: StaffUsersStats;
 }
 
 export interface SocialConnection {
@@ -178,6 +206,7 @@ export interface Announcement {
     priority: AnnouncementPriority;
     priority_label?: string;
     is_pinned: boolean;
+    is_published: boolean;
     published_at?: string | null;
     created_by?: User | null;
     created_at: string;
@@ -197,7 +226,9 @@ export interface FAQ {
     audience_label?: string;
     sort_order: number;
     is_featured: boolean;
+    is_published: boolean;
     published_at?: string | null;
+    created_by?: User | null;
     created_at: string;
     updated_at: string;
 }
@@ -325,7 +356,7 @@ export interface HomeStats {
 export interface ActivityEvent {
     id: number;
     kind: 'account' | 'post' | 'comment' | 'event' | 'reward' | string;
-    actor: Pick<User, 'id' | 'username'> & { avatar?: string | null } | null;
+    actor: Pick<User, 'id' | 'username' | 'avatar' | 'profile_picture' | 'profile_thumbnail'> | null;
     action: string;
     target_title: string;
     target_url: string;

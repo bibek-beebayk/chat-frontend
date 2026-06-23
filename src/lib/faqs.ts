@@ -1,6 +1,16 @@
 import { apiClient } from '@/lib/api';
 import { FAQ } from '@/types';
 
+export interface FAQInput {
+    question: string;
+    answer: string;
+    category: string;
+    audience: string;
+    sort_order: number;
+    is_featured: boolean;
+    is_published: boolean;
+}
+
 function unwrapList(data: FAQ[] | { results: FAQ[] }): FAQ[] {
     return Array.isArray(data) ? data : data.results || [];
 }
@@ -22,6 +32,11 @@ export const faqApi = {
         return unwrapList(data);
     },
 
+    async listManage(): Promise<FAQ[]> {
+        const data = await apiClient.get<FAQ[] | { results: FAQ[] }>('/api/faqs/manage/');
+        return unwrapList(data);
+    },
+
     async listFeatured(): Promise<FAQ[]> {
         const data = await apiClient.get<FAQ[] | { results: FAQ[] }>('/api/faqs/featured/');
         return unwrapList(data);
@@ -29,5 +44,17 @@ export const faqApi = {
 
     async getById(id: number): Promise<FAQ> {
         return apiClient.get<FAQ>(`/api/faqs/${id}/`);
+    },
+
+    create(input: FAQInput): Promise<FAQ> {
+        return apiClient.post<FAQ>('/api/faqs/', input);
+    },
+
+    update(id: number, input: FAQInput): Promise<FAQ> {
+        return apiClient.patch<FAQ>(`/api/faqs/${id}/`, input);
+    },
+
+    delete(id: number): Promise<void> {
+        return apiClient.delete<void>(`/api/faqs/${id}/`);
     },
 };

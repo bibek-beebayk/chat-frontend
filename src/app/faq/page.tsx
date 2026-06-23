@@ -1,11 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PageShell } from '@/components/layout/PageShell';
 import { useAuth } from '@/contexts/AuthContext';
-import { faqApi } from '@/lib/faqs';
+import { FAQInput, faqApi } from '@/lib/faqs';
 import { FAQ } from '@/types';
 import styles from './page.module.css';
 
@@ -19,6 +19,25 @@ const categoryFilters = [
     { label: 'Technical', value: 'technical' },
 ];
 
+const categoryOptions = categoryFilters.filter((item) => item.value !== 'all');
+
+const audienceOptions = [
+    { label: 'All Members', value: 'all' },
+    { label: 'Players', value: 'players' },
+    { label: 'Agents', value: 'agents' },
+    { label: 'Staff', value: 'staff' },
+];
+
+const emptyForm: FAQInput = {
+    question: '',
+    answer: '',
+    category: 'account',
+    audience: 'all',
+    sort_order: 0,
+    is_featured: false,
+    is_published: true,
+};
+
 export default function FaqPage() {
     const router = useRouter();
     const { user, loading: authLoading } = useAuth();
@@ -29,12 +48,18 @@ export default function FaqPage() {
     const [activeCategory, setActiveCategory] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [openIds, setOpenIds] = useState<number[]>([]);
+    const [formOpen, setFormOpen] = useState(false);
+    const [editingFaq, setEditingFaq] = useState<FAQ | null>(null);
+    const [formData, setFormData] = useState<FAQInput>(emptyForm);
+    const [formSaving, setFormSaving] = useState(false);
+    const [formError, setFormError] = useState<string | null>(null);
+    const isStaff = user?.user_type === 'staff';
 
     const loadFaqs = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const list = await faqApi.list();
+            const list = isStaff ? await faqApi.listManage() : await faqApi.list();
             setFaqs(list);
             setOpenIds((current) => current.filter((id) => list.some((faq) => faq.id === id)));
         } catch (err) {
@@ -42,7 +67,7 @@ export default function FaqPage() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [isStaff]);
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -69,6 +94,79 @@ export default function FaqPage() {
 
     const toggleOpen = (id: number) => {
         setOpenIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+    };
+
+    const openCreateForm = () => {
+        setEditingFaq(null);
+        setFormData(emptyForm);
+        setFormError(null);
+        setFormOpen(true);
+    };
+
+    const openEditForm = (faq: FAQ) => {
+        setEditingFaq(faq);
+        setFormData({
+            question: faq.question,
+            answer: faq.answer || '',
+            category: faq.category || 'account',
+            audience: faq.audience || 'all',
+            sort_order: faq.sort_order || 0,
+            is_featured: faq.is_featured,
+            is_published: faq.is_published,
+        });
+        setFormError(null);
+        setFormOpen(true);
+    };
+
+    const closeForm = () => {
+        if (formSaving) return;
+        setFormOpen(false);
+        setEditingFaq(null);
+        setFormData(emptyForm);
+        setFormError(null);
+    };
+
+    const submitForm = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (!formData.question.trim()) {
+            setFormError('Question is required.');
+            return;
+        }
+        if (!formData.answer.trim()) {
+            setFormError('Answer is required.');
+            return;
+        }
+
+        setFormSaving(true);
+        setFormError(null);
+        try {
+            if (editingFaq) {
+                await faqApi.update(editingFaq.id, formData);
+            } else {
+                await faqApi.create(formData);
+            }
+            setFormOpen(false);
+            setEditingFaq(null);
+            setFormData(emptyForm);
+            await loadFaqs();
+        } catch (err) {
+            setFormError(err instanceof Error ? err.message : 'Unable to save FAQ.');
+        } finally {
+            setFormSaving(false);
+        }
+    };
+
+    const deleteFaq = async (faq: FAQ) => {
+        const confirmed = window.confirm(`Delete "${faq.question}"? This cannot be undone.`);
+        if (!confirmed) return;
+
+        setError(null);
+        try {
+            await faqApi.delete(faq.id);
+            await loadFaqs();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Unable to delete FAQ.');
+        }
     };
 
     if (authLoading || !user) {
@@ -133,6 +231,11 @@ export default function FaqPage() {
                             </button>
                         ))}
                     </div>
+                    {isStaff && (
+                        <button type="button" className={styles.createBtn} onClick={openCreateForm}>
+                            Create FAQ
+                        </button>
+                    )}
                 </section>
 
                 {error && (
@@ -164,6 +267,7 @@ export default function FaqPage() {
                                     >
                                         <span>{faq.category_label || faq.category}</span>
                                         <strong>{faq.question}</strong>
+                                        {isStaff && !faq.is_published && <small className={styles.draftBadge}>Draft</small>}
                                     </button>
                                 ))}
                             </section>
@@ -187,9 +291,13 @@ export default function FaqPage() {
                                                 onClick={() => toggleOpen(faq.id)}
                                             >
                                                 <span className={styles.categoryBadge}>{faq.category_label || faq.category}</span>
+                                                {isStaff && !faq.is_published && <span className={styles.draftBadge}>Draft</span>}
                                                 <strong>{faq.question}</strong>
                                                 <span className={styles.toggleMark}>{isOpen ? '-' : '+'}</span>
                                             </button>
+                                            {isStaff && (
+                                                <StaffFaqActions faq={faq} onEdit={openEditForm} onDelete={deleteFaq} />
+                                            )}
                                             {isOpen && (
                                                 <div
                                                     className={styles.answer}
@@ -204,7 +312,157 @@ export default function FaqPage() {
                     </>
                 )}
             </PageShell>
+
+            {formOpen && (
+                <FAQFormModal
+                    editingFaq={editingFaq}
+                    formData={formData}
+                    formError={formError}
+                    saving={formSaving}
+                    onChange={setFormData}
+                    onClose={closeForm}
+                    onSubmit={submitForm}
+                />
+            )}
         </DashboardLayout>
+    );
+}
+
+function StaffFaqActions({
+    faq,
+    onEdit,
+    onDelete,
+}: {
+    faq: FAQ;
+    onEdit: (faq: FAQ) => void;
+    onDelete: (faq: FAQ) => void;
+}) {
+    return (
+        <div className={styles.staffActions}>
+            <button type="button" className={styles.editBtn} onClick={() => onEdit(faq)}>
+                Edit
+            </button>
+            <button type="button" className={styles.deleteBtn} onClick={() => onDelete(faq)}>
+                Delete
+            </button>
+        </div>
+    );
+}
+
+function FAQFormModal({
+    editingFaq,
+    formData,
+    formError,
+    saving,
+    onChange,
+    onClose,
+    onSubmit,
+}: {
+    editingFaq: FAQ | null;
+    formData: FAQInput;
+    formError: string | null;
+    saving: boolean;
+    onChange: (next: FAQInput) => void;
+    onClose: () => void;
+    onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+}) {
+    const setField = <K extends keyof FAQInput>(field: K, value: FAQInput[K]) => {
+        onChange({ ...formData, [field]: value });
+    };
+
+    return (
+        <div className={styles.modalBackdrop} role="presentation" onMouseDown={onClose}>
+            <form className={styles.faqForm} onSubmit={onSubmit} onMouseDown={(event) => event.stopPropagation()}>
+                <header className={styles.formHeader}>
+                    <div>
+                        <span>{editingFaq ? 'Edit FAQ' : 'New FAQ'}</span>
+                        <h2>{editingFaq ? 'Update FAQ' : 'Create FAQ'}</h2>
+                    </div>
+                    <button type="button" onClick={onClose} disabled={saving} aria-label="Close FAQ form">×</button>
+                </header>
+
+                {formError && <p className={styles.formError}>{formError}</p>}
+
+                <label className={styles.formField}>
+                    <span>Question</span>
+                    <input
+                        type="text"
+                        value={formData.question}
+                        onChange={(event) => setField('question', event.target.value)}
+                        placeholder="What should users ask?"
+                        disabled={saving}
+                    />
+                </label>
+
+                <div className={styles.formGrid}>
+                    <label className={styles.formField}>
+                        <span>Category</span>
+                        <select value={formData.category} onChange={(event) => setField('category', event.target.value)} disabled={saving}>
+                            {categoryOptions.map((option) => (
+                                <option key={option.value} value={option.value}>{option.label}</option>
+                            ))}
+                        </select>
+                    </label>
+
+                    <label className={styles.formField}>
+                        <span>Audience</span>
+                        <select value={formData.audience} onChange={(event) => setField('audience', event.target.value)} disabled={saving}>
+                            {audienceOptions.map((option) => (
+                                <option key={option.value} value={option.value}>{option.label}</option>
+                            ))}
+                        </select>
+                    </label>
+
+                    <label className={styles.formField}>
+                        <span>Sort order</span>
+                        <input
+                            type="number"
+                            min="0"
+                            value={formData.sort_order}
+                            onChange={(event) => setField('sort_order', Number(event.target.value || 0))}
+                            disabled={saving}
+                        />
+                    </label>
+                </div>
+
+                <label className={styles.formField}>
+                    <span>Answer</span>
+                    <textarea
+                        value={formData.answer}
+                        onChange={(event) => setField('answer', event.target.value)}
+                        placeholder="Write the answer. HTML is supported."
+                        disabled={saving}
+                        rows={8}
+                    />
+                </label>
+
+                <div className={styles.toggleRow}>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={formData.is_featured}
+                            onChange={(event) => setField('is_featured', event.target.checked)}
+                            disabled={saving}
+                        />
+                        <span>Feature FAQ</span>
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={formData.is_published}
+                            onChange={(event) => setField('is_published', event.target.checked)}
+                            disabled={saving}
+                        />
+                        <span>Publish now</span>
+                    </label>
+                </div>
+
+                <footer className={styles.formActions}>
+                    <button type="button" onClick={onClose} disabled={saving}>Cancel</button>
+                    <button type="submit" disabled={saving}>{saving ? 'Saving...' : editingFaq ? 'Update' : 'Create'}</button>
+                </footer>
+            </form>
+        </div>
     );
 }
 

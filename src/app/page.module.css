@@ -6,6 +6,15 @@
     width: 100%;
 }
 
+.authLoading {
+    align-items: center;
+    background: var(--color-bg-primary);
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100%;
+}
+
 .home {
     display: flex;
     flex-direction: column;
@@ -523,6 +532,343 @@
     height: 100%;
 }
 
+.staffDashboard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    width: 100%;
+}
+
+.staffHeader {
+    align-items: center;
+    background:
+        linear-gradient(135deg, rgba(21, 15, 37, 0.96), rgba(13, 10, 25, 0.98)),
+        radial-gradient(circle at 12% 18%, rgba(var(--color-primary-rgb), 0.2), transparent 26%);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+    border-radius: var(--radius-lg);
+    display: flex;
+    gap: var(--spacing-lg);
+    justify-content: space-between;
+    padding: clamp(1.15rem, 2.5vw, 1.75rem);
+}
+
+.staffEyebrow {
+    color: var(--color-primary-light);
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+}
+
+.staffHeader h1 {
+    color: var(--color-text-primary);
+    font-size: clamp(1.9rem, 4vw, 3rem);
+    letter-spacing: 0;
+    line-height: 1;
+    margin: 0;
+}
+
+.staffHeader p:not(.staffEyebrow) {
+    color: var(--color-text-secondary);
+    line-height: 1.55;
+    margin-top: 0.6rem;
+    max-width: 680px;
+}
+
+.staffRefreshButton {
+    align-items: center;
+    background: linear-gradient(135deg, #8f35ff, #5c16d9);
+    border-radius: var(--radius-md);
+    color: #fff;
+    display: inline-flex;
+    flex-shrink: 0;
+    font-weight: 800;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+}
+
+.staffRefreshButton:disabled {
+    cursor: wait;
+    opacity: 0.72;
+}
+
+.staffRefreshButton svg,
+.staffMetricIcon svg {
+    height: 18px;
+    width: 18px;
+}
+
+.staffError {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(248, 113, 113, 0.28);
+    border-radius: var(--radius-md);
+    color: #fecaca;
+    font-weight: 700;
+    padding: 0.85rem 1rem;
+}
+
+.staffMetricGrid {
+    display: grid;
+    gap: var(--spacing-md);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.staffMetricCard {
+    align-items: flex-start;
+    background: linear-gradient(180deg, rgba(20, 12, 38, 0.96), rgba(10, 7, 22, 0.96));
+    border: 1px solid rgba(var(--color-primary-rgb), 0.18);
+    border-radius: var(--radius-lg);
+    display: flex;
+    gap: 0.9rem;
+    min-height: 132px;
+    min-width: 0;
+    padding: var(--spacing-lg);
+}
+
+.staffMetricCard > div {
+    min-width: 0;
+}
+
+.staffMetricIcon {
+    align-items: center;
+    border-radius: 14px;
+    display: inline-flex;
+    flex-shrink: 0;
+    height: 42px;
+    justify-content: center;
+    width: 42px;
+}
+
+.staffMetricCard p {
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    font-weight: 800;
+    margin-bottom: 0.35rem;
+}
+
+.staffMetricCard strong {
+    color: var(--color-text-primary);
+    display: block;
+    font-size: clamp(1.45rem, 2.4vw, 2rem);
+    line-height: 1;
+}
+
+.staffMetricCard small {
+    color: var(--color-text-muted);
+    display: block;
+    font-size: 0.78rem;
+    line-height: 1.35;
+    margin-top: 0.55rem;
+}
+
+.staffPanelGrid {
+    display: grid;
+    gap: var(--spacing-md);
+    grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+}
+
+.staffPanel,
+.staffQuickActions button {
+    background: rgba(12, 8, 25, 0.92);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.staffPanel {
+    padding: var(--spacing-lg);
+}
+
+.staffPanelHeader {
+    align-items: flex-start;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-md);
+}
+
+.staffPanelHeader h2 {
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    font-weight: 900;
+    margin: 0 0 0.25rem;
+}
+
+.staffPanelHeader p {
+    color: var(--color-text-muted);
+    font-size: 0.82rem;
+    line-height: 1.4;
+}
+
+.staffPanelHeader button {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    flex-shrink: 0;
+    font-size: 0.82rem;
+    font-weight: 800;
+    padding: 0.55rem 0.85rem;
+}
+
+.staffQueueSummary {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-bottom: var(--spacing-md);
+}
+
+.staffQueueSummary div {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    padding: 0.85rem;
+}
+
+.staffQueueSummary span,
+.sourceRow span {
+    color: var(--color-text-muted);
+    display: block;
+    font-size: 0.76rem;
+}
+
+.staffQueueSummary strong {
+    color: var(--color-text-primary);
+    display: block;
+    font-size: 1.4rem;
+    margin-top: 0.25rem;
+}
+
+.sourceBreakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.sourceRow {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: var(--radius-md);
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem;
+}
+
+.sourceRow strong {
+    color: var(--color-text-primary);
+    display: block;
+    font-size: 0.9rem;
+    margin-bottom: 0.18rem;
+}
+
+.sourceRow small {
+    color: var(--color-primary-light);
+    flex-shrink: 0;
+    font-weight: 900;
+}
+
+.staffActivityList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.staffActivityItem {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: var(--radius-md);
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.78rem;
+    text-align: left;
+    width: 100%;
+}
+
+.staffActivityItem > span:last-child {
+    min-width: 0;
+}
+
+.staffActivityItem:hover,
+.staffPanelHeader button:hover,
+.staffQuickActions button:hover {
+    border-color: rgba(var(--color-primary-rgb), 0.34);
+    transform: translateY(-1px);
+}
+
+.staffActivityAvatar {
+    align-items: center;
+    background: linear-gradient(135deg, #ffd15e, #7c22e7 58%, #140627);
+    border-radius: 999px;
+    color: #fff;
+    display: inline-flex;
+    flex-shrink: 0;
+    font-size: 0.74rem;
+    font-weight: 900;
+    height: 38px;
+    justify-content: center;
+    width: 38px;
+}
+
+.staffActivityAvatar img {
+    border-radius: inherit;
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+}
+
+.staffActivityItem strong {
+    color: var(--color-text-primary);
+    display: block;
+    font-size: 0.84rem;
+    line-height: 1.35;
+}
+
+.staffActivityItem small {
+    color: var(--color-text-muted);
+    display: block;
+    font-size: 0.74rem;
+    margin-top: 0.22rem;
+}
+
+.staffEmptyState {
+    align-items: center;
+    color: var(--color-text-muted);
+    display: flex;
+    justify-content: center;
+    min-height: 180px;
+    text-align: center;
+}
+
+.staffQuickActions {
+    display: grid;
+    gap: var(--spacing-md);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.staffQuickActions button {
+    padding: var(--spacing-lg);
+    text-align: left;
+}
+
+.staffQuickActions strong {
+    color: var(--color-text-primary);
+    display: block;
+    font-size: 0.95rem;
+    margin-bottom: 0.35rem;
+}
+
+.staffQuickActions span {
+    color: var(--color-text-muted);
+    display: block;
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
 :global(html[data-theme='light']) .hero {
     background:
         radial-gradient(circle at 78% 20%, rgba(234, 179, 8, 0.2), transparent 18%),
@@ -642,6 +988,38 @@
     background: rgba(15, 23, 42, 0.1);
 }
 
+:global(html[data-theme='light']) .staffHeader {
+    background:
+        linear-gradient(135deg, #ffffff, #f8fafc),
+        radial-gradient(circle at 12% 18%, rgba(99, 102, 241, 0.16), transparent 26%);
+    border-color: rgba(99, 102, 241, 0.16);
+}
+
+:global(html[data-theme='light']) .staffError {
+    background: rgba(254, 226, 226, 0.82);
+    border-color: rgba(248, 113, 113, 0.32);
+    color: #991b1b;
+}
+
+:global(html[data-theme='light']) .staffMetricCard,
+:global(html[data-theme='light']) .staffPanel,
+:global(html[data-theme='light']) .staffQuickActions button {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(99, 102, 241, 0.14);
+}
+
+:global(html[data-theme='light']) .staffPanelHeader button,
+:global(html[data-theme='light']) .staffQueueSummary div,
+:global(html[data-theme='light']) .sourceRow,
+:global(html[data-theme='light']) .staffActivityItem {
+    background: rgba(99, 102, 241, 0.06);
+    border-color: rgba(99, 102, 241, 0.12);
+}
+
+:global(html[data-theme='light']) .sourceRow small {
+    color: var(--color-primary);
+}
+
 @media (max-width: 1180px) {
     .hero {
         grid-template-columns: 1fr;
@@ -656,6 +1034,14 @@
         max-height: 180px;
         max-width: 280px;
     }
+
+    .staffMetricGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .staffPanelGrid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 900px) {
@@ -666,11 +1052,197 @@
     .featureGrid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
+    .staffQuickActions {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 720px) {
     .home {
         gap: 0.85rem;
+    }
+
+    .staffDashboard {
+        gap: 0.85rem;
+        padding-bottom: 0.75rem;
+    }
+
+    .staffHeader {
+        align-items: stretch;
+        border-radius: var(--radius-md);
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 0.9rem;
+    }
+
+    .staffEyebrow {
+        font-size: 0.68rem;
+        margin-bottom: 0.32rem;
+    }
+
+    .staffHeader h1 {
+        font-size: 1.8rem;
+    }
+
+    .staffHeader p:not(.staffEyebrow) {
+        font-size: 0.84rem;
+        line-height: 1.42;
+        margin-top: 0.45rem;
+    }
+
+    .staffRefreshButton {
+        justify-content: center;
+        min-height: 40px;
+        padding: 0.65rem 0.85rem;
+        width: 100%;
+    }
+
+    .staffMetricGrid {
+        gap: 0.7rem;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .staffMetricCard {
+        border-radius: var(--radius-md);
+        flex-direction: column;
+        gap: 0.55rem;
+        min-height: 0;
+        padding: 0.75rem;
+    }
+
+    .staffMetricIcon {
+        border-radius: 12px;
+        height: 34px;
+        width: 34px;
+    }
+
+    .staffMetricIcon svg {
+        height: 16px;
+        width: 16px;
+    }
+
+    .staffMetricCard p {
+        font-size: 0.7rem;
+        line-height: 1.25;
+        margin-bottom: 0.32rem;
+    }
+
+    .staffMetricCard strong {
+        font-size: 1.28rem;
+    }
+
+    .staffMetricCard small {
+        display: none;
+    }
+
+    .staffPanel {
+        border-radius: var(--radius-md);
+        padding: 0.9rem;
+    }
+
+    .staffPanelHeader {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 0.65rem;
+        margin-bottom: 0.85rem;
+    }
+
+    .staffPanelHeader h2 {
+        font-size: 0.94rem;
+    }
+
+    .staffPanelHeader p {
+        font-size: 0.76rem;
+    }
+
+    .staffPanelHeader button {
+        min-height: 38px;
+        width: 100%;
+    }
+
+    .staffQueueSummary {
+        gap: 0.5rem;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-bottom: 0.8rem;
+    }
+
+    .staffQueueSummary div {
+        padding: 0.62rem;
+    }
+
+    .staffQueueSummary span {
+        font-size: 0.64rem;
+        line-height: 1.25;
+    }
+
+    .staffQueueSummary strong {
+        font-size: 1.14rem;
+    }
+
+    .sourceRow {
+        align-items: center;
+        flex-direction: row;
+        gap: 0.65rem;
+        padding: 0.7rem;
+    }
+
+    .sourceRow strong {
+        font-size: 0.82rem;
+    }
+
+    .sourceRow span {
+        font-size: 0.68rem;
+    }
+
+    .sourceRow small {
+        font-size: 0.78rem;
+        text-align: right;
+    }
+
+    .staffActivityList {
+        gap: 0.5rem;
+    }
+
+    .staffActivityItem {
+        align-items: flex-start;
+        gap: 0.6rem;
+        padding: 0.7rem;
+    }
+
+    .staffActivityAvatar {
+        height: 34px;
+        width: 34px;
+    }
+
+    .staffActivityItem strong {
+        display: -webkit-box;
+        font-size: 0.78rem;
+        line-height: 1.32;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+    }
+
+    .staffActivityItem small {
+        font-size: 0.68rem;
+    }
+
+    .staffEmptyState {
+        min-height: 120px;
+    }
+
+    .staffQuickActions button {
+        border-radius: var(--radius-md);
+        padding: 0.85rem;
+    }
+
+    .staffQuickActions strong {
+        font-size: 0.86rem;
+    }
+
+    .staffQuickActions span {
+        font-size: 0.75rem;
     }
 
     .hero {
@@ -891,6 +1463,31 @@
     .featureGrid,
     .statsGrid {
         grid-template-columns: 1fr;
+    }
+
+    .staffMetricGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .staffMetricCard {
+        align-items: center;
+        display: grid;
+        grid-template-columns: 34px minmax(0, 1fr);
+    }
+
+    .staffMetricCard > div {
+        align-items: center;
+        display: grid;
+        gap: 0.5rem;
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .staffMetricCard p {
+        margin: 0;
+    }
+
+    .staffMetricCard strong {
+        text-align: right;
     }
 
     .statCard {

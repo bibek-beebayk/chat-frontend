@@ -7,8 +7,9 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { RightSidebar } from '@/components/layout/RightSidebar';
 import { analyticsApi } from '@/lib/analytics';
 import { postApi } from '@/lib/posts';
-import { hasCompletedSocialOnboarding, socialApi } from '@/lib/social';
-import { HomeStats, Post } from '@/types';
+import { rewardsApi } from '@/lib/rewards';
+import { hasCompletedSocialOnboarding, resolveProfileImageUrl, socialApi } from '@/lib/social';
+import { ActivityEvent, HomeStats, Post, StreakRedemptionRequest } from '@/types';
 import styles from './page.module.css';
 
 const featureLinks = [
@@ -16,6 +17,12 @@ const featureLinks = [
     { title: 'Exclusive', label: 'Events', icon: <CalendarIcon /> },
     { title: 'Direct', label: 'Support', icon: <ChatIcon /> },
     // { title: 'VIP', label: 'Access', icon: <CrownIcon /> },
+];
+
+const dashboardSources = [
+    { source: 'login_streak', label: 'Login Streak' },
+    { source: 'scratch_bonus', label: 'Scratch Bonus' },
+    { source: 'win_bonus', label: 'Win Bonus' },
 ];
 
 export default function HomePage() {
@@ -26,6 +33,10 @@ export default function HomePage() {
     const [statsLoading, setStatsLoading] = useState(true);
     const [postsLoading, setPostsLoading] = useState(true);
     const [postsError, setPostsError] = useState<string | null>(null);
+    const [staffRedemptions, setStaffRedemptions] = useState<StreakRedemptionRequest[]>([]);
+    const [staffActivity, setStaffActivity] = useState<ActivityEvent[]>([]);
+    const [staffLoading, setStaffLoading] = useState(true);
+    const [staffError, setStaffError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!loading && !user) {
@@ -38,7 +49,9 @@ export default function HomePage() {
         const loadHomeData = async () => {
             setPostsLoading(true);
             setStatsLoading(true);
+            setStaffLoading(user.user_type === 'staff');
             setPostsError(null);
+            setStaffError(null);
 
             if (user.user_type === 'player') {
                 try {
@@ -51,6 +64,29 @@ export default function HomePage() {
                     router.replace('/onboarding');
                     return;
                 }
+            }
+
+            if (user.user_type === 'staff') {
+                setPostsLoading(false);
+                try {
+                    const [stats, redemptions, activity] = await Promise.all([
+                        analyticsApi.getHomeStats(),
+                        rewardsApi.listRedemptions(),
+                        analyticsApi.getRecentActivity(8),
+                    ]);
+                    setHomeStats(stats);
+                    setStaffRedemptions(redemptions);
+                    setStaffActivity(activity);
+                } catch {
+                    setHomeStats(null);
+                    setStaffRedemptions([]);
+                    setStaffActivity([]);
+                    setStaffError('Failed to load staff dashboard insights.');
+                } finally {
+                    setStatsLoading(false);
+                    setStaffLoading(false);
+                }
+                return;
             }
 
             try {
@@ -115,16 +151,51 @@ export default function HomePage() {
 
     if (loading) {
         return (
-            <DashboardLayout>
-                <div className={styles.loading}>
-                    <div className="spinner"></div>
-                </div>
-            </DashboardLayout>
+            <div className={styles.authLoading}>
+                <div className="spinner"></div>
+            </div>
         );
     }
 
     if (!user) return null;
     const stats = buildStats(homeStats, statsLoading);
+
+    if (user.user_type === 'staff') {
+        return (
+            <DashboardLayout>
+                <StaffDashboard
+                    activity={staffActivity}
+                    error={staffError}
+                    homeStats={homeStats}
+                    loading={staffLoading || statsLoading}
+                    redemptions={staffRedemptions}
+                    onRefresh={() => {
+                        setStaffLoading(true);
+                        setStatsLoading(true);
+                        setStaffError(null);
+                        Promise.all([
+                            analyticsApi.getHomeStats(),
+                            rewardsApi.listRedemptions(),
+                            analyticsApi.getRecentActivity(8),
+                        ])
+                            .then(([nextStats, nextRedemptions, nextActivity]) => {
+                                setHomeStats(nextStats);
+                                setStaffRedemptions(nextRedemptions);
+                                setStaffActivity(nextActivity);
+                            })
+                            .catch(() => {
+                                setStaffError('Failed to refresh staff dashboard insights.');
+                            })
+                            .finally(() => {
+                                setStaffLoading(false);
+                                setStatsLoading(false);
+                            });
+                    }}
+                    onNavigate={(path) => router.push(path)}
+                />
+            </DashboardLayout>
+        );
+    }
 
     return (
         <DashboardLayout rightSidebar={<RightSidebar />}>
@@ -229,6 +300,198 @@ export default function HomePage() {
     );
 }
 
+function StaffDashboard({
+    activity,
+    error,
+    homeStats,
+    loading,
+    redemptions,
+    onRefresh,
+    onNavigate,
+}: {
+    activity: ActivityEvent[];
+    error: string | null;
+    homeStats: HomeStats | null;
+    loading: boolean;
+    redemptions: StreakRedemptionRequest[];
+    onRefresh: () => void;
+    onNavigate: (path: string) => void;
+}) {
+    const pendingRequests = redemptions.filter((request) => request.status === 'pending');
+    const approvedRequests = redemptions.filter((request) => request.status === 'approved');
+    const completedToday = redemptions.filter((request) => {
+        if (request.status !== 'completed' || !request.completed_at) return false;
+        return new Date(request.completed_at).toDateString() === new Date().toDateString();
+    });
+    const activeRequests = redemptions.filter((request) => request.status === 'pending' || request.status === 'approved');
+    const activeValue = activeRequests.reduce((total, request) => total + Number(request.amount || 0), 0);
+
+    const metrics = [
+        {
+            label: 'Active Members',
+            value: homeStats ? formatCount(homeStats.active_members) : loading ? '...' : '0',
+            detail: 'Registered community accounts',
+            tone: 'purple',
+            icon: <MembersIcon />,
+        },
+        {
+            label: 'Online Now',
+            value: homeStats ? formatCount(homeStats.online_now) : loading ? '...' : '0',
+            detail: 'Seen in the last 15 minutes',
+            tone: 'green',
+            icon: <SignalIcon />,
+        },
+        {
+            label: 'Pending Requests',
+            value: loading ? '...' : formatCount(pendingRequests.length),
+            detail: 'Need staff review',
+            tone: 'gold',
+            icon: <GiftIcon />,
+        },
+        {
+            label: 'Approved Queue',
+            value: loading ? '...' : formatCount(approvedRequests.length),
+            detail: 'Ready to complete',
+            tone: 'blue',
+            icon: <CheckIcon />,
+        },
+    ];
+
+    return (
+        <div className={styles.staffDashboard}>
+            <section className={styles.staffHeader}>
+                <div>
+                    <p className={styles.staffEyebrow}>Staff Home</p>
+                    <h1>Dashboard</h1>
+                    <p>Monitor community activity, reward requests, and operational queues from one place.</p>
+                </div>
+                <button type="button" className={styles.staffRefreshButton} onClick={onRefresh} disabled={loading}>
+                    <RefreshIcon />
+                    Refresh
+                </button>
+            </section>
+
+            {error && <div className={styles.staffError}>{error}</div>}
+
+            <section className={styles.staffMetricGrid} aria-label="Staff dashboard metrics">
+                {metrics.map((metric) => (
+                    <article key={metric.label} className={styles.staffMetricCard}>
+                        <span className={`${styles.staffMetricIcon} ${styles[metric.tone]}`}>{metric.icon}</span>
+                        <div>
+                            <p>{metric.label}</p>
+                            <strong>{metric.value}</strong>
+                            <small>{metric.detail}</small>
+                        </div>
+                    </article>
+                ))}
+            </section>
+
+            <section className={styles.staffPanelGrid}>
+                <article className={styles.staffPanel}>
+                    <header className={styles.staffPanelHeader}>
+                        <div>
+                            <h2>Redemption Queue</h2>
+                            <p>{formatCurrency(activeValue)} currently awaiting staff action</p>
+                        </div>
+                        <button type="button" onClick={() => onNavigate('/rewards/redemptions')}>Open</button>
+                    </header>
+
+                    <div className={styles.staffQueueSummary}>
+                        <div>
+                            <span>Pending</span>
+                            <strong>{pendingRequests.length}</strong>
+                        </div>
+                        <div>
+                            <span>Approved</span>
+                            <strong>{approvedRequests.length}</strong>
+                        </div>
+                        <div>
+                            <span>Completed Today</span>
+                            <strong>{completedToday.length}</strong>
+                        </div>
+                    </div>
+
+                    <div className={styles.sourceBreakdown}>
+                        {dashboardSources.map((sourceItem) => {
+                            const sourceRequests = redemptions.filter((request) => request.source === sourceItem.source);
+                            const sourceActive = sourceRequests.filter((request) => request.status === 'pending' || request.status === 'approved');
+                            const sourceValue = sourceActive.reduce((total, request) => total + Number(request.amount || 0), 0);
+
+                            return (
+                                <div key={sourceItem.source} className={styles.sourceRow}>
+                                    <div>
+                                        <strong>{sourceItem.label}</strong>
+                                        <span>{sourceActive.length} active requests</span>
+                                    </div>
+                                    <small>{formatCurrency(sourceValue)}</small>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </article>
+
+                <article className={styles.staffPanel}>
+                    <header className={styles.staffPanelHeader}>
+                        <div>
+                            <h2>Recent Activity</h2>
+                            <p>Latest important community events</p>
+                        </div>
+                    </header>
+
+                    <div className={styles.staffActivityList}>
+                        {loading ? (
+                            <div className={styles.staffEmptyState}>Loading activity...</div>
+                        ) : activity.length === 0 ? (
+                            <div className={styles.staffEmptyState}>No recent activity yet.</div>
+                        ) : (
+                            activity.map((item) => {
+                                const avatarUrl = resolveProfileImageUrl(item.actor);
+                                const actorName = item.actor?.username || 'Community';
+
+                                return (
+                                    <button
+                                        key={item.id}
+                                        type="button"
+                                        className={styles.staffActivityItem}
+                                        onClick={() => item.target_url && onNavigate(item.target_url)}
+                                    >
+                                        <span className={styles.staffActivityAvatar}>
+                                            {avatarUrl ? (
+                                                <img src={avatarUrl} alt={`${actorName} profile`} />
+                                            ) : (
+                                                getInitials(item.actor?.username || item.kind)
+                                            )}
+                                        </span>
+                                        <span>
+                                            <strong>{formatActivityTitle(item)}</strong>
+                                            <small>{formatPostDate(new Date(item.created_at))}</small>
+                                        </span>
+                                    </button>
+                                );
+                            })
+                        )}
+                    </div>
+                </article>
+            </section>
+
+            <section className={styles.staffQuickActions} aria-label="Quick staff actions">
+                <button type="button" onClick={() => onNavigate('/announcements')}>
+                    <strong>Announcements</strong>
+                    <span>Create and manage admin announcements.</span>
+                </button>
+                <button type="button" onClick={() => onNavigate('/events')}>
+                    <strong>Events</strong>
+                    <span>Review upcoming and active events.</span>
+                </button>
+                <button type="button" onClick={() => onNavigate('/posts')}>
+                    <strong>Posts</strong>
+                    <span>Moderate community posts and pinned updates.</span>
+                </button>
+            </section>
+        </div>
+    );
+}
+
 function buildStats(homeStats: HomeStats | null, loading: boolean) {
     const fallback = loading ? '...' : '0';
     return [
@@ -268,6 +531,20 @@ function formatCount(value: number): string {
         return new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(value);
     }
     return new Intl.NumberFormat('en').format(value);
+}
+
+function formatCurrency(value: number): string {
+    return new Intl.NumberFormat('en', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(value);
+}
+
+function formatActivityTitle(activity: ActivityEvent): string {
+    const actor = activity.actor?.username || 'System';
+    return `${actor} ${activity.action} ${activity.target_title}`.trim();
 }
 
 function PinnedPostCard({ post, onLike, onOpen }: { post: Post; onLike: (post: Post) => void; onOpen: () => void }) {
@@ -407,6 +684,25 @@ function CalendarIcon() {
             <path d="M16 2v4" />
             <path d="M8 2v4" />
             <path d="M3 10h18" />
+        </svg>
+    );
+}
+
+function CheckIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M20 6 9 17l-5-5" />
+        </svg>
+    );
+}
+
+function RefreshIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+            <path d="M3 21v-5h5" />
+            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+            <path d="M16 8h5V3" />
         </svg>
     );
 }
