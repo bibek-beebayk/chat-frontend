@@ -9,7 +9,23 @@
         var(--color-bg-primary);
     position: relative;
     overflow-x: hidden;
-    padding-bottom: var(--spacing-xl);
+    padding-bottom: 0;
+}
+
+.loginCentered {
+    justify-content: center;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.loginCentered .topLogoContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.loginCentered .contentWrapper {
+    margin-top: 0;
 }
 
 .topLogoContainer {
@@ -379,6 +395,38 @@
     opacity: 0.62;
 }
 
+.downloadPrompt {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.85rem;
+    margin-top: 0.35rem;
+    padding: 0.75rem 0.85rem;
+    border: 1px solid rgba(153, 51, 255, 0.28);
+    border-radius: var(--radius-md);
+    background: rgba(153, 51, 255, 0.1);
+    color: var(--color-text-secondary);
+    font-size: 0.88rem;
+    text-decoration: none;
+}
+
+.downloadPrompt a,
+.downloadPrompt strong {
+    color: var(--color-primary-light);
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.downloadPrompt:hover {
+    border-color: rgba(153, 51, 255, 0.55);
+    background: rgba(153, 51, 255, 0.16);
+}
+
+.downloadPrompt:hover a,
+.downloadPrompt:hover strong {
+    color: #fff;
+}
+
 .promoBanner {
     width: 100%;
     max-width: 1100px;
@@ -445,14 +493,23 @@
     text-align: center;
 }
 
+@media (max-width: 560px) {
+    .downloadPrompt {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+}
+
 /* Mobile & Desktop Optimizations */
 @media (min-width: 1024px) {
     .contentWrapper {
         flex-direction: row;
         justify-content: center;
-        align-items: stretch;
+        align-items: center;
+        /* Changed from stretch to center */
         gap: 0;
-        padding: 4rem;
+        padding: 2rem;
         /* Restore full padding on desktop */
     }
 
@@ -498,7 +555,7 @@
         overflow: visible;
         mask-image: none;
         -webkit-mask-image: none;
-        margin-top: var(--spacing-2xl);
+        margin-top: var(--spacing-md);
         /* Some spacing above it on desktop */
     }
 

@@ -7,8 +7,9 @@ import { usePathname } from 'next/navigation';
 export const Footer: React.FC = () => {
     const pathname = usePathname();
     const isChatPage = pathname?.startsWith('/chat') || pathname?.startsWith('/staff-dashboard');
+    const isAuthPage = ['/login', '/register', '/verify-otp', '/set-password', '/forgot-password'].some((prefix) => pathname?.startsWith(prefix));
 
-    if (isChatPage) return null;
+    if (isChatPage || isAuthPage) return null;
 
     return (
         <footer style={{

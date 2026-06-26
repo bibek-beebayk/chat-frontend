@@ -8,6 +8,7 @@ import { Input } from '@/components/forms/Input';
 import { Button } from '@/components/forms/Button';
 import { UserType } from '@/types';
 import styles from './page.module.css';
+import DownloadAppModal from '@/components/auth/DownloadAppModal';
 
 function RegisterPageContent() {
     const [username, setUsername] = useState('');
@@ -19,6 +20,7 @@ function RegisterPageContent() {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
     const { register } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -65,7 +67,7 @@ function RegisterPageContent() {
     ];
 
         return (
-        <div className={styles.container}>
+        <div className={`${styles.container} ${styles.loginCentered}`}>
 
             <div className={styles.topLogoContainer}>
                 <img src="/logo-2.png" alt="Rollin Community Logo" className={styles.topLogoImage} />
@@ -77,7 +79,7 @@ function RegisterPageContent() {
                         {/* <p className={styles.welcomeText}>Welcome to the official</p> */}
                         <div className={styles.titleRow}>
                             <img src="/logo-2.png" alt="Icon" className={styles.inlineLogo} />
-                            <h1 className={`${styles.title} gradient-text`} style={{ textTransform: 'uppercase', fontSize: '2.8rem' }}>ROLLIN COMMUNITY</h1>
+                            <h1 className={`${styles.title} gradient-text`} style={{ textTransform: 'uppercase' }}>ROLLIN COMMUNITY</h1>
                         </div>
                         <p className={styles.subtitle}>The official community for Hi-Rollin players!</p>
                     </div>
@@ -120,7 +122,6 @@ function RegisterPageContent() {
                     )}
 
                     <div className={styles.userTypeSection}>
-                        <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.5rem', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>I am a...</label>
                         <div className={styles.radioGroup}>
                             {userTypeOptions.map((option) => (
                                 <label
@@ -232,33 +233,31 @@ function RegisterPageContent() {
                         Create Account
                     </Button>
 
-                    <div className={styles.footer}>
-                        <span>Already have an account?</span>
+                    <div style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.9rem' }}>
+                        <span style={{ color: 'var(--color-text-secondary)' }}>Already have an account? </span>
                         <Link href={loginHref} className={styles.link}>
-                            Sign In
+                            Sign In &rarr;
                         </Link>
                     </div>
-                    <div className={styles.footer}>
+
+                    <button 
+                        type="button" 
+                        onClick={() => setIsDownloadModalOpen(true)} 
+                        className={styles.downloadPrompt}
+                        style={{ background: 'rgba(153, 51, 255, 0.1)', cursor: 'pointer', textAlign: 'left', width: '100%', border: '1px solid rgba(153, 51, 255, 0.28)' }}
+                    >
                         <span>Prefer the mobile app?</span>
-                        <Link href="/download" className={styles.link}>
-                            Download App
-                        </Link>
-                    </div>
+                        <strong>Download App</strong>
+                    </button>
                 </form>
 
             </div>
             </div>
             </div>
-
-            <div className={styles.promoBanner}>
-                <div className={styles.promoContent}>
-                    <h3>Already have an account?</h3>
-                    <p>LOGIN NOW!</p>
-                </div>
-                <Link href={loginHref} className={styles.joinBtn}>
-                    LOGIN &rarr;
-                </Link>
-            </div>
+            <DownloadAppModal 
+                isOpen={isDownloadModalOpen}
+                onClose={() => setIsDownloadModalOpen(false)}
+            />
         </div>
     );
 }
