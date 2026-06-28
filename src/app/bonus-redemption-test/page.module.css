@@ -1,0 +1,221 @@
+.page {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background:
+        radial-gradient(circle at 18% 12%, rgba(168, 85, 247, 0.24), transparent 32%),
+        radial-gradient(circle at 82% 14%, rgba(245, 158, 11, 0.18), transparent 28%),
+        linear-gradient(145deg, #080611 0%, #12091f 48%, #05030a 100%);
+    color: #f8fafc;
+}
+
+.panel {
+    width: min(760px, 100%);
+    padding: 24px;
+    border: 1px solid rgba(168, 85, 247, 0.26);
+    border-radius: 18px;
+    background: rgba(14, 10, 28, 0.86);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+}
+
+.header {
+    display: grid;
+    gap: 8px;
+}
+
+.header span {
+    color: #c084fc;
+    font-size: 0.76rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1;
+}
+
+.header p,
+.sourceIntro p {
+    margin: 0;
+    color: rgba(248, 250, 252, 0.72);
+    line-height: 1.55;
+}
+
+.sourceTabs {
+    display: flex;
+    gap: 8px;
+    margin: 22px 0 16px;
+    padding: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.sourceTabs button,
+.actions button,
+.inlineField button,
+.primaryButton {
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 900;
+}
+
+.sourceTabs button {
+    flex: 1;
+    padding: 11px 12px;
+    border-radius: 10px;
+    color: rgba(248, 250, 252, 0.72);
+    background: transparent;
+}
+
+.sourceTabs .activeTab {
+    color: #fff;
+    background: linear-gradient(135deg, #7c3aed, #c026d3);
+}
+
+.form {
+    display: grid;
+    gap: 14px;
+}
+
+.sourceIntro {
+    padding: 14px;
+    border: 1px solid rgba(245, 158, 11, 0.22);
+    border-radius: 14px;
+    background: rgba(245, 158, 11, 0.08);
+}
+
+.sourceIntro strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.form label {
+    display: grid;
+    gap: 7px;
+}
+
+.form label span,
+.output span {
+    color: rgba(248, 250, 252, 0.68);
+    font-size: 0.78rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.form input,
+.form select {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 13px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    outline: none;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.form input:focus,
+.form select:focus {
+    border-color: rgba(192, 132, 252, 0.75);
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.14);
+}
+
+.inlineField {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+}
+
+.inlineField button {
+    min-width: 72px;
+    border-radius: 12px;
+    color: #f8fafc;
+    background: rgba(255, 255, 255, 0.10);
+}
+
+.primaryButton {
+    min-height: 48px;
+    border-radius: 14px;
+    color: #fff;
+    background: linear-gradient(135deg, #7c3aed, #c026d3);
+}
+
+.primaryButton:disabled,
+.actions button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.error {
+    padding: 11px 12px;
+    border: 1px solid rgba(248, 113, 113, 0.38);
+    border-radius: 12px;
+    color: #fecaca;
+    background: rgba(127, 29, 29, 0.22);
+    font-weight: 800;
+}
+
+.output {
+    display: grid;
+    gap: 12px;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.output > div:not(.actions) {
+    display: grid;
+    gap: 7px;
+}
+
+.output code {
+    display: block;
+    overflow-wrap: anywhere;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 12px;
+    color: #d8b4fe;
+    background: rgba(0, 0, 0, 0.22);
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.actions button {
+    min-height: 44px;
+    border-radius: 12px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.10);
+}
+
+.actions button:last-child {
+    background: linear-gradient(135deg, #f59e0b, #c026d3);
+}
+
+@media (max-width: 560px) {
+    .page {
+        padding: 12px;
+        place-items: start center;
+    }
+
+    .panel {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .actions {
+        grid-template-columns: 1fr;
+    }
+}
