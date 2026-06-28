@@ -213,7 +213,7 @@ export interface Announcement {
     updated_at: string;
 }
 
-export type FAQCategory = 'account' | 'community' | 'rewards' | 'events' | 'security' | 'technical' | string;
+export type FAQCategory = 'general' | 'account' | 'community' | 'rewards' | 'events' | 'security' | 'technical' | string;
 export type FAQAudience = 'all' | 'players' | 'agents' | 'staff' | string;
 
 export interface FAQ {

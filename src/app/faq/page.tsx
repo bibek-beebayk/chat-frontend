@@ -11,6 +11,7 @@ import styles from './page.module.css';
 
 const categoryFilters = [
     { label: 'All', value: 'all' },
+    { label: 'General', value: 'general' },
     { label: 'Account', value: 'account' },
     { label: 'Community', value: 'community' },
     { label: 'Rewards', value: 'rewards' },
@@ -31,7 +32,7 @@ const audienceOptions = [
 const emptyForm: FAQInput = {
     question: '',
     answer: '',
-    category: 'account',
+    category: 'general',
     audience: 'all',
     sort_order: 0,
     is_featured: false,
@@ -108,7 +109,7 @@ export default function FaqPage() {
         setFormData({
             question: faq.question,
             answer: faq.answer || '',
-            category: faq.category || 'account',
+            category: faq.category || 'general',
             audience: faq.audience || 'all',
             sort_order: faq.sort_order || 0,
             is_featured: faq.is_featured,
