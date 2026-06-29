@@ -34,11 +34,11 @@
     justify-content: center;
     padding-top: var(--spacing-md);
     /* Reduced from 2xl for mobile */
-    padding-bottom: 0;
+    padding-bottom: var(--spacing-md);
 }
 
 .topLogoImage {
-    width: 128px;
+    width: 190px;
     max-width: 90%;
     height: auto;
 }
@@ -148,12 +148,14 @@
 }
 
 .title {
+    display: none;
     font-size: 2.5rem;
     font-weight: 800;
     line-height: 1.1;
 }
 
 .subtitle {
+    display: none;
     color: var(--color-text-secondary);
     font-size: 0.95rem;
     max-width: 90%;
@@ -165,7 +167,7 @@
     width: 100vw;
     margin-left: calc(-50vw + 50%);
     overflow: hidden;
-    margin-top: var(--spacing-md);
+    margin-top: 2.75rem;
     mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
     -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
 }
@@ -600,6 +602,14 @@
         width: 60px;
         height: 60px;
         margin-right: 0.5rem;
+    }
+
+    .title {
+        display: block;
+    }
+
+    .subtitle {
+        display: block;
     }
 
     .logoImage {
