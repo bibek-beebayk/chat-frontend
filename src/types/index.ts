@@ -14,6 +14,8 @@ export interface User {
     avatar?: string | null;
     profile_picture?: string | null;
     profile_thumbnail?: string | null;
+    has_usable_password?: boolean;
+    needs_username_setup?: boolean;
     agent_availability?: 'online' | 'busy' | 'away' | 'offline' | string;
     agent_status_note?: string;
     joined_at?: string;

@@ -16,7 +16,7 @@ type ToastState = { message: string; type: 'success' | 'error' } | null;
 
 export default function SettingsPage() {
     const router = useRouter();
-    const { user, loading } = useAuth();
+    const { user, loading, checkAuth } = useAuth();
     const { themeMode, accentColor, accentOptions, setThemeMode, setAccentColor } = useTheme();
     const [toast, setToast] = useState<ToastState>(null);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -33,12 +33,24 @@ export default function SettingsPage() {
         }
     }, [loading, router, user]);
 
+    useEffect(() => {
+        if (
+            !loading &&
+            user &&
+            typeof window !== 'undefined' &&
+            new URLSearchParams(window.location.search).get('setupPassword') === '1'
+        ) {
+            setIsPasswordModalOpen(true);
+        }
+    }, [loading, user]);
+
     if (loading || !user) {
         return null;
     }
 
     const displayName = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.username;
     const userType = user.user_type.charAt(0).toUpperCase() + user.user_type.slice(1);
+    const isPasswordSetupMode = user.has_usable_password === false;
 
     const togglePreference = (key: keyof typeof preferences) => {
         setPreferences((current) => ({ ...current, [key]: !current[key] }));
@@ -157,8 +169,8 @@ export default function SettingsPage() {
                         <div className={styles.actionList}>
                             <button type="button" className={styles.actionRow} onClick={() => setIsPasswordModalOpen(true)}>
                                 <span>
-                                    <strong>Change Password</strong>
-                                    <small>Update your current password.</small>
+                                    <strong>{isPasswordSetupMode ? 'Set Password' : 'Change Password'}</strong>
+                                    <small>{isPasswordSetupMode ? 'Add a password for username or email login.' : 'Update your current password.'}</small>
                                 </span>
                                 <span aria-hidden="true">›</span>
                             </button>
@@ -191,7 +203,16 @@ export default function SettingsPage() {
                 <ChangePasswordModal
                     isOpen={isPasswordModalOpen}
                     onClose={() => setIsPasswordModalOpen(false)}
-                    onSuccess={(message) => setToast({ message, type: 'success' })}
+                    requiresCurrentPassword={!isPasswordSetupMode}
+                    onSuccess={(message) => {
+                        setToast({ message, type: 'success' });
+                        setIsPasswordModalOpen(false);
+                        if (isPasswordSetupMode) {
+                            checkAuth().finally(() => router.replace('/'));
+                            return;
+                        }
+                        checkAuth();
+                    }}
                     onError={(message) => setToast({ message, type: 'error' })}
                 />
                 {toast && (

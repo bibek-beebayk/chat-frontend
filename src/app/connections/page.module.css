@@ -473,6 +473,99 @@
     background: rgba(153, 51, 255, 0.18);
 }
 
+:global(html[data-theme='light']) .heroPanel {
+    border-color: rgba(99, 102, 241, 0.16);
+    background:
+        radial-gradient(circle at 12% 0%, rgba(153, 51, 255, 0.12), transparent 34%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.94));
+    box-shadow: var(--shadow-sm);
+}
+
+:global(html[data-theme='light']) .heroEyebrow,
+:global(html[data-theme='light']) .userType,
+:global(html[data-theme='light']) .sectionCount {
+    color: var(--color-primary-dark);
+    background: rgba(153, 51, 255, 0.1);
+    border-color: rgba(153, 51, 255, 0.18);
+}
+
+:global(html[data-theme='light']) .statCard,
+:global(html[data-theme='light']) .tabs,
+:global(html[data-theme='light']) .searchRow,
+:global(html[data-theme='light']) .userCard,
+:global(html[data-theme='light']) .chatBtn,
+:global(html[data-theme='light']) .menuTrigger {
+    background: rgba(255, 255, 255, 0.82);
+    border-color: rgba(15, 23, 42, 0.08);
+}
+
+:global(html[data-theme='light']) .controlPanel,
+:global(html[data-theme='light']) .sectionCard {
+    border-color: rgba(99, 102, 241, 0.14);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.94));
+    box-shadow: var(--shadow-sm);
+}
+
+:global(html[data-theme='light']) .pendingBtn,
+:global(html[data-theme='light']) .connectBtn,
+:global(html[data-theme='light']) .showMoreBtn {
+    color: var(--color-primary-dark);
+    background: rgba(153, 51, 255, 0.09);
+    border-color: rgba(153, 51, 255, 0.2);
+}
+
+:global(html[data-theme='light']) .pendingBtn:hover,
+:global(html[data-theme='light']) .connectBtn:hover,
+:global(html[data-theme='light']) .showMoreBtn:hover {
+    background: rgba(153, 51, 255, 0.14);
+}
+
+:global(html[data-theme='light']) .activeTab {
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.16);
+}
+
+:global(html[data-theme='light']) .refreshBtn {
+    color: var(--color-text-primary);
+    background: rgba(248, 250, 252, 0.92);
+    border-color: rgba(15, 23, 42, 0.08);
+}
+
+:global(html[data-theme='light']) .refreshBtn:hover {
+    border-color: rgba(153, 51, 255, 0.24);
+    background: #fff;
+}
+
+:global(html[data-theme='light']) .sectionHeader {
+    border-bottom-color: rgba(15, 23, 42, 0.08);
+}
+
+:global(html[data-theme='light']) .emptyState {
+    border-color: rgba(15, 23, 42, 0.14);
+    background: rgba(248, 250, 252, 0.72);
+}
+
+:global(html[data-theme='light']) .userCard:hover {
+    background: #fff;
+    border-color: rgba(153, 51, 255, 0.22);
+}
+
+:global(html[data-theme='light']) .menuPanel {
+    background: #fff;
+    border-color: rgba(99, 102, 241, 0.18);
+    box-shadow: var(--shadow-md);
+}
+
+:global(html[data-theme='light']) .menuPanel button:hover {
+    background: rgba(153, 51, 255, 0.08);
+}
+
+:global(html[data-theme='light']) .errorBox {
+    color: #b91c1c;
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.24);
+}
+
 @media (max-width: 640px) {
     .heroPanel,
     .controlPanel,

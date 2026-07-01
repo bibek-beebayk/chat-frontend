@@ -1,0 +1,117 @@
+.page,
+.loading {
+    align-items: center;
+    background:
+        radial-gradient(circle at 20% 12%, rgba(var(--color-primary-rgb), 0.28), transparent 32%),
+        radial-gradient(circle at 85% 18%, rgba(255, 215, 0, 0.16), transparent 28%),
+        var(--color-bg-primary);
+    display: grid;
+    min-height: 100vh;
+    padding: 1.25rem;
+}
+
+.card {
+    background: rgba(var(--color-surface-rgb), 0.9);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.28);
+    border-radius: 18px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.32);
+    margin: 0 auto;
+    max-width: 460px;
+    padding: clamp(1.35rem, 4vw, 2rem);
+    text-align: center;
+    width: 100%;
+}
+
+.logo {
+    display: block;
+    height: 76px;
+    margin: 0 auto 1rem;
+    object-fit: contain;
+    width: auto;
+}
+
+.eyebrow {
+    color: var(--color-primary-light);
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    margin: 0 0 0.5rem;
+    text-transform: uppercase;
+}
+
+.card h1 {
+    color: var(--color-text-primary);
+    font-size: clamp(1.75rem, 6vw, 2.35rem);
+    line-height: 1.02;
+    margin: 0;
+}
+
+.copy {
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    line-height: 1.45;
+    margin: 0.8rem auto 1.35rem;
+    max-width: 340px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    text-align: left;
+}
+
+.form label {
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+    font-weight: 800;
+}
+
+.form input {
+    background: rgba(var(--color-bg-secondary-rgb), 0.82);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    color: var(--color-text-primary);
+    font: inherit;
+    font-weight: 700;
+    outline: none;
+    padding: 0.95rem 1rem;
+    width: 100%;
+}
+
+.form input:focus {
+    border-color: rgba(var(--color-primary-rgb), 0.8);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.16);
+}
+
+.form small {
+    color: var(--color-text-secondary);
+    font-size: 0.78rem;
+}
+
+.form button {
+    background: var(--color-primary);
+    border: 0;
+    border-radius: 12px;
+    color: #fff;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 900;
+    margin-top: 0.45rem;
+    padding: 0.95rem 1rem;
+}
+
+.form button:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.error {
+    background: rgba(255, 92, 122, 0.12);
+    border: 1px solid rgba(255, 92, 122, 0.32);
+    border-radius: 10px;
+    color: #ffb4c2;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 0.75rem 0.85rem;
+}

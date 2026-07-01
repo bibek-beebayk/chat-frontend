@@ -277,6 +277,61 @@
     text-decoration: none;
 }
 
+:global(html[data-theme='light']) .panel {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.94));
+    border-color: rgba(99, 102, 241, 0.14);
+    box-shadow: var(--shadow-sm);
+}
+
+:global(html[data-theme='light']) .profileSummary span {
+    color: var(--color-primary-dark);
+    background: rgba(153, 51, 255, 0.1);
+    border-color: rgba(153, 51, 255, 0.18);
+}
+
+:global(html[data-theme='light']) .secondaryAction,
+:global(html[data-theme='light']) .segment,
+:global(html[data-theme='light']) .accentBtn,
+:global(html[data-theme='light']) .settingToggle,
+:global(html[data-theme='light']) .actionRow,
+:global(html[data-theme='light']) .linkGrid a {
+    background: rgba(255, 255, 255, 0.82);
+    border-color: rgba(15, 23, 42, 0.08);
+}
+
+:global(html[data-theme='light']) .secondaryAction:hover,
+:global(html[data-theme='light']) .settingToggle:hover,
+:global(html[data-theme='light']) .actionRow:hover,
+:global(html[data-theme='light']) .linkGrid a:hover {
+    background: #fff;
+    border-color: rgba(153, 51, 255, 0.22);
+}
+
+:global(html[data-theme='light']) .section {
+    border-top-color: rgba(15, 23, 42, 0.08);
+}
+
+:global(html[data-theme='light']) .segmentBtn.active {
+    color: #fff;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    box-shadow: 0 8px 18px rgba(99, 102, 241, 0.14);
+}
+
+:global(html[data-theme='light']) .accentBtn.activeAccent {
+    color: var(--color-text-primary);
+    background: rgba(153, 51, 255, 0.08);
+    border-color: rgba(153, 51, 255, 0.24);
+}
+
+:global(html[data-theme='light']) .switch {
+    background: rgba(15, 23, 42, 0.14);
+}
+
+:global(html[data-theme='light']) .switch span {
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.18);
+}
+
 @media (min-width: 640px) {
     .profileActions,
     .linkGrid {
