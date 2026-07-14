@@ -22,6 +22,68 @@
     width: 100%;
 }
 
+<<<<<<< Updated upstream
+=======
+.passwordNotice {
+    align-items: center;
+    background:
+        radial-gradient(circle at 6% 30%, rgba(255, 215, 0, 0.16), transparent 26%),
+        rgba(18, 12, 34, 0.92);
+    border: 1px solid rgba(255, 215, 0, 0.28);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding: 1rem;
+}
+
+.passwordNoticeIcon {
+    align-items: center;
+    background: rgba(255, 215, 0, 0.14);
+    border: 1px solid rgba(255, 215, 0, 0.26);
+    border-radius: 14px;
+    color: var(--color-accent);
+    display: flex;
+    height: 46px;
+    justify-content: center;
+    width: 46px;
+}
+
+.passwordNoticeIcon svg {
+    height: 22px;
+    width: 22px;
+}
+
+.passwordNotice h2 {
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    font-weight: 900;
+    margin: 0 0 0.2rem;
+}
+
+.passwordNotice p {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.passwordNotice button {
+    background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+    border: 0;
+    border-radius: var(--radius-md);
+    color: #fff;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 900;
+    padding: 0.72rem 1rem;
+    white-space: nowrap;
+}
+
+>>>>>>> Stashed changes
 .hero {
     border: 1px solid rgba(var(--color-primary-rgb), 0.34);
     border-radius: var(--radius-lg);
@@ -72,7 +134,7 @@
 }
 
 .hero h1 {
-    background: linear-gradient(180deg, #fff 10%, #c987ff 48%, #7f28ff 100%);
+    background: linear-gradient(180deg, #fff 10%, var(--color-primary-light) 48%, var(--color-primary) 100%);
     background-clip: text;
     color: transparent;
     font-size: clamp(2.4rem, 5.5vw, 4.7rem);
@@ -108,7 +170,7 @@
 }
 
 .featureIcon {
-    color: var(--color-primary-light);
+    color: var(--color-accent);
     display: inline-flex;
     flex-shrink: 0;
     height: 22px;
@@ -167,8 +229,8 @@
 }
 
 .primaryAction {
-    background: linear-gradient(135deg, #8f35ff, #5c16d9);
-    box-shadow: 0 12px 28px rgba(102, 32, 214, 0.35);
+    background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+    box-shadow: 0 12px 28px rgba(var(--color-accent-rgb), 0.24);
     color: white;
 }
 
@@ -234,8 +296,8 @@
 }
 
 .purple {
-    background: rgba(147, 51, 234, 0.22);
-    color: #d6a2ff;
+    background: rgba(var(--color-accent-rgb), 0.2);
+    color: var(--color-accent);
 }
 
 .green {
@@ -398,11 +460,11 @@
 }
 
 .roleBadge {
-    background: linear-gradient(135deg, #9333ea, #6d28d9);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
 }
 
 .pinnedBadge {
-    background: linear-gradient(135deg, #9333ea, #6d28d9);
+    background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
 }
 
 .feedContentRow {
@@ -431,7 +493,7 @@
     aspect-ratio: 2 / 1;
     background:
         radial-gradient(circle at 20% 25%, rgba(255, 214, 74, 0.85), transparent 18%),
-        radial-gradient(circle at 78% 70%, rgba(153, 51, 255, 0.82), transparent 28%),
+        radial-gradient(circle at 78% 70%, rgba(var(--color-primary-rgb), 0.82), transparent 28%),
         linear-gradient(135deg, #2a0e56, #f59e0b);
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: var(--radius-md);
@@ -526,7 +588,7 @@
 }
 
 .pollTrack span {
-    background: linear-gradient(90deg, #9d36ff, #5b18d8);
+    background: linear-gradient(90deg, var(--color-accent), var(--color-primary));
     border-radius: inherit;
     display: block;
     height: 100%;
@@ -578,7 +640,7 @@
 
 .staffRefreshButton {
     align-items: center;
-    background: linear-gradient(135deg, #8f35ff, #5c16d9);
+    background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
     border-radius: var(--radius-md);
     color: #fff;
     display: inline-flex;
@@ -890,7 +952,7 @@
 }
 
 :global(html[data-theme='light']) .hero h1 {
-    background: linear-gradient(180deg, #2e1065 8%, #6d28d9 48%, #be185d 100%);
+    background: linear-gradient(180deg, var(--color-primary-dark) 8%, var(--color-primary) 48%, var(--color-secondary) 100%);
     background-clip: text;
     text-shadow: none;
 }
@@ -912,7 +974,7 @@
 }
 
 :global(html[data-theme='light']) .featureIcon {
-    color: var(--color-primary);
+    color: var(--color-accent);
 }
 
 :global(html[data-theme='light']) .heroLogo {
@@ -931,8 +993,8 @@
 }
 
 :global(html[data-theme='light']) .purple {
-    background: rgba(124, 58, 237, 0.12);
-    color: #6d28d9;
+    background: rgba(var(--color-accent-rgb), 0.14);
+    color: var(--color-primary-dark);
 }
 
 :global(html[data-theme='light']) .green {

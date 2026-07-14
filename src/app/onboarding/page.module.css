@@ -1,7 +1,7 @@
 .page {
     align-items: center;
     background:
-        radial-gradient(circle at 12% 8%, rgba(153, 51, 255, 0.24), transparent 34%),
+        radial-gradient(circle at 12% 8%, rgba(var(--color-primary-rgb), 0.24), transparent 34%),
         radial-gradient(circle at 88% 14%, rgba(255, 215, 0, 0.12), transparent 28%),
         linear-gradient(135deg, #090612, #130a24 52%, #080610);
     display: flex;
@@ -19,7 +19,7 @@
 
 .sidePanel,
 .panel {
-    border: 1px solid rgba(153, 51, 255, 0.2);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
     border-radius: var(--radius-lg);
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
 }
@@ -136,7 +136,7 @@
 }
 
 .progressTrack span {
-    background: linear-gradient(90deg, #8f35ff, #ffd15e);
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
     border-radius: inherit;
     display: block;
     height: 100%;
@@ -165,7 +165,7 @@
 
 .hero {
     align-items: start;
-    border: 1px solid rgba(153, 51, 255, 0.16);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
     border-radius: var(--radius-lg);
     background:
         radial-gradient(circle at 92% 0%, rgba(255, 215, 0, 0.08), transparent 34%),
@@ -217,7 +217,7 @@
 }
 
 .stepPills .activeStep {
-    background: linear-gradient(135deg, rgba(153, 51, 255, 0.9), rgba(99, 102, 241, 0.72));
+    background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.9), rgba(99, 102, 241, 0.72));
     color: #fff;
 }
 
@@ -291,7 +291,7 @@
 
 .card:hover {
     background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(153, 51, 255, 0.24);
+    border-color: rgba(var(--color-primary-rgb), 0.24);
     transform: translateY(-1px);
 }
 
@@ -329,8 +329,8 @@
 }
 
 .nameRow span {
-    background: rgba(153, 51, 255, 0.13);
-    border: 1px solid rgba(153, 51, 255, 0.2);
+    background: rgba(var(--color-primary-rgb), 0.13);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
     border-radius: 999px;
     color: var(--color-primary-light);
     font-size: 0.66rem;
@@ -365,8 +365,8 @@
 }
 
 .primaryBtn {
-    background: linear-gradient(135deg, #8f35ff, #5c16d9);
-    box-shadow: 0 12px 26px rgba(102, 32, 214, 0.28);
+    background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+    box-shadow: 0 12px 26px rgba(var(--color-primary-rgb), 0.28);
     color: #fff;
 }
 
@@ -382,7 +382,7 @@
 }
 
 .secondaryBtn:hover {
-    border-color: rgba(153, 51, 255, 0.32);
+    border-color: rgba(var(--color-primary-rgb), 0.32);
 }
 
 .footerActions {
@@ -397,7 +397,7 @@
 
 :global(html[data-theme='light']) .page {
     background:
-        radial-gradient(circle at 12% 8%, rgba(153, 51, 255, 0.14), transparent 34%),
+        radial-gradient(circle at 12% 8%, rgba(var(--color-primary-rgb), 0.14), transparent 34%),
         radial-gradient(circle at 88% 14%, rgba(255, 193, 7, 0.14), transparent 28%),
         linear-gradient(135deg, #ffffff, #f7f2ff 58%, #fff8df);
 }
@@ -405,7 +405,7 @@
 :global(html[data-theme='light']) .sidePanel,
 :global(html[data-theme='light']) .panel {
     background: linear-gradient(180deg, #ffffff, #fbf8ff);
-    border-color: rgba(153, 51, 255, 0.16);
+    border-color: rgba(var(--color-primary-rgb), 0.16);
     box-shadow: 0 18px 46px rgba(86, 42, 145, 0.12);
 }
 
@@ -422,16 +422,16 @@
 :global(html[data-theme='light']) .footerActions,
 :global(html[data-theme='light']) .stepPills {
     background: rgba(248, 244, 255, 0.82);
-    border-color: rgba(153, 51, 255, 0.12);
+    border-color: rgba(var(--color-primary-rgb), 0.12);
 }
 
 :global(html[data-theme='light']) .empty {
-    border-color: rgba(153, 51, 255, 0.18);
+    border-color: rgba(var(--color-primary-rgb), 0.18);
 }
 
 :global(html[data-theme='light']) .secondaryBtn {
     background: rgba(255, 255, 255, 0.72);
-    border-color: rgba(153, 51, 255, 0.14);
+    border-color: rgba(var(--color-primary-rgb), 0.14);
 }
 
 @media (min-width: 760px) {

@@ -79,6 +79,11 @@ class ApiClient {
             headers['Content-Type'] = 'application/json';
         }
 
+        if (!options.skipAuth && typeof window !== 'undefined') {
+            this.accessToken = this.accessToken || localStorage.getItem('accessToken');
+            this.refreshToken = this.refreshToken || localStorage.getItem('refreshToken');
+        }
+
         if (this.accessToken && !options.skipAuth) {
             headers['Authorization'] = `Bearer ${this.accessToken}`;
         }

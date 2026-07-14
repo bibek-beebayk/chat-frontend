@@ -91,7 +91,7 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    border: 2px solid rgba(153, 51, 255, 0.3);
+    border: 2px solid rgba(var(--color-primary-rgb), 0.3);
 }
 
 .memberInfo {
@@ -202,8 +202,8 @@
 
 .activityAvatarFallback {
     align-items: center;
-    background: rgba(153, 51, 255, 0.16);
-    border: 1px solid rgba(153, 51, 255, 0.28);
+    background: rgba(var(--color-primary-rgb), 0.16);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.28);
     border-radius: 50%;
     color: var(--color-primary-light);
     display: flex;
@@ -301,7 +301,7 @@
 }
 
 .completeBtn {
-    background: rgba(153, 51, 255, 0.15);
+    background: rgba(var(--color-primary-rgb), 0.15);
     border: 1px solid var(--color-primary);
     color: var(--color-primary-light);
     border-radius: var(--radius-md);
@@ -319,7 +319,7 @@
 
 .streakWidget {
     background:
-        radial-gradient(circle at 18% 0%, rgba(153, 51, 255, 0.22), transparent 38%),
+        radial-gradient(circle at 18% 0%, rgba(var(--color-primary-rgb), 0.22), transparent 38%),
         linear-gradient(180deg, rgba(20, 10, 35, 0.92), rgba(11, 7, 22, 0.94));
     position: relative;
     z-index: 150;
@@ -362,7 +362,7 @@
 
 .streakInfo::after {
     background: rgba(10, 6, 20, 0.98);
-    border: 1px solid rgba(153, 51, 255, 0.24);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.24);
     border-radius: var(--radius-md);
     bottom: calc(100% + 0.55rem);
     box-shadow: var(--shadow-md);
@@ -402,8 +402,8 @@
 
 .streakRing {
     align-items: baseline;
-    background: rgba(153, 51, 255, 0.16);
-    border: 1px solid rgba(153, 51, 255, 0.28);
+    background: rgba(var(--color-primary-rgb), 0.16);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.28);
     border-radius: var(--radius-lg);
     color: var(--color-text-primary);
     display: flex;
@@ -534,7 +534,7 @@
 
 .redeemModal {
     background: linear-gradient(180deg, rgba(20, 10, 35, 0.98), rgba(12, 7, 24, 0.98));
-    border: 1px solid rgba(153, 51, 255, 0.2);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
     border-radius: var(--radius-lg);
     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
     display: grid;
@@ -609,7 +609,7 @@
 
 .redeemField input:focus {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(153, 51, 255, 0.14);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.14);
 }
 
 .redeemActions {
@@ -652,29 +652,29 @@
 
 :global(html[data-theme='light']) .streakWidget {
     background:
-        radial-gradient(circle at 18% 0%, rgba(153, 51, 255, 0.12), transparent 38%),
+        radial-gradient(circle at 18% 0%, rgba(var(--color-primary-rgb), 0.12), transparent 38%),
         linear-gradient(180deg, #ffffff, #fbf8ff);
 }
 
 :global(html[data-theme='light']) .streakInfo {
-    background: rgba(153, 51, 255, 0.08);
-    border-color: rgba(153, 51, 255, 0.14);
+    background: rgba(var(--color-primary-rgb), 0.08);
+    border-color: rgba(var(--color-primary-rgb), 0.14);
 }
 
 :global(html[data-theme='light']) .streakInfo::after {
     background: #ffffff;
-    border-color: rgba(153, 51, 255, 0.18);
+    border-color: rgba(var(--color-primary-rgb), 0.18);
     color: var(--color-text-primary);
 }
 
 :global(html[data-theme='light']) .requestStatus {
     background: rgba(248, 244, 255, 0.82);
-    border-color: rgba(153, 51, 255, 0.12);
+    border-color: rgba(var(--color-primary-rgb), 0.12);
 }
 
 :global(html[data-theme='light']) .lastRedemptionStatus {
     background: rgba(248, 244, 255, 0.82);
-    border-color: rgba(153, 51, 255, 0.12);
+    border-color: rgba(var(--color-primary-rgb), 0.12);
 }
 
 :global(html[data-theme='light']) .redemptionStatus_pending {
@@ -715,10 +715,10 @@
 
 :global(html[data-theme='light']) .redeemModal {
     background: linear-gradient(180deg, #ffffff, #fbf8ff);
-    border-color: rgba(153, 51, 255, 0.14);
+    border-color: rgba(var(--color-primary-rgb), 0.14);
 }
 
 :global(html[data-theme='light']) .redeemField input {
     background: #fff;
-    border-color: rgba(153, 51, 255, 0.14);
+    border-color: rgba(var(--color-primary-rgb), 0.14);
 }

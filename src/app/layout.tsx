@@ -19,6 +19,10 @@ export const metadata: Metadata = {
     title: 'Rollin Community',
     description: 'Rollin Community Chat Application',
     manifest: "/manifest.json",
+    icons: {
+        icon: "/favicon.ico",
+        shortcut: "/favicon.ico",
+    },
     appleWebApp: {
         capable: true,
         statusBarStyle: "black-translucent",

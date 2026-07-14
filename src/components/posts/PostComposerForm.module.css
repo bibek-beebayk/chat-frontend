@@ -1,5 +1,5 @@
 .wrap {
-    border: 1px solid rgba(153, 51, 255, 0.18);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.18);
     border-radius: var(--radius-lg);
     background:
         radial-gradient(circle at 88% 0%, rgba(255, 215, 0, 0.08), transparent 28%),
@@ -51,7 +51,7 @@
 .input:focus,
 .textarea:focus,
 .select:focus {
-    border-color: rgba(153, 51, 255, 0.55);
+    border-color: rgba(var(--color-primary-rgb), 0.55);
     box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.14);
     background: rgba(255, 255, 255, 0.06);
 }
@@ -130,19 +130,19 @@
 }
 
 .addBtn {
-    border: 1px solid rgba(153, 51, 255, 0.26);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.26);
     border-radius: 999px;
     min-height: 38px;
     padding: 0.5rem 0.85rem;
     color: var(--color-primary-light);
-    background: rgba(153, 51, 255, 0.1);
+    background: rgba(var(--color-primary-rgb), 0.1);
     font-size: 0.82rem;
     font-weight: 900;
 }
 
 .addBtn:hover:not(:disabled) {
-    background: rgba(153, 51, 255, 0.16);
-    border-color: rgba(153, 51, 255, 0.46);
+    background: rgba(var(--color-primary-rgb), 0.16);
+    border-color: rgba(var(--color-primary-rgb), 0.46);
 }
 
 .addBtn:disabled {
@@ -153,10 +153,10 @@
 .dropzone {
     width: 100%;
     margin-top: 0.85rem;
-    border: 1px dashed rgba(153, 51, 255, 0.34);
+    border: 1px dashed rgba(var(--color-primary-rgb), 0.34);
     border-radius: var(--radius-md);
     background:
-        radial-gradient(circle at 18% 20%, rgba(153, 51, 255, 0.13), transparent 34%),
+        radial-gradient(circle at 18% 20%, rgba(var(--color-primary-rgb), 0.13), transparent 34%),
         rgba(255, 255, 255, 0.025);
     color: var(--color-text-primary);
     display: flex;

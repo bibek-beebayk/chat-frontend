@@ -46,7 +46,7 @@
     background:
         radial-gradient(circle at 86% 0%, rgba(255, 215, 0, 0.08), transparent 30%),
         linear-gradient(180deg, rgba(20, 10, 35, 0.92), rgba(10, 7, 20, 0.96));
-    border: 1px solid rgba(153, 51, 255, 0.18);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.18);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
 }
@@ -67,7 +67,7 @@
     inset: 0;
     pointer-events: none;
     background:
-        radial-gradient(circle at 14% 12%, rgba(153, 51, 255, 0.22), transparent 30%),
+        radial-gradient(circle at 14% 12%, rgba(var(--color-primary-rgb), 0.22), transparent 30%),
         linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
         linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px);
     background-size: auto, 48px 48px, 48px 48px;
@@ -96,8 +96,8 @@
     display: inline-flex;
     width: fit-content;
     color: var(--color-primary-light);
-    background: rgba(153, 51, 255, 0.14);
-    border: 1px solid rgba(153, 51, 255, 0.25);
+    background: rgba(var(--color-primary-rgb), 0.14);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.25);
     border-radius: 999px;
     padding: 0.26rem 0.58rem;
     font-size: 0.7rem;
@@ -125,8 +125,8 @@
 
 .avatarBtn {
     grid-column: 1 / -1;
-    border: 1px solid rgba(153, 51, 255, 0.25);
-    background: rgba(153, 51, 255, 0.12);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.25);
+    background: rgba(var(--color-primary-rgb), 0.12);
     color: var(--color-text-primary);
     border-radius: var(--radius-md);
     min-height: 42px;
@@ -136,7 +136,7 @@
 }
 
 .avatarBtn:hover:not(:disabled) {
-    background: rgba(153, 51, 255, 0.18);
+    background: rgba(var(--color-primary-rgb), 0.18);
 }
 
 .avatarBtn:disabled {
@@ -238,7 +238,7 @@
 }
 
 .actionBtn:hover {
-    border-color: rgba(153, 51, 255, 0.35);
+    border-color: rgba(var(--color-primary-rgb), 0.35);
     color: var(--color-primary-light);
 }
 

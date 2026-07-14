@@ -4,9 +4,9 @@
 
 .panel {
     background:
-        radial-gradient(circle at 18% 0%, rgba(153, 51, 255, 0.16), transparent 28%),
+        radial-gradient(circle at 18% 0%, rgba(var(--color-primary-rgb), 0.16), transparent 28%),
         linear-gradient(180deg, rgba(20, 10, 35, 0.92), rgba(10, 7, 20, 0.96));
-    border: 1px solid rgba(153, 51, 255, 0.16);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
@@ -44,8 +44,8 @@
 }
 
 .supportQuickBtn {
-    border: 1px solid rgba(153, 51, 255, 0.28);
-    background: rgba(153, 51, 255, 0.14);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.28);
+    background: rgba(var(--color-primary-rgb), 0.14);
     color: var(--color-text-primary);
     border-radius: 999px;
     font-size: 0.76rem;
@@ -56,7 +56,7 @@
 }
 
 .supportQuickBtn:hover {
-    border-color: rgba(153, 51, 255, 0.5);
+    border-color: rgba(var(--color-primary-rgb), 0.5);
     color: var(--color-primary-light);
 }
 
@@ -107,7 +107,7 @@
 }
 
 .searchBox:focus-within {
-    border-color: rgba(153, 51, 255, 0.5);
+    border-color: rgba(var(--color-primary-rgb), 0.5);
     box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.12);
 }
 
@@ -239,7 +239,7 @@
 }
 
 .roomItem:hover {
-    border-color: rgba(153, 51, 255, 0.28);
+    border-color: rgba(var(--color-primary-rgb), 0.28);
     background: rgba(255, 255, 255, 0.065);
 }
 

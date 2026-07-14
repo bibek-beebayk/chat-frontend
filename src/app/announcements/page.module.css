@@ -1,9 +1,9 @@
 .heroPanel {
     background:
-        radial-gradient(circle at 12% 0%, rgba(153, 51, 255, 0.2), transparent 32%),
+        radial-gradient(circle at 12% 0%, rgba(var(--color-primary-rgb), 0.2), transparent 32%),
         radial-gradient(circle at 92% 18%, rgba(255, 215, 0, 0.08), transparent 28%),
         linear-gradient(135deg, rgba(20, 10, 35, 0.94), rgba(10, 7, 18, 0.96));
-    border: 1px solid rgba(153, 51, 255, 0.2);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     display: grid;
@@ -13,8 +13,8 @@
 }
 
 .heroEyebrow {
-    background: rgba(153, 51, 255, 0.14);
-    border: 1px solid rgba(153, 51, 255, 0.28);
+    background: rgba(var(--color-primary-rgb), 0.14);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.28);
     border-radius: 999px;
     color: var(--color-primary-light);
     display: inline-flex;
@@ -53,7 +53,7 @@
 .announcementCard,
 .emptyBox {
     background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
-    border: 1px solid rgba(153, 51, 255, 0.16);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
 }
@@ -124,19 +124,19 @@
 }
 
 .activeFilter {
-    background: linear-gradient(135deg, rgba(153, 51, 255, 0.86), rgba(99, 102, 241, 0.72));
+    background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.86), rgba(99, 102, 241, 0.72));
     color: #fff;
 }
 
 .refreshBtn,
 .createBtn {
-    background: rgba(153, 51, 255, 0.12);
-    border: 1px solid rgba(153, 51, 255, 0.3);
+    background: rgba(var(--color-primary-rgb), 0.12);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
     color: var(--color-text-primary);
 }
 
 .createBtn {
-    background: linear-gradient(135deg, rgba(153, 51, 255, 0.92), rgba(99, 102, 241, 0.82));
+    background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.92), rgba(99, 102, 241, 0.82));
     box-shadow: 0 10px 24px rgba(99, 102, 241, 0.22);
     color: #fff;
 }
@@ -194,14 +194,14 @@
 
 .featuredCard:hover,
 .announcementCard:hover {
-    border-color: rgba(153, 51, 255, 0.28);
+    border-color: rgba(var(--color-primary-rgb), 0.28);
     transform: translateY(-1px);
 }
 
 .featuredCard {
     background:
         radial-gradient(circle at 8% 12%, rgba(250, 204, 21, 0.18), transparent 24%),
-        radial-gradient(circle at 84% 20%, rgba(153, 51, 255, 0.26), transparent 34%),
+        radial-gradient(circle at 84% 20%, rgba(var(--color-primary-rgb), 0.26), transparent 34%),
         linear-gradient(135deg, rgba(31, 18, 55, 0.98), rgba(11, 7, 24, 0.98));
     border-color: rgba(250, 204, 21, 0.24);
     box-shadow:
@@ -290,7 +290,7 @@
     aspect-ratio: 16 / 9;
     background:
         radial-gradient(circle at 70% 22%, rgba(255, 215, 0, 0.14), transparent 28%),
-        linear-gradient(135deg, rgba(153, 51, 255, 0.24), rgba(10, 7, 20, 0.92));
+        linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.24), rgba(10, 7, 20, 0.92));
     display: flex;
     justify-content: center;
     overflow: hidden;
@@ -450,7 +450,7 @@
 
 .announcementForm {
     background: linear-gradient(180deg, rgba(20, 10, 35, 0.98), rgba(10, 7, 18, 0.98));
-    border: 1px solid rgba(153, 51, 255, 0.22);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.22);
     border-radius: var(--radius-lg);
     box-shadow: 0 28px 80px rgba(0, 0, 0, 0.46);
     display: flex;
@@ -532,8 +532,8 @@
 .formField input:focus,
 .formField select:focus,
 .formField textarea:focus {
-    border-color: rgba(153, 51, 255, 0.55);
-    box-shadow: 0 0 0 3px rgba(153, 51, 255, 0.12);
+    border-color: rgba(var(--color-primary-rgb), 0.55);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.12);
 }
 
 .formField textarea {
@@ -579,7 +579,7 @@
 }
 
 .formActions button:last-child {
-    background: linear-gradient(135deg, rgba(153, 51, 255, 0.92), rgba(99, 102, 241, 0.82));
+    background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.92), rgba(99, 102, 241, 0.82));
     color: #fff;
 }
 
@@ -589,14 +589,14 @@
 :global(html[data-theme='light']) .emptyBox,
 :global(html[data-theme='light']) .announcementForm {
     background: linear-gradient(180deg, #ffffff, #fbf8ff);
-    border-color: rgba(153, 51, 255, 0.14);
+    border-color: rgba(var(--color-primary-rgb), 0.14);
     box-shadow: 0 10px 28px rgba(86, 42, 145, 0.08);
 }
 
 :global(html[data-theme='light']) .featuredCard {
     background:
         radial-gradient(circle at 8% 12%, rgba(250, 204, 21, 0.18), transparent 24%),
-        radial-gradient(circle at 84% 20%, rgba(153, 51, 255, 0.12), transparent 34%),
+        radial-gradient(circle at 84% 20%, rgba(var(--color-primary-rgb), 0.12), transparent 34%),
         linear-gradient(135deg, #fffdf5, #f8f4ff);
     border-color: rgba(202, 138, 4, 0.22);
     box-shadow: 0 18px 42px rgba(86, 42, 145, 0.11);
@@ -613,7 +613,7 @@
 }
 
 :global(html[data-theme='light']) .pinnedBadge {
-    background: linear-gradient(135deg, rgba(250, 204, 21, 0.2), rgba(153, 51, 255, 0.1));
+    background: linear-gradient(135deg, rgba(250, 204, 21, 0.2), rgba(var(--color-primary-rgb), 0.1));
     border-color: rgba(202, 138, 4, 0.22);
     color: #854d0e;
 }
@@ -621,7 +621,7 @@
 :global(html[data-theme='light']) .statCard,
 :global(html[data-theme='light']) .filterBtn {
     background: rgba(248, 244, 255, 0.82);
-    border-color: rgba(153, 51, 255, 0.12);
+    border-color: rgba(var(--color-primary-rgb), 0.12);
 }
 
 :global(html[data-theme='light']) .modalBackdrop {
@@ -641,7 +641,7 @@
 :global(html[data-theme='light']) .formField select,
 :global(html[data-theme='light']) .formField textarea {
     background: rgba(248, 244, 255, 0.86);
-    border-color: rgba(153, 51, 255, 0.14);
+    border-color: rgba(var(--color-primary-rgb), 0.14);
     color: var(--color-text-primary);
 }
 

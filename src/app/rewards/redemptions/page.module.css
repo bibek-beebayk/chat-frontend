@@ -19,7 +19,7 @@
 .requestCard,
 .emptyState {
     background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
-    border: 1px solid rgba(153, 51, 255, 0.16);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
 }
@@ -87,7 +87,7 @@
 }
 
 .activeFilter {
-    background: linear-gradient(135deg, rgba(153, 51, 255, 0.86), rgba(99, 102, 241, 0.72));
+    background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.86), rgba(99, 102, 241, 0.72));
     color: #fff;
 }
 
@@ -136,7 +136,7 @@
 }
 
 .requestSummary:focus-visible {
-    box-shadow: inset 0 0 0 3px rgba(153, 51, 255, 0.3);
+    box-shadow: inset 0 0 0 3px rgba(var(--color-primary-rgb), 0.3);
     outline: none;
 }
 
@@ -200,8 +200,8 @@
 
 .statusBadge,
 .sourceBadge {
-    background: rgba(153, 51, 255, 0.14);
-    border: 1px solid rgba(153, 51, 255, 0.24);
+    background: rgba(var(--color-primary-rgb), 0.14);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.24);
     border-radius: 999px;
     color: var(--color-primary-light);
     font-size: 0.7rem;
@@ -217,8 +217,8 @@
 }
 
 .source_login_streak {
-    background: rgba(153, 51, 255, 0.14);
-    border-color: rgba(153, 51, 255, 0.24);
+    background: rgba(var(--color-primary-rgb), 0.14);
+    border-color: rgba(var(--color-primary-rgb), 0.24);
     color: var(--color-primary-light);
 }
 
@@ -412,8 +412,8 @@
 }
 
 .recordPill {
-    background: rgba(153, 51, 255, 0.09);
-    border: 1px solid rgba(153, 51, 255, 0.16);
+    background: rgba(var(--color-primary-rgb), 0.09);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
     border-radius: var(--radius-sm);
     padding: 0.55rem;
 }
@@ -432,8 +432,8 @@
 }
 
 .actions button {
-    background: rgba(153, 51, 255, 0.14);
-    border: 1px solid rgba(153, 51, 255, 0.28);
+    background: rgba(var(--color-primary-rgb), 0.14);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.28);
     color: var(--color-text-primary);
 }
 
@@ -467,9 +467,9 @@
 
 .confirmDialog {
     background:
-        radial-gradient(circle at 20% 0%, rgba(153, 51, 255, 0.18), transparent 42%),
+        radial-gradient(circle at 20% 0%, rgba(var(--color-primary-rgb), 0.18), transparent 42%),
         linear-gradient(180deg, rgba(20, 10, 35, 0.98), rgba(12, 7, 24, 0.98));
-    border: 1px solid rgba(153, 51, 255, 0.22);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.22);
     border-radius: var(--radius-lg);
     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
     display: grid;
@@ -538,7 +538,7 @@
 
 .reasonField textarea:focus {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(153, 51, 255, 0.14);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.14);
 }
 
 .reasonError {
@@ -568,8 +568,8 @@
 }
 
 .confirmActions button:last-child {
-    background: rgba(153, 51, 255, 0.82);
-    border: 1px solid rgba(153, 51, 255, 0.9);
+    background: rgba(var(--color-primary-rgb), 0.82);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.9);
     color: #fff;
 }
 
@@ -595,7 +595,7 @@
 :global(html[data-theme='light']) .requestCard,
 :global(html[data-theme='light']) .emptyState {
     background: linear-gradient(180deg, #ffffff, #fbf8ff);
-    border-color: rgba(153, 51, 255, 0.14);
+    border-color: rgba(var(--color-primary-rgb), 0.14);
     box-shadow: 0 10px 28px rgba(86, 42, 145, 0.08);
 }
 
@@ -604,7 +604,7 @@
 :global(html[data-theme='light']) .note,
 :global(html[data-theme='light']) .verificationPanel {
     background: rgba(248, 244, 255, 0.82);
-    border-color: rgba(153, 51, 255, 0.12);
+    border-color: rgba(var(--color-primary-rgb), 0.12);
 }
 
 :global(html[data-theme='light']) .hiRollinAccount {
@@ -622,8 +622,8 @@
 }
 
 :global(html[data-theme='light']) .recordPill {
-    background: rgba(153, 51, 255, 0.06);
-    border-color: rgba(153, 51, 255, 0.12);
+    background: rgba(var(--color-primary-rgb), 0.06);
+    border-color: rgba(var(--color-primary-rgb), 0.12);
 }
 
 :global(html[data-theme='light']) .verifiedBadge {
@@ -663,7 +663,7 @@
 }
 
 :global(html[data-theme='light']) .requestDetails {
-    border-top-color: rgba(153, 51, 255, 0.12);
+    border-top-color: rgba(var(--color-primary-rgb), 0.12);
 }
 
 :global(html[data-theme='light']) .sourceBadge {
@@ -674,8 +674,8 @@
 
 :global(html[data-theme='light']) .source_login_streak {
     background: rgba(250, 245, 255, 0.9);
-    border-color: rgba(147, 51, 234, 0.2);
-    color: #7e22ce;
+    border-color: rgba(var(--color-primary-rgb), 0.2);
+    color: var(--color-primary-dark);
 }
 
 :global(html[data-theme='light']) .source_scratch_bonus {
@@ -701,19 +701,19 @@
 
 :global(html[data-theme='light']) .confirmDialog {
     background:
-        radial-gradient(circle at 20% 0%, rgba(153, 51, 255, 0.1), transparent 42%),
+        radial-gradient(circle at 20% 0%, rgba(var(--color-primary-rgb), 0.1), transparent 42%),
         linear-gradient(180deg, #ffffff, #fbf8ff);
-    border-color: rgba(153, 51, 255, 0.16);
+    border-color: rgba(var(--color-primary-rgb), 0.16);
 }
 
 :global(html[data-theme='light']) .confirmDetails {
     background: rgba(248, 244, 255, 0.82);
-    border-color: rgba(153, 51, 255, 0.12);
+    border-color: rgba(var(--color-primary-rgb), 0.12);
 }
 
 :global(html[data-theme='light']) .reasonField textarea {
     background: #ffffff;
-    border-color: rgba(153, 51, 255, 0.14);
+    border-color: rgba(var(--color-primary-rgb), 0.14);
 }
 
 @media (max-width: 720px) {

@@ -9,8 +9,8 @@
 
 .backBtn {
     align-items: center;
-    background: rgba(153, 51, 255, 0.1);
-    border: 1px solid rgba(153, 51, 255, 0.22);
+    background: rgba(var(--color-primary-rgb), 0.1);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.22);
     border-radius: 999px;
     color: var(--color-text-primary);
     display: inline-flex;
@@ -32,7 +32,7 @@
     background:
         radial-gradient(circle at 88% 0%, rgba(255, 215, 0, 0.06), transparent 30%),
         linear-gradient(180deg, rgba(20, 10, 35, 0.92), rgba(10, 7, 20, 0.96));
-    border: 1px solid rgba(153, 51, 255, 0.18);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.18);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
@@ -93,8 +93,8 @@
 
 .pinnedBadge,
 .categoryBadge {
-    background: rgba(153, 51, 255, 0.14);
-    border: 1px solid rgba(153, 51, 255, 0.24);
+    background: rgba(var(--color-primary-rgb), 0.14);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.24);
     color: var(--color-primary-light);
 }
 
@@ -192,18 +192,18 @@
 :global(html[data-theme='light']) .articleShell,
 :global(html[data-theme='light']) .emptyBox {
     background: linear-gradient(180deg, #ffffff, #fbf8ff);
-    border-color: rgba(153, 51, 255, 0.14);
+    border-color: rgba(var(--color-primary-rgb), 0.14);
     box-shadow: 0 10px 28px rgba(86, 42, 145, 0.08);
 }
 
 :global(html[data-theme='light']) .content {
-    border-top-color: rgba(153, 51, 255, 0.12);
+    border-top-color: rgba(var(--color-primary-rgb), 0.12);
 }
 
 :global(html[data-theme='light']) .priorityBadge,
 :global(html[data-theme='light']) .metaRow span {
     background: rgba(248, 244, 255, 0.82);
-    border-color: rgba(153, 51, 255, 0.12);
+    border-color: rgba(var(--color-primary-rgb), 0.12);
 }
 
 @media (max-width: 640px) {

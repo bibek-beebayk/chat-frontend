@@ -14,7 +14,7 @@
 }
 
 .itemWrap {
-    border-left: 2px solid rgba(153, 51, 255, 0.18);
+    border-left: 2px solid rgba(var(--color-primary-rgb), 0.18);
     padding: 0.65rem 0 0.2rem 0.8rem;
 }
 
@@ -173,7 +173,7 @@
     right: 0;
     min-width: 116px;
     border-radius: var(--radius-md);
-    border: 1px solid rgba(153, 51, 255, 0.2);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
     background: #130d26;
     box-shadow: var(--shadow-md);
     display: flex;
@@ -192,7 +192,7 @@
 }
 
 .actionMenuBtn:hover {
-    background: rgba(153, 51, 255, 0.14);
+    background: rgba(var(--color-primary-rgb), 0.14);
     color: var(--color-text-primary);
 }
 

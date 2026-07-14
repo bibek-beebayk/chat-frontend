@@ -51,6 +51,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [loading, setLoading] = useState(true);
 
     const checkAuth = async () => {
+        const accessToken = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+        if (!accessToken) {
+            setUser(null);
+            localStorage.removeItem('user');
+            setLoading(false);
+            return;
+        }
+
         try {
             const data = await apiClient.get<User>('/api/auth/me/');
             const normalized = normalizeUser(data);
