@@ -158,7 +158,6 @@ export default function HomePage() {
     }
 
     if (!user) return null;
-    const stats = buildStats(homeStats, statsLoading);
 
     if (user.user_type === 'staff') {
         return (
@@ -229,21 +228,6 @@ export default function HomePage() {
                             </button> */}
                         </div>
                     </div>
-
-                    <div className={styles.heroArt} aria-hidden="true">
-                        <img src="/logo-2.png" alt="" className={styles.heroLogo} />
-                    </div>
-                </section>
-
-                <section className={styles.statsGrid} aria-label="Community statistics">
-                    {stats.map((stat) => (
-                        <article key={stat.label} className={styles.statCard}>
-                            <span className={`${styles.statIcon} ${styles[stat.tone]}`}>{stat.icon}</span>
-                            <p>{stat.label}</p>
-                            <strong>{stat.value}</strong>
-                            <small>{stat.detail}</small>
-                        </article>
-                    ))}
                 </section>
 
                 <section className={styles.feedPanel}>
@@ -490,40 +474,6 @@ function StaffDashboard({
             </section>
         </div>
     );
-}
-
-function buildStats(homeStats: HomeStats | null, loading: boolean) {
-    const fallback = loading ? '...' : '0';
-    return [
-        {
-            label: 'Community Members',
-            value: homeStats ? formatCount(homeStats.active_members) : fallback,
-            detail: 'Active Accounts',
-            tone: 'purple',
-            icon: <MembersIcon />,
-        },
-        {
-            label: 'Online Now',
-            value: homeStats ? formatCount(homeStats.online_now) : fallback,
-            detail: 'Seen in 15 Minutes',
-            tone: 'green',
-            icon: <SignalIcon />,
-        },
-        {
-            label: 'Redeemable Bonuses',
-            value: homeStats ? formatCount(homeStats.redeemable_bonuses) : fallback,
-            detail: 'Streak Rewards Ready',
-            tone: 'gold',
-            icon: <GiftIcon />,
-        },
-        {
-            label: 'Active Events',
-            value: homeStats ? formatCount(homeStats.active_events) : fallback,
-            detail: 'Running Now',
-            tone: 'blue',
-            icon: <CalendarIcon />,
-        },
-    ];
 }
 
 function formatCount(value: number): string {

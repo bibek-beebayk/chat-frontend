@@ -114,7 +114,7 @@ function LoginPageContent() {
                 <Script
                     src="https://accounts.google.com/gsi/client"
                     strategy="afterInteractive"
-                    onLoad={() => setGoogleReady(true)}
+                    onReady={() => setGoogleReady(true)}
                 />
             )}
             <div className={styles.topLogoContainer}>
