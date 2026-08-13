@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PageShell } from '@/components/layout/PageShell';
 import { Toast } from '@/components/ui/Toast';
-import { PlinkoBoard } from '@/components/games/plinko/PlinkoBoard';
+import { PlinkoCanvas, PlinkoCanvasHandle } from '@/components/games/plinko/PlinkoCanvas';
 import { PlinkoControls } from '@/components/games/plinko/PlinkoControls';
 import { ResultPanel } from '@/components/games/plinko/ResultPanel';
+import { playWinChime, unlockAudio, WinTier } from '@/components/games/plinko/audio';
 import { useAuth } from '@/contexts/AuthContext';
 import { emitPointsUpdated, usePointsBalance } from '@/hooks/usePointsBalance';
 import { plinkoApi } from '@/lib/plinko';
@@ -14,6 +15,14 @@ import { PlinkoConfig, PlinkoRiskLevel, PlinkoRound, PlinkoRows } from '@/types'
 import styles from './page.module.css';
 
 type ToastState = { message: string; type: 'success' | 'error' } | null;
+
+function winTierFor(multiplier: number): WinTier {
+    if (multiplier < 1) return 'minimal';
+    if (multiplier < 2) return 'subtle';
+    if (multiplier < 5) return 'medium';
+    if (multiplier < 20) return 'large';
+    return 'extreme';
+}
 
 export default function PlinkoPage() {
     const { user } = useAuth();
@@ -23,10 +32,18 @@ export default function PlinkoPage() {
     const [riskLevel, setRiskLevel] = useState<PlinkoRiskLevel>('low');
     const [wagerAmount, setWagerAmount] = useState('10');
     const [isPlaying, setIsPlaying] = useState(false);
-    const [activeRound, setActiveRound] = useState<PlinkoRound | null>(null);
+    const [pendingRound, setPendingRound] = useState<PlinkoRound | null>(null);
     const [lastRound, setLastRound] = useState<PlinkoRound | null>(null);
     const [error, setError] = useState('');
     const [toast, setToast] = useState<ToastState>(null);
+    const canvasRef = useRef<PlinkoCanvasHandle>(null);
+
+    // Changing the board configuration makes the previously displayed result
+    // belong to a different setup - clear it so the result panel always
+    // represents the current rows/risk selection, not a stale prior round.
+    useEffect(() => {
+        setLastRound(null);
+    }, [rows, riskLevel]);
 
     useEffect(() => {
         plinkoApi.getConfig()
@@ -39,7 +56,11 @@ export default function PlinkoPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const handleRelease = async (dropOffset: number) => {
+    const handleDrop = async () => {
+        // Drop is the actual gesture that starts a round - unlock audio here
+        // too, not just on a board tap, so peg-hit/landing sounds work even
+        // if the player never touched the board directly before dropping.
+        unlockAudio();
         const wager = Number(wagerAmount);
         if (!wager || wager < 1) {
             setError('Enter a valid wager.');
@@ -49,8 +70,12 @@ export default function PlinkoPage() {
         setIsPlaying(true);
         setLastRound(null);
         try {
-            const round = await plinkoApi.play({ rows, risk_level: riskLevel, wager_amount: wager, drop_offset: dropOffset });
-            setActiveRound(round);
+            // No drop_offset sent - the ball always launches from top-center now;
+            // the backend field/param stays wired for backwards compatibility
+            // and simply defaults to 0 (unbiased) when omitted.
+            const round = await plinkoApi.play({ rows, risk_level: riskLevel, wager_amount: wager });
+            setPendingRound(round);
+            canvasRef.current?.play(round.rows, round.slot_index);
         } catch (err: any) {
             setError(err?.message || 'Unable to play Plinko right now.');
             setIsPlaying(false);
@@ -58,14 +83,16 @@ export default function PlinkoPage() {
     };
 
     const handleLanded = () => {
-        if (!activeRound) return;
-        setLastRound(activeRound);
+        if (!pendingRound) return;
+        setLastRound(pendingRound);
         setIsPlaying(false);
         emitPointsUpdated();
-        const net = activeRound.payout_amount - activeRound.wager_amount;
+        const net = pendingRound.payout_amount - pendingRound.wager_amount;
+        const multiplier = Number(pendingRound.multiplier);
+        playWinChime(winTierFor(multiplier));
         setToast({
             message: net >= 0
-                ? `You won ${activeRound.payout_amount.toLocaleString()} points!`
+                ? `You won ${pendingRound.payout_amount.toLocaleString()} points!`
                 : `You lost ${Math.abs(net).toLocaleString()} points.`,
             type: net >= 0 ? 'success' : 'error',
         });
@@ -100,12 +127,10 @@ export default function PlinkoPage() {
             <main className={styles.main}>
                 <div className={styles.layout}>
                     <div className={styles.boardColumn}>
-                        <PlinkoBoard
+                        <PlinkoCanvas
+                            ref={canvasRef}
                             rows={rows}
                             multipliers={multipliers}
-                            path={activeRound ? activeRound.path : null}
-                            disabled={isPlaying}
-                            onRelease={handleRelease}
                             onLanded={handleLanded}
                         />
                     </div>
@@ -132,6 +157,7 @@ export default function PlinkoPage() {
                             onRowsChange={setRows}
                             onRiskChange={setRiskLevel}
                             onWagerChange={setWagerAmount}
+                            onDrop={handleDrop}
                         />
 
                         {error && <p className={styles.errorText}>{error}</p>}

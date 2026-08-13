@@ -6,7 +6,7 @@ export const plinkoApi = {
         return apiClient.get<PlinkoConfig>('/api/plinko/config/');
     },
 
-    play(payload: { rows: PlinkoRows; risk_level: PlinkoRiskLevel; wager_amount: number; drop_offset?: number }): Promise<PlinkoRound> {
+    play(payload: { rows: PlinkoRows; risk_level: PlinkoRiskLevel; wager_amount: number }): Promise<PlinkoRound> {
         return apiClient.post<PlinkoRound>('/api/plinko/play/', payload);
     },
 

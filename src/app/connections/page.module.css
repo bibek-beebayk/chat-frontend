@@ -473,8 +473,6 @@
     background: rgba(var(--color-primary-rgb), 0.18);
 }
 
-<<<<<<< Updated upstream
-=======
 :global(html[data-theme='light']) .heroPanel {
     border-color: rgba(99, 102, 241, 0.16);
     background:
@@ -568,7 +566,6 @@
     border-color: rgba(239, 68, 68, 0.24);
 }
 
->>>>>>> Stashed changes
 @media (max-width: 640px) {
     .heroPanel,
     .controlPanel,

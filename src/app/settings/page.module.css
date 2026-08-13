@@ -277,8 +277,6 @@
     text-decoration: none;
 }
 
-<<<<<<< Updated upstream
-=======
 :global(html[data-theme='light']) .panel {
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.94));
     border-color: rgba(99, 102, 241, 0.14);
@@ -334,7 +332,6 @@
     box-shadow: 0 1px 4px rgba(15, 23, 42, 0.18);
 }
 
->>>>>>> Stashed changes
 @media (min-width: 640px) {
     .profileActions,
     .linkGrid {

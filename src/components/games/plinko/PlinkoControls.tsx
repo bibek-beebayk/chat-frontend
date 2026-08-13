@@ -13,6 +13,7 @@ interface PlinkoControlsProps {
     onRowsChange: (rows: PlinkoRows) => void;
     onRiskChange: (risk: PlinkoRiskLevel) => void;
     onWagerChange: (value: string) => void;
+    onDrop: () => void;
 }
 
 export function PlinkoControls({
@@ -25,6 +26,7 @@ export function PlinkoControls({
     onRowsChange,
     onRiskChange,
     onWagerChange,
+    onDrop,
 }: PlinkoControlsProps) {
     const wagerNumber = Number(wagerAmount);
     const maxWager = Math.min(config.max_wager, balance);
@@ -32,22 +34,24 @@ export function PlinkoControls({
 
     return (
         <div className={styles.controls}>
-            <div className={styles.field}>
-                <span>Rows</span>
-                <div className={styles.optionRow}>
-                    {config.rows_options.map((option) => (
-                        <button
-                            key={option}
-                            type="button"
-                            className={`${styles.optionBtn} ${rows === option ? styles.optionActive : ''}`}
-                            onClick={() => onRowsChange(option)}
-                            disabled={disabled}
-                        >
-                            {option}
-                        </button>
-                    ))}
+            {config.rows_options.length > 1 && (
+                <div className={styles.field}>
+                    <span>Rows</span>
+                    <div className={styles.optionRow}>
+                        {config.rows_options.map((option) => (
+                            <button
+                                key={option}
+                                type="button"
+                                className={`${styles.optionBtn} ${rows === option ? styles.optionActive : ''}`}
+                                onClick={() => onRowsChange(option)}
+                                disabled={disabled}
+                            >
+                                {option}
+                            </button>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
 
             <div className={styles.field}>
                 <span>Risk</span>
@@ -78,13 +82,9 @@ export function PlinkoControls({
                 />
             </label>
 
-            <p className={styles.hint}>
-                {disabled
-                    ? 'Ball dropping...'
-                    : isValidWager
-                        ? 'Drag the ball left or right on the board, then let go to drop it.'
-                        : 'Enter a valid wager to enable dropping.'}
-            </p>
+            <button type="button" className={styles.dropButton} onClick={onDrop} disabled={disabled || !isValidWager}>
+                {disabled ? 'Dropping...' : 'Drop'}
+            </button>
         </div>
     );
 }

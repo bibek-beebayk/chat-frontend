@@ -4,13 +4,13 @@
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     display: grid;
-    gap: var(--spacing-md);
-    padding: var(--spacing-lg);
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
 }
 
 .field {
     display: grid;
-    gap: 0.5rem;
+    gap: 0.4rem;
 }
 
 .field > span {
@@ -21,26 +21,33 @@
 }
 
 .optionRow {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: var(--radius-md);
     display: flex;
-    gap: 0.5rem;
+    overflow: hidden;
 }
 
 .optionBtn {
-    background: rgba(255, 255, 255, 0.045);
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    border-radius: var(--radius-md);
+    background: transparent;
+    border: 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
     color: var(--color-text-secondary);
-    flex: 1;
+    flex: 1 1 0;
     font-size: 0.84rem;
     font-weight: 800;
     min-height: 40px;
     padding: 0.5rem;
 }
 
+.optionBtn:last-child {
+    border-right: 0;
+}
+
 .optionActive {
-    background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.86), rgba(99, 102, 241, 0.72));
-    border-color: transparent;
-    color: #fff;
+    background: linear-gradient(135deg, var(--plinko-cyan, #35d5ff), var(--plinko-purple, #8b3fe8), var(--plinko-pink, #ff3fb0));
+    color: #0c0720;
+    position: relative;
 }
 
 .optionBtn:disabled {
@@ -63,12 +70,20 @@
     outline: none;
 }
 
-.hint {
-    color: var(--color-text-muted);
-    font-size: 0.82rem;
-    line-height: 1.4;
-    margin: 0;
-    text-align: center;
+.dropButton {
+    background: linear-gradient(135deg, var(--plinko-cyan, #35d5ff), var(--plinko-pink, #ff3fb0));
+    border: 0;
+    border-radius: 999px;
+    color: #0c0720;
+    font-size: 0.95rem;
+    font-weight: 900;
+    min-height: 48px;
+    padding: 0.8rem;
+}
+
+.dropButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
 }
 
 :global(html[data-theme='light']) .controls {
@@ -77,9 +92,13 @@
     box-shadow: 0 10px 28px rgba(86, 42, 145, 0.08);
 }
 
-:global(html[data-theme='light']) .optionBtn {
+:global(html[data-theme='light']) .optionRow {
     background: rgba(248, 244, 255, 0.82);
-    border-color: rgba(var(--color-primary-rgb), 0.12);
+    border-color: rgba(var(--color-primary-rgb), 0.16);
+}
+
+:global(html[data-theme='light']) .optionBtn {
+    border-right-color: rgba(var(--color-primary-rgb), 0.14);
     color: var(--color-text-secondary);
 }
 
