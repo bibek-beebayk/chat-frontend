@@ -1,0 +1,118 @@
+.loadingArea,
+.emptyState {
+    align-items: center;
+    color: var(--color-text-muted);
+    display: flex;
+    justify-content: center;
+    min-height: 220px;
+    text-align: center;
+}
+
+.main {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    padding: var(--spacing-lg);
+}
+
+.layout {
+    display: grid;
+    gap: var(--spacing-lg);
+    grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.9fr);
+    height: calc(100vh - 120px);
+}
+
+.boardColumn {
+    align-items: center;
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    min-height: 0;
+    min-width: 0;
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.sidebarHeader h1 {
+    color: var(--color-text-primary);
+    font-size: 1.6rem;
+    margin: 0.15rem 0 0.3rem;
+}
+
+.eyebrow {
+    color: var(--color-primary-light);
+    font-size: 0.76rem;
+    font-weight: 850;
+    letter-spacing: 0.04em;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.description {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.balanceRow {
+    align-items: center;
+    background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
+    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.balanceRow span {
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+    font-weight: 850;
+    text-transform: uppercase;
+}
+
+.balanceRow strong {
+    background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+    background-clip: text;
+    color: transparent;
+    font-size: 1.3rem;
+}
+
+.errorText {
+    color: #fca5a5;
+    font-size: 0.86rem;
+    margin: 0;
+}
+
+:global(html[data-theme='light']) .balanceRow {
+    background: linear-gradient(180deg, #ffffff, #fbf8ff);
+    border-color: rgba(var(--color-primary-rgb), 0.14);
+    box-shadow: 0 10px 28px rgba(86, 42, 145, 0.08);
+}
+
+@media (max-width: 900px) {
+    .main {
+        padding: var(--spacing-md);
+    }
+
+    .layout {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+
+    .boardColumn {
+        height: auto;
+    }
+
+    .sidebar {
+        overflow-y: visible;
+    }
+}

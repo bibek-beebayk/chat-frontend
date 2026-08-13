@@ -1,0 +1,85 @@
+.loadingArea,
+.emptyState {
+    align-items: center;
+    color: var(--color-text-muted);
+    display: flex;
+    justify-content: center;
+    min-height: 220px;
+    text-align: center;
+}
+
+.gameGrid {
+    display: grid;
+    gap: var(--spacing-md);
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.gameCard {
+    background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
+    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: var(--spacing-lg);
+}
+
+.gameIcon {
+    align-items: center;
+    background: rgba(var(--color-accent-rgb), 0.14);
+    border-radius: 14px;
+    color: var(--color-accent);
+    display: inline-flex;
+    height: 46px;
+    justify-content: center;
+    width: 46px;
+}
+
+.gameCard h3 {
+    color: var(--color-text-primary);
+    font-size: 1.05rem;
+    font-weight: 900;
+    margin: 0;
+}
+
+.gameCard p {
+    color: var(--color-text-secondary);
+    font-size: 0.86rem;
+    line-height: 1.45;
+    margin: 0;
+    flex-grow: 1;
+}
+
+.playButton {
+    background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+    border-radius: 999px;
+    color: #fff;
+    font-size: 0.86rem;
+    font-weight: 850;
+    padding: 0.65rem 1rem;
+    text-align: center;
+    text-decoration: none;
+}
+
+.comingSoon {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    color: var(--color-text-muted);
+    font-size: 0.82rem;
+    font-weight: 800;
+    padding: 0.6rem 1rem;
+    text-align: center;
+}
+
+:global(html[data-theme='light']) .gameCard {
+    background: linear-gradient(180deg, #ffffff, #fbf8ff);
+    border-color: rgba(var(--color-primary-rgb), 0.14);
+    box-shadow: 0 10px 28px rgba(86, 42, 145, 0.08);
+}
+
+:global(html[data-theme='light']) .comingSoon {
+    background: rgba(248, 244, 255, 0.82);
+    border-color: rgba(var(--color-primary-rgb), 0.12);
+}

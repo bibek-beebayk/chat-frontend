@@ -353,6 +353,84 @@ export interface HomeStats {
     active_events: number;
 }
 
+export type PointsRedemptionStatus = 'pending' | 'approved' | 'completed' | 'rejected' | string;
+
+export interface PointAction {
+    id: number;
+    slug: string;
+    label: string;
+    points_value: number;
+    is_active: boolean;
+    description?: string;
+    max_awards_per_day?: number | null;
+}
+
+export interface PointsBalance {
+    balance: number;
+    lifetime_earned: number;
+    updated_at: string;
+}
+
+export interface PointsLedgerEntry {
+    id: number;
+    entry_type: string;
+    delta: number;
+    balance_after: number;
+    action?: PointAction | null;
+    note?: string;
+    metadata?: Record<string, unknown>;
+    created_at: string;
+}
+
+export interface PointsRedemptionRequest {
+    id: number;
+    user: User;
+    points_amount: number;
+    reward_description?: string;
+    status: PointsRedemptionStatus;
+    status_label?: string;
+    note?: string;
+    staff_note?: string;
+    reviewed_by?: User | null;
+    reviewed_at?: string | null;
+    completed_at?: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Game {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+    is_active: boolean;
+}
+
+export type PlinkoRows = 8 | 12 | 16;
+export type PlinkoRiskLevel = 'low' | 'medium' | 'high';
+
+export interface PlinkoConfig {
+    rows_options: PlinkoRows[];
+    risk_options: PlinkoRiskLevel[];
+    multipliers: Record<string, Record<PlinkoRiskLevel, number[]>>;
+    min_wager: number;
+    max_wager: number;
+}
+
+export interface PlinkoRound {
+    id: number;
+    rows: PlinkoRows;
+    risk_level: PlinkoRiskLevel;
+    wager_amount: number;
+    slot_index: number;
+    multiplier: string;
+    payout_amount: number;
+    path: number[];
+    drop_offset: number;
+    balance_after: number;
+    created_at: string;
+}
+
 export interface ActivityEvent {
     id: number;
     kind: 'account' | 'post' | 'comment' | 'event' | 'reward' | string;

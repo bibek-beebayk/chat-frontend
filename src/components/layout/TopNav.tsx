@@ -2,12 +2,14 @@ import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotification } from '@/contexts/NotificationContext';
+import { usePointsBalance } from '@/hooks/usePointsBalance';
 import { resolveProfileImageUrl } from '@/lib/social';
 import styles from './TopNav.module.css';
 
 export function TopNav({ onMenuClick }: { onMenuClick: () => void }) {
     const { user } = useAuth();
     const { unreadCount, requestPermission } = useNotification();
+    const pointsBalance = usePointsBalance();
     const profileImage = resolveProfileImageUrl(user);
     const userInitial = user?.username?.trim()?.[0]?.toUpperCase() || 'U';
     const userRole = user?.user_type ? user.user_type.charAt(0).toUpperCase() + user.user_type.slice(1) : 'Account';
@@ -37,6 +39,13 @@ export function TopNav({ onMenuClick }: { onMenuClick: () => void }) {
                         <span className={styles.notificationBadge}>{unreadCount > 99 ? '99+' : unreadCount}</span>
                     )}
                 </button>
+
+                {user?.user_type === 'player' && (
+                    <Link href="/rewards" className={styles.pointsBadge} aria-label="Reward points">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        <span>{pointsBalance.toLocaleString()}</span>
+                    </Link>
+                )}
 
                 {user && (
                     <Link href="/profile" className={styles.profileSection}>

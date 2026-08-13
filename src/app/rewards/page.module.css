@@ -1,0 +1,235 @@
+.loadingArea,
+.emptyState {
+    align-items: center;
+    color: var(--color-text-muted);
+    display: flex;
+    justify-content: center;
+    min-height: 220px;
+    text-align: center;
+}
+
+.balanceCard,
+.redeemSection,
+.ledgerSection {
+    background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
+    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-lg);
+}
+
+.balanceCard {
+    align-items: center;
+    display: flex;
+    gap: var(--spacing-lg);
+    justify-content: space-between;
+}
+
+.balanceCard > div > span,
+.lifetimeStat span {
+    color: var(--color-text-muted);
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 850;
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+}
+
+.balanceCard > div > strong {
+    background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+    background-clip: text;
+    color: transparent;
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    line-height: 1;
+}
+
+.lifetimeStat {
+    text-align: right;
+}
+
+.lifetimeStat strong {
+    color: var(--color-text-primary);
+    font-size: 1.4rem;
+}
+
+.redeemSection h2,
+.ledgerSection h2 {
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    font-weight: 900;
+    margin: 0 0 var(--spacing-md);
+}
+
+.redeemForm {
+    display: grid;
+    gap: var(--spacing-md);
+}
+
+.redeemForm label {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.redeemForm label span {
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+
+.redeemForm input,
+.redeemForm textarea {
+    background: rgba(8, 5, 16, 0.76);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font: inherit;
+    padding: 0.7rem 0.85rem;
+    resize: vertical;
+}
+
+.redeemForm input:focus,
+.redeemForm textarea:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.14);
+    outline: none;
+}
+
+.redeemForm button {
+    background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+    border: 0;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 850;
+    justify-self: start;
+    min-height: 44px;
+    padding: 0.7rem 1.4rem;
+}
+
+.redeemForm button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.formError {
+    color: #fca5a5;
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.requestStatus {
+    align-items: center;
+    background: rgba(234, 179, 8, 0.1);
+    border: 1px solid rgba(234, 179, 8, 0.28);
+    border-radius: var(--radius-md);
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+    padding: 0.85rem;
+}
+
+.requestStatus span {
+    color: var(--color-text-secondary);
+    font-size: 0.88rem;
+}
+
+.requestStatus strong {
+    color: #fde68a;
+    text-transform: capitalize;
+}
+
+.status_approved strong {
+    color: #93c5fd;
+}
+
+.status_completed strong {
+    color: #86efac;
+}
+
+.status_rejected strong {
+    color: #fca5a5;
+}
+
+.emptyLedger {
+    color: var(--color-text-muted);
+    font-size: 0.88rem;
+    margin: 0;
+}
+
+.ledgerList {
+    display: grid;
+    gap: 0.55rem;
+}
+
+.ledgerItem {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: var(--radius-md);
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    padding: 0.7rem 0.85rem;
+}
+
+.ledgerItem span {
+    color: var(--color-text-primary);
+    font-size: 0.88rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ledgerItem time {
+    color: var(--color-text-muted);
+    font-size: 0.76rem;
+    white-space: nowrap;
+}
+
+.positive {
+    color: #86efac;
+}
+
+.negative {
+    color: #fca5a5;
+}
+
+:global(html[data-theme='light']) .balanceCard,
+:global(html[data-theme='light']) .redeemSection,
+:global(html[data-theme='light']) .ledgerSection {
+    background: linear-gradient(180deg, #ffffff, #fbf8ff);
+    border-color: rgba(var(--color-primary-rgb), 0.14);
+    box-shadow: 0 10px 28px rgba(86, 42, 145, 0.08);
+}
+
+:global(html[data-theme='light']) .redeemForm input,
+:global(html[data-theme='light']) .redeemForm textarea {
+    background: #ffffff;
+    border-color: rgba(var(--color-primary-rgb), 0.14);
+}
+
+:global(html[data-theme='light']) .ledgerItem {
+    background: rgba(248, 244, 255, 0.7);
+    border-color: rgba(var(--color-primary-rgb), 0.12);
+}
+
+@media (max-width: 720px) {
+    .balanceCard {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .lifetimeStat {
+        text-align: left;
+    }
+
+    .ledgerItem {
+        grid-template-columns: 1fr auto;
+    }
+
+    .ledgerItem time {
+        grid-column: 1 / -1;
+    }
+}

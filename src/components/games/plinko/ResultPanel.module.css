@@ -1,0 +1,47 @@
+.panel {
+    border-radius: var(--radius-lg);
+    display: grid;
+    gap: var(--spacing-md);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-lg);
+}
+
+.win {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.28);
+}
+
+.loss {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.22);
+}
+
+.panel span {
+    color: var(--color-text-muted);
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 850;
+    margin-bottom: 0.3rem;
+    text-transform: uppercase;
+}
+
+.panel strong {
+    color: var(--color-text-primary);
+    display: block;
+    font-size: 1rem;
+}
+
+.win strong {
+    color: #86efac;
+}
+
+.loss strong {
+    color: #fca5a5;
+}
+
+@media (max-width: 640px) {
+    .panel {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}

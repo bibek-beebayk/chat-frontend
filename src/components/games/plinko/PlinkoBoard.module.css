@@ -1,0 +1,248 @@
+.board {
+    --plinko-cyan: #35d5ff;
+    --plinko-pink: #ff3fb0;
+    --plinko-purple: #8b3fe8;
+    --plinko-navy: #0c0720;
+
+    aspect-ratio: 3 / 4;
+    background: linear-gradient(150deg, var(--plinko-cyan) 0%, var(--plinko-purple) 40%, var(--plinko-pink) 75%, var(--plinko-cyan) 100%);
+    border-radius: 0 0 8% 8% / 0 0 4% 4%;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+    max-height: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    padding: 4px;
+    position: relative;
+    touch-action: none;
+    width: 100%;
+}
+
+@media (max-width: 900px) {
+    .board {
+        height: auto !important;
+        max-height: none;
+        width: 100% !important;
+    }
+}
+
+.board::before {
+    background:
+        radial-gradient(circle at 50% 0%, rgba(168, 85, 247, 0.3), transparent 55%),
+        radial-gradient(circle at 50% 100%, rgba(255, 63, 176, 0.16), transparent 55%),
+        linear-gradient(180deg, #170d38, var(--plinko-navy));
+    border-radius: inherit;
+    content: "";
+    inset: 4px;
+    position: absolute;
+    z-index: 0;
+}
+
+.chevronRail {
+    display: flex;
+    flex-direction: column;
+    gap: 10%;
+    height: 46%;
+    position: absolute;
+    top: 8%;
+    width: 5%;
+    z-index: 1;
+}
+
+.chevronRail[data-side="left"] {
+    left: 3%;
+}
+
+.chevronRail[data-side="right"] {
+    right: 3%;
+}
+
+.chevron {
+    aspect-ratio: 1;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    width: 100%;
+}
+
+.chevronRail[data-side="right"] .chevron {
+    clip-path: polygon(100% 0, 0 50%, 100% 100%);
+}
+
+.chevronCyan {
+    background: var(--plinko-cyan);
+    filter: drop-shadow(0 0 4px rgba(53, 213, 255, 0.7));
+}
+
+.chevronPink {
+    background: var(--plinko-pink);
+    filter: drop-shadow(0 0 4px rgba(255, 63, 176, 0.7));
+}
+
+.chute {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-top: none;
+    clip-path: polygon(0 0, 100% 0, 76% 100%, 24% 100%);
+    height: 16px;
+    left: 50%;
+    margin-left: -14px;
+    position: absolute;
+    top: 0;
+    width: 28px;
+    z-index: 1;
+}
+
+.dot {
+    background: radial-gradient(circle at 35% 30%, #bdf3ff, var(--plinko-cyan) 55%, rgba(53, 213, 255, 0.25) 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 3px rgba(53, 213, 255, 0.5);
+    height: 5px;
+    margin-left: -2.5px;
+    margin-top: -2.5px;
+    position: absolute;
+    transition: transform 200ms ease, box-shadow 200ms ease;
+    width: 5px;
+    z-index: 1;
+}
+
+.dotHit {
+    animation: dotPulse 300ms ease-out;
+}
+
+@keyframes dotPulse {
+    0% {
+        box-shadow: 0 0 3px rgba(255, 63, 176, 0.5);
+        transform: scale(1);
+    }
+    45% {
+        box-shadow: 0 0 14px rgba(255, 63, 176, 1);
+        transform: scale(2.4);
+    }
+    100% {
+        box-shadow: 0 0 3px rgba(255, 63, 176, 0.5);
+        transform: scale(1);
+    }
+}
+
+.fanLines {
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 1;
+}
+
+.fanLine {
+    stroke: var(--plinko-pink);
+    stroke-width: 0.35;
+    opacity: 0.55;
+    filter: drop-shadow(0 0 1px var(--plinko-pink));
+}
+
+.launcherTrack {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px dashed rgba(255, 255, 255, 0.28);
+    border-radius: 999px;
+    height: 3px;
+    position: absolute;
+    top: 3%;
+    transform: translateY(-50%);
+    z-index: 2;
+}
+
+.ballWrapper {
+    position: absolute;
+    z-index: 3;
+}
+
+.ballWrapper.dropping::before {
+    background: rgba(53, 213, 255, 0.35);
+    border-radius: 50%;
+    content: "";
+    filter: blur(3px);
+    height: 10px;
+    left: -5px;
+    position: absolute;
+    top: -13px;
+    width: 10px;
+}
+
+.idleBall {
+    cursor: grab;
+}
+
+.idleBall:active {
+    cursor: grabbing;
+}
+
+.idleDisabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.ballSquash {
+    transform-origin: center;
+}
+
+.ballLanded {
+    animation: plinkoLandBounce 460ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.ballSpin {
+    animation: plinkoSpin 550ms linear infinite;
+    background: radial-gradient(circle at 32% 28%, #fff, var(--plinko-cyan) 60%, var(--plinko-purple) 100%);
+    border-radius: 50%;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45), 0 0 14px rgba(53, 213, 255, 0.65);
+    height: 17px;
+    margin-left: -8.5px;
+    margin-top: -8.5px;
+    width: 17px;
+}
+
+.ballSpinPaused {
+    animation-play-state: paused;
+}
+
+@keyframes plinkoSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes plinkoLandBounce {
+    0% {
+        transform: scale(1);
+    }
+    30% {
+        transform: scale(1.55);
+    }
+    60% {
+        transform: scale(0.85);
+    }
+    100% {
+        transform: scale(1.15);
+    }
+}
+
+.slot {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 63, 176, 0.35);
+    border-radius: var(--radius-sm);
+    color: #fdeeff;
+    font-size: 0.64rem;
+    font-weight: 850;
+    padding: 0.26rem 0.3rem;
+    position: absolute;
+    text-align: center;
+    top: 90%;
+    transform: translate(-50%, 0);
+    transition: background 200ms ease, color 200ms ease, border-color 200ms ease, transform 200ms ease;
+    white-space: nowrap;
+    z-index: 2;
+}
+
+.slotWinning {
+    background: linear-gradient(135deg, var(--plinko-cyan), var(--plinko-pink));
+    border-color: transparent;
+    color: #0c0720;
+    transform: translate(-50%, 0) scale(1.15);
+}
