@@ -22,7 +22,10 @@ export function usePointsBalance(intervalMs: number = 30000): number {
         }
         try {
             const data = await pointsApi.getBalance();
-            setBalance(data.balance);
+            // balance is a Decimal, serialized as a string - normalize to a
+            // number once here so every consumer of this hook can keep
+            // treating it as a plain number.
+            setBalance(Number(data.balance));
         } catch {
             // Keep current value on transient errors
         }

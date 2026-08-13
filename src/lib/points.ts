@@ -5,6 +5,11 @@ function unwrapList(data: PointsRedemptionRequest[] | { results: PointsRedemptio
     return Array.isArray(data) ? data : data.results || [];
 }
 
+/** Points balances/payouts are Decimal on the backend (serialized as strings) - format consistently to 2 decimal places wherever they're displayed. */
+export function formatPoints(value: number | string): string {
+    return Number(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 export const pointsApi = {
     getBalance(): Promise<PointsBalance> {
         return apiClient.get<PointsBalance>('/api/points/balance/');

@@ -275,12 +275,17 @@ export const PlinkoCanvas = forwardRef<PlinkoCanvasHandle, PlinkoCanvasProps>(fu
             ctx.stroke();
         }
 
-        // Winning bin highlight - cosmetic only, the actual result already came from the server.
+        // Landed-bin highlight - cosmetic only, the actual result already
+        // came from the server. Colored by whether this slot's multiplier
+        // is actually a net win (>=1x) or a loss (<1x) - a flat celebratory
+        // color regardless of outcome made every landing look like a win.
         if (phaseRef.current === 'landed' && winningSlotRef.current !== null) {
             const cx = board.binCenters[winningSlotRef.current];
+            const landedMultiplier = multipliers[winningSlotRef.current] ?? 0;
+            const isNetWin = landedMultiplier >= 1;
             ctx.beginPath();
             ctx.arc(cx, board.binY, 26, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(255, 63, 176, 0.18)';
+            ctx.fillStyle = isNetWin ? 'rgba(74, 222, 128, 0.2)' : 'rgba(248, 113, 113, 0.16)';
             ctx.fill();
         }
 
@@ -349,13 +354,17 @@ export const PlinkoCanvas = forwardRef<PlinkoCanvasHandle, PlinkoCanvasProps>(fu
             <div className={styles.tray} style={{ top: `${trayTopPercent}%`, height: `${trayHeightPercent}%` }}>
                 {geometry.binLayout.map((bin, idx) => {
                     const multiplier = multipliers[idx] ?? 0;
-                    const isWinning = phase === 'landed' && winningSlot === idx;
+                    const isLanded = phase === 'landed' && winningSlot === idx;
+                    // A landed slot below 1x is a real loss - it must not
+                    // get the same bright celebratory pulse as a win, or
+                    // every landing looks like a win regardless of outcome.
+                    const landedClass = isLanded ? (multiplier >= 1 ? styles.slotWon : styles.slotLost) : '';
                     const leftPercent = (bin.left / geometry.width) * 100;
                     const widthPercent = (bin.width / geometry.width) * 100;
                     return (
                         <div
                             key={idx}
-                            className={`${styles.slot} ${styles[`tier-${tierForMultiplier(multiplier)}`]} ${isWinning ? styles.slotWinning : ''}`}
+                            className={`${styles.slot} ${styles[`tier-${tierForMultiplier(multiplier)}`]} ${landedClass}`}
                             style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}
                         >
                             {multiplier}x

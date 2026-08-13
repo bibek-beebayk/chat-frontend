@@ -368,7 +368,9 @@ export interface PointAction {
 }
 
 export interface PointsBalance {
-    balance: number;
+    // Decimal fields serialize as strings (DRF DecimalField default) to
+    // preserve precision - parse with Number() before display/arithmetic.
+    balance: string;
     lifetime_earned: number;
     updated_at: string;
 }
@@ -376,8 +378,8 @@ export interface PointsBalance {
 export interface PointsLedgerEntry {
     id: number;
     entry_type: string;
-    delta: number;
-    balance_after: number;
+    delta: string;
+    balance_after: string;
     action?: PointAction | null;
     note?: string;
     metadata?: Record<string, unknown>;
@@ -411,12 +413,13 @@ export interface Game {
 export type PlinkoRows = 8 | 12 | 16;
 export type PlinkoRiskLevel = 'low' | 'medium' | 'high';
 
+export type PlinkoWager = 5 | 10;
+
 export interface PlinkoConfig {
     rows_options: PlinkoRows[];
     risk_options: PlinkoRiskLevel[];
     multipliers: Record<string, Record<PlinkoRiskLevel, number[]>>;
-    min_wager: number;
-    max_wager: number;
+    wager_options: PlinkoWager[];
 }
 
 export interface PlinkoRound {
@@ -426,10 +429,11 @@ export interface PlinkoRound {
     wager_amount: number;
     slot_index: number;
     multiplier: string;
-    payout_amount: number;
+    // Decimal - serializes as a string, parse with Number() before display/arithmetic.
+    payout_amount: string;
     path: number[];
     drop_offset: number;
-    balance_after: number;
+    balance_after: string;
     created_at: string;
 }
 

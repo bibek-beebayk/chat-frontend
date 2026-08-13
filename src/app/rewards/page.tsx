@@ -6,7 +6,7 @@ import { PageShell } from '@/components/layout/PageShell';
 import { Toast } from '@/components/ui/Toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { emitPointsUpdated } from '@/hooks/usePointsBalance';
-import { pointsApi } from '@/lib/points';
+import { formatPoints, pointsApi } from '@/lib/points';
 import { PointsBalance, PointsLedgerEntry, PointsRedemptionRequest } from '@/types';
 import styles from './page.module.css';
 
@@ -66,7 +66,7 @@ export default function RewardsPage() {
             setFormError('Enter a valid number of points to redeem.');
             return;
         }
-        if (balance && amount > balance.balance) {
+        if (balance && amount > Number(balance.balance)) {
             setFormError('You do not have enough points for this redemption.');
             return;
         }
@@ -114,7 +114,7 @@ export default function RewardsPage() {
                         <section className={styles.balanceCard}>
                             <div>
                                 <span>Reward Points</span>
-                                <strong>{(balance?.balance ?? 0).toLocaleString()}</strong>
+                                <strong>{formatPoints(balance?.balance ?? 0)}</strong>
                             </div>
                             <div className={styles.lifetimeStat}>
                                 <span>Lifetime Earned</span>
@@ -163,7 +163,7 @@ export default function RewardsPage() {
                                         />
                                     </label>
                                     {formError && <p className={styles.formError}>{formError}</p>}
-                                    <button type="submit" disabled={submitting || !balance?.balance}>
+                                    <button type="submit" disabled={submitting || !Number(balance?.balance ?? 0)}>
                                         {submitting ? 'Submitting...' : 'Submit Request'}
                                     </button>
                                 </form>
@@ -179,8 +179,8 @@ export default function RewardsPage() {
                                     {ledger.map((entry) => (
                                         <div key={entry.id} className={styles.ledgerItem}>
                                             <span>{entry.action?.label || entryTypeCopy[entry.entry_type] || entry.entry_type}</span>
-                                            <strong className={entry.delta >= 0 ? styles.positive : styles.negative}>
-                                                {entry.delta >= 0 ? '+' : ''}{entry.delta.toLocaleString()}
+                                            <strong className={Number(entry.delta) >= 0 ? styles.positive : styles.negative}>
+                                                {Number(entry.delta) >= 0 ? '+' : ''}{formatPoints(entry.delta)}
                                             </strong>
                                             <time>{formatDate(entry.created_at)}</time>
                                         </div>
