@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PageShell } from '@/components/layout/PageShell';
-import { Toast } from '@/components/ui/Toast';
 import { PlinkoCanvas, PlinkoCanvasHandle } from '@/components/games/plinko/PlinkoCanvas';
 import { PlinkoControls } from '@/components/games/plinko/PlinkoControls';
+import { PlinkoPopupState, PlinkoResultPopup } from '@/components/games/plinko/PlinkoResultPopup';
 import { ResultPanel } from '@/components/games/plinko/ResultPanel';
 import { playWinChime, unlockAudio, WinTier } from '@/components/games/plinko/audio';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,8 +14,6 @@ import { formatPoints } from '@/lib/points';
 import { plinkoApi } from '@/lib/plinko';
 import { PlinkoConfig, PlinkoRiskLevel, PlinkoRound, PlinkoRows, PlinkoWager } from '@/types';
 import styles from './page.module.css';
-
-type ToastState = { message: string; type: 'success' | 'error' } | null;
 
 // Pause between the end of one autoplay round and the start of the next, so
 // the player can actually see the landing result before the ball resets.
@@ -40,12 +38,12 @@ export default function PlinkoPage() {
     const [pendingRound, setPendingRound] = useState<PlinkoRound | null>(null);
     const [lastRound, setLastRound] = useState<PlinkoRound | null>(null);
     const [error, setError] = useState('');
-    const [toast, setToast] = useState<ToastState>(null);
-    // Stable identity so Toast's auto-dismiss timer (keyed on this prop)
+    const [popup, setPopup] = useState<PlinkoPopupState>(null);
+    // Stable identity so the popup's auto-dismiss timer (keyed on this prop)
     // doesn't get reset by unrelated page re-renders - autoplay re-renders
     // this page every ~1.1s, and an inline arrow here would recreate on
     // every one of those.
-    const closeToast = useCallback(() => setToast(null), []);
+    const closePopup = useCallback(() => setPopup(null), []);
     // Small-screen only: balance/rows/risk/wager/result live behind this
     // toggle so the board can stay front and center; irrelevant on desktop,
     // where that panel is always visible regardless of this flag.
@@ -57,6 +55,17 @@ export default function PlinkoPage() {
     const [autoplayMenuOpen, setAutoplayMenuOpen] = useState(false);
     const canvasRef = useRef<PlinkoCanvasHandle>(null);
     const autoplayTimeoutRef = useRef<number | null>(null);
+    // Running totals for the active autoplay session, so a single cumulative
+    // popup can be shown when it ends instead of one popup per round (which
+    // would be far too disruptive at ~1.1s/round). Reset when a new session
+    // starts; read and reset again whenever a session ends.
+    const autoplayStatsRef = useRef({ rounds: 0, totalWager: 0, totalPayout: 0 });
+    // Bumped every time a popup is shown so it always remounts (key change)
+    // instead of just re-rendering with new props - guarantees the entrance
+    // animation replays even if a new result arrives while the previous
+    // popup is still visible/animating (e.g. dropping again immediately
+    // after a manual round, before its popup has auto-dismissed).
+    const popupKeyRef = useRef(0);
     // handleDrop closes over rows/riskLevel/wagerAmount/balance, which can
     // change between renders; the autoplay continuation timer fires after a
     // delay, so it reads through this ref to always call the latest version
@@ -92,6 +101,10 @@ export default function PlinkoPage() {
         };
     }, []);
 
+    // Ends the current autoplay session (natural completion, a manual
+    // toggle-off, or a failed/insufficient-balance round) and - if at least
+    // one round actually ran - shows a single cumulative result popup
+    // instead of the per-round one, then resets the running totals.
     const stopAutoplay = () => {
         if (autoplayTimeoutRef.current !== null) {
             window.clearTimeout(autoplayTimeoutRef.current);
@@ -99,6 +112,15 @@ export default function PlinkoPage() {
         }
         setAutoplayRemaining(null);
         setAutoplayMenuOpen(false);
+
+        const stats = autoplayStatsRef.current;
+        if (stats.rounds > 0) {
+            popupKeyRef.current += 1;
+            setPopup({ kind: 'autoplay', rounds: stats.rounds, totalWager: stats.totalWager, totalPayout: stats.totalPayout });
+            const returnRatio = stats.totalWager > 0 ? stats.totalPayout / stats.totalWager : 1;
+            playWinChime(winTierFor(returnRatio));
+            autoplayStatsRef.current = { rounds: 0, totalWager: 0, totalPayout: 0 };
+        }
     };
 
     const handleDrop = async () => {
@@ -141,30 +163,27 @@ export default function PlinkoPage() {
         // payout_amount/wager_amount are Decimal - payout_amount serializes as
         // a string, so parse before doing arithmetic or formatting.
         const payout = Number(pendingRound.payout_amount);
-        const net = payout - pendingRound.wager_amount;
         const multiplier = Number(pendingRound.multiplier);
         playWinChime(winTierFor(multiplier));
-        setToast({
-            message: net >= 0
-                ? `You won ${formatPoints(payout)} points!`
-                : `You lost ${formatPoints(Math.abs(net))} points.`,
-            type: net >= 0 ? 'success' : 'error',
-        });
 
-        // Autoplay continuation: decrement, and if rounds remain, schedule
-        // the next drop after a short pause so the result is actually
-        // visible. Read autoplayRemaining directly from this render's
-        // closure (fresh, same as pendingRound above) rather than via a
-        // setState updater function - React is allowed to invoke updater
-        // functions more than once (Next.js dev mode double-invokes them
-        // deliberately via StrictMode), and a setTimeout side effect inside
-        // one used to fire twice, silently starting an extra autoplay round
-        // and scrambling which round's result the toast vs. the result
-        // panel ended up showing.
+        // Read autoplayRemaining directly from this render's closure (fresh,
+        // same as pendingRound above) rather than via a setState updater
+        // function - React is allowed to invoke updater functions more than
+        // once (Next.js dev mode double-invokes them deliberately via
+        // StrictMode), and a setTimeout side effect inside one used to fire
+        // twice, silently starting an extra autoplay round.
         if (autoplayRemaining !== null) {
+            // Part of an autoplay session - accumulate into the running
+            // total instead of popping up a result every ~1.1s; the summary
+            // shows once, when the session actually ends (see stopAutoplay).
+            const stats = autoplayStatsRef.current;
+            stats.rounds += 1;
+            stats.totalWager += pendingRound.wager_amount;
+            stats.totalPayout += payout;
+
             const next = autoplayRemaining - 1;
             if (next <= 0) {
-                setAutoplayRemaining(null);
+                stopAutoplay();
             } else {
                 setAutoplayRemaining(next);
                 autoplayTimeoutRef.current = window.setTimeout(() => {
@@ -172,6 +191,9 @@ export default function PlinkoPage() {
                     handleDropRef.current();
                 }, AUTOPLAY_CONTINUE_DELAY_MS);
             }
+        } else {
+            popupKeyRef.current += 1;
+            setPopup({ kind: 'round', round: pendingRound });
         }
     };
 
@@ -186,6 +208,10 @@ export default function PlinkoPage() {
     const handleSelectAutoplayCount = (count: number) => {
         setAutoplayMenuOpen(false);
         setAutoplayRemaining(count);
+        // Defensive: stopAutoplay() already leaves this zeroed by the time a
+        // new session can start, but zeroing again here makes "every
+        // session starts from zero" true independent of that ordering.
+        autoplayStatsRef.current = { rounds: 0, totalWager: 0, totalPayout: 0 };
         handleDropRef.current();
     };
 
@@ -241,6 +267,7 @@ export default function PlinkoPage() {
                             multipliers={multipliers}
                             onLanded={handleLanded}
                         />
+                        <PlinkoResultPopup key={popupKeyRef.current} state={popup} onClose={closePopup} />
                     </div>
 
                     <aside className={styles.sidebar}>
@@ -279,7 +306,6 @@ export default function PlinkoPage() {
                     </aside>
                 </div>
             </main>
-            {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
         </DashboardLayout>
     );
 }

@@ -1,0 +1,255 @@
+/* Positioned relative to .boardColumn (the Plinko board's own wrapper, not
+   the viewport) so the popup is centered on the board itself - the sidebar
+   controls sit alongside it, not underneath it, so centering on the full
+   screen would visibly offset the popup away from the board. */
+.overlay {
+    align-items: center;
+    animation: plinkoPopupFadeIn 160ms ease-out;
+    background: rgba(5, 2, 12, 0.68);
+    backdrop-filter: blur(3px);
+    border-radius: var(--radius-md);
+    display: flex;
+    inset: 0;
+    justify-content: center;
+    padding: var(--spacing-md);
+    position: absolute;
+    z-index: 1200;
+}
+
+@keyframes plinkoPopupFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.card {
+    border-radius: var(--radius-lg);
+    max-width: 360px;
+    overflow: hidden;
+    padding: 2rem 1.75rem 1.6rem;
+    position: relative;
+    text-align: center;
+    width: 100%;
+}
+
+.win {
+    animation: plinkoPopupPopIn 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    background: linear-gradient(160deg, #2a1a52 0%, #3a1a4a 55%, #1a0f38 100%);
+    border: 1px solid rgba(255, 210, 63, 0.4);
+    box-shadow: 0 0 0 1px rgba(255, 210, 63, 0.15), 0 20px 60px rgba(255, 63, 176, 0.25), 0 0 40px rgba(255, 210, 63, 0.15);
+}
+
+.loss {
+    animation: plinkoPopupFadeUp 260ms ease-out;
+    background: linear-gradient(160deg, #241f2b 0%, #1a1620 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes plinkoPopupPopIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.75);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes plinkoPopupFadeUp {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.magnitude-big {
+    box-shadow: 0 0 0 1px rgba(255, 210, 63, 0.45), 0 24px 70px rgba(255, 63, 176, 0.35), 0 0 60px rgba(255, 210, 63, 0.25);
+}
+
+.magnitude-huge {
+    box-shadow: 0 0 0 1px rgba(255, 210, 63, 0.6), 0 28px 90px rgba(255, 63, 176, 0.45), 0 0 90px rgba(255, 210, 63, 0.4);
+}
+
+.closeBtn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 0;
+    border-radius: 999px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 1.1rem;
+    height: 28px;
+    line-height: 1;
+    position: absolute;
+    right: 0.7rem;
+    top: 0.7rem;
+    width: 28px;
+    z-index: 2;
+}
+
+.closeBtn:hover {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.icon {
+    display: flex;
+    justify-content: center;
+    margin: 0 auto 0.6rem;
+    position: relative;
+    z-index: 1;
+}
+
+.win .icon {
+    animation: plinkoIconBounce 700ms ease-out 100ms both;
+    color: #ffd23f;
+    filter: drop-shadow(0 0 12px rgba(255, 210, 63, 0.6));
+}
+
+.win .icon svg {
+    height: 52px;
+    width: 52px;
+}
+
+.loss .icon {
+    color: #94a3b8;
+}
+
+.loss .icon svg {
+    height: 40px;
+    width: 40px;
+}
+
+@keyframes plinkoIconBounce {
+    0% {
+        opacity: 0;
+        transform: scale(0.3) translateY(-8px);
+    }
+
+    60% {
+        opacity: 1;
+        transform: scale(1.15) translateY(0);
+    }
+
+    100% {
+        transform: scale(1) translateY(0);
+    }
+}
+
+.headline {
+    color: #ffffff;
+    font-size: 1.4rem;
+    font-weight: 900;
+    margin: 0 0 0.9rem;
+    position: relative;
+    z-index: 1;
+}
+
+.win .headline {
+    background: linear-gradient(135deg, #ffd23f, #ff3fb0);
+    background-clip: text;
+    color: transparent;
+}
+
+.loss .headline {
+    color: #d1d5db;
+}
+
+.amountRow {
+    align-items: baseline;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    position: relative;
+    z-index: 1;
+}
+
+.amountRow span {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.76rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.amountRow strong {
+    font-size: 2rem;
+    font-weight: 900;
+}
+
+.win .amountRow strong {
+    color: #4ade80;
+}
+
+.loss .amountRow strong {
+    color: #f87171;
+}
+
+.detail {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.82rem;
+    margin: 0.6rem 0 0;
+    position: relative;
+    z-index: 1;
+}
+
+.confetti {
+    border-radius: inherit;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    position: absolute;
+}
+
+.confettiPiece {
+    animation: plinkoConfettiFall 1300ms ease-in forwards;
+    animation-delay: calc(var(--i) * 45ms);
+    height: 10px;
+    left: calc(2% + (var(--i) * 5.5%));
+    opacity: 0;
+    position: absolute;
+    top: -10%;
+    width: 6px;
+}
+
+.confettiPiece:nth-child(3n) {
+    background: #35d5ff;
+}
+
+.confettiPiece:nth-child(3n + 1) {
+    background: #ff3fb0;
+}
+
+.confettiPiece:nth-child(3n + 2) {
+    background: #ffd23f;
+}
+
+@keyframes plinkoConfettiFall {
+    0% {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(240px) rotate(540deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .win,
+    .loss,
+    .win .icon,
+    .confettiPiece {
+        animation: none;
+    }
+}
