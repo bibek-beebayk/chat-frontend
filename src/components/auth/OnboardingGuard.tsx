@@ -11,6 +11,7 @@ const BYPASS_PREFIXES = [
     '/verify-otp',
     '/set-password',
     '/test-email',
+    '/username-setup',
     '/onboarding',
     '/privacy',
     '/terms',
@@ -30,6 +31,11 @@ export function OnboardingGuard({ children }: Props) {
         if (loading || !pathname) return;
         if (!user || user.user_type !== 'player') return;
         if (BYPASS_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return;
+
+        if (user.needs_username_setup) {
+            router.replace(`/username-setup?next=${encodeURIComponent(pathname)}`);
+            return;
+        }
 
         let cancelled = false;
         const run = async () => {

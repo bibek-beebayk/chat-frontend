@@ -31,6 +31,14 @@ function PostLoginContent() {
                 return;
             }
 
+            if (user.needs_username_setup) {
+                const destination = nextUrl
+                    ? `/username-setup?next=${encodeURIComponent(nextUrl)}`
+                    : '/username-setup';
+                router.replace(destination);
+                return;
+            }
+
             if (nextUrl?.startsWith('/redeem') || nextUrl?.startsWith('/scratch-redeem')) {
                 router.replace(nextUrl);
                 return;

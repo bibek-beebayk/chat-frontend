@@ -10,12 +10,21 @@ interface PlinkoControlsProps {
     wagerAmount: string;
     balance: number;
     disabled: boolean;
+    isValidWager: boolean;
     onRowsChange: (rows: PlinkoRows) => void;
     onRiskChange: (risk: PlinkoRiskLevel) => void;
     onWagerChange: (value: string) => void;
     onDrop: () => void;
 }
 
+/**
+ * Drop stays inside the same `.controls` card as the fields (not a separate
+ * component) so its position/spacing relative to the card is identical on
+ * desktop. On small screens, the card around it collapses via `visibility`
+ * (not `display`) so this button - which explicitly sets its own
+ * `visibility: visible` - can stay pinned and interactive even while the
+ * rest of the card is hidden. See PlinkoControls.module.css.
+ */
 export function PlinkoControls({
     config,
     rows,
@@ -23,14 +32,13 @@ export function PlinkoControls({
     wagerAmount,
     balance,
     disabled,
+    isValidWager,
     onRowsChange,
     onRiskChange,
     onWagerChange,
     onDrop,
 }: PlinkoControlsProps) {
-    const wagerNumber = Number(wagerAmount);
     const maxWager = Math.min(config.max_wager, balance);
-    const isValidWager = wagerNumber >= config.min_wager && wagerNumber <= maxWager;
 
     return (
         <div className={styles.controls}>

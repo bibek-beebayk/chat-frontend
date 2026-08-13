@@ -16,7 +16,7 @@ type NavItem = {
     badge?: number;
 };
 
-const hiddenPrefixes = ['/login', '/register', '/verify-otp', '/set-password', '/test-email', '/onboarding', '/post-login'];
+const hiddenPrefixes = ['/login', '/register', '/verify-otp', '/set-password', '/test-email', '/username-setup', '/onboarding', '/post-login'];
 
 export const MobileBottomNav: React.FC = () => {
     const pathname = usePathname();

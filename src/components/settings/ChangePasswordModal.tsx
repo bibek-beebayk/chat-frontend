@@ -8,9 +8,10 @@ interface ChangePasswordModalProps {
     onClose: () => void;
     onSuccess: (message: string) => void;
     onError: (message: string) => void;
+    requiresCurrentPassword?: boolean;
 }
 
-export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClose, onSuccess, onError }) => {
+export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen, onClose, onSuccess, onError, requiresCurrentPassword = true }) => {
     const [formData, setFormData] = useState({
         old_password: '',
         new_password: '',
@@ -37,8 +38,12 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen
 
         setLoading(true);
         try {
-            await apiClient.post('/api/auth/change-password/', formData);
-            onSuccess("Password changed successfully");
+            await apiClient.post('/api/auth/change-password/', {
+                old_password: requiresCurrentPassword ? formData.old_password : '',
+                new_password: formData.new_password,
+                confirm_new_password: formData.confirm_new_password,
+            });
+            onSuccess(requiresCurrentPassword ? 'Password changed successfully' : 'Password set successfully');
             onClose();
             setFormData({ old_password: '', new_password: '', confirm_new_password: '' });
         } catch (err: any) {
@@ -50,6 +55,8 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen
                 else if (data.confirm_new_password) errorMsg = data.confirm_new_password[0];
                 else if (data.new_password) errorMsg = data.new_password[0];
                 else if (data.detail) errorMsg = data.detail;
+            } else if (err.message) {
+                errorMsg = err.message;
             }
             onError(errorMsg);
         } finally {
@@ -61,20 +68,22 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({ isOpen
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title="Change Password"
+            title={requiresCurrentPassword ? 'Change Password' : 'Set Password'}
         >
             <form onSubmit={handleSubmit} className={styles.form}>
-                <div className={styles.formGroup}>
-                    <label>Current Password</label>
-                    <input
-                        type="password"
-                        name="old_password"
-                        value={formData.old_password}
-                        onChange={handleChange}
-                        required
-                        className={styles.input}
-                    />
-                </div>
+                {requiresCurrentPassword && (
+                    <div className={styles.formGroup}>
+                        <label>Current Password</label>
+                        <input
+                            type="password"
+                            name="old_password"
+                            value={formData.old_password}
+                            onChange={handleChange}
+                            required
+                            className={styles.input}
+                        />
+                    </div>
+                )}
                 <div className={styles.formGroup}>
                     <label>New Password</label>
                     <input

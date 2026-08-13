@@ -14,6 +14,18 @@
     flex-direction: column;
     min-height: 0;
     padding: var(--spacing-lg);
+    position: relative;
+}
+
+.settingsToggle,
+.settingsBackdrop {
+    display: none;
+}
+
+.settingsPanel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
 }
 
 .layout {
@@ -132,5 +144,102 @@
     .sidebar {
         max-width: 100%;
         overflow-y: visible;
+    }
+}
+
+/*
+ * Small screens: title/info compact at the top, board front-and-center in
+ * the middle, Drop pinned to the bottom of the viewport, everything else
+ * (balance/rows/risk/wager/result) tucked behind a top-right settings
+ * toggle. `.sidebar` dissolves via display:contents so its former children
+ * (sidebarHeader / settingsPanel / the drop button) become direct grid
+ * items of `.layout` and can be reordered independently with `order` -
+ * matches the existing single-column breakpoint above, just restructured.
+ */
+@media (max-width: 768px) {
+    .sidebar {
+        display: contents;
+    }
+
+    .sidebarHeader {
+        order: 1;
+        padding-right: 52px;
+    }
+
+    .sidebarHeader h1 {
+        font-size: 1.15rem;
+        margin: 0.1rem 0 0.15rem;
+    }
+
+    .eyebrow {
+        font-size: 0.66rem;
+    }
+
+    .description {
+        font-size: 0.8rem;
+    }
+
+    .boardColumn {
+        order: 2;
+    }
+
+    .settingsToggle {
+        align-items: center;
+        background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+        border: 0;
+        border-radius: 999px;
+        box-shadow: var(--shadow-sm);
+        color: #fff;
+        display: flex;
+        height: 40px;
+        justify-content: center;
+        position: absolute;
+        right: var(--spacing-md);
+        top: var(--spacing-md);
+        width: 40px;
+        z-index: 50;
+    }
+
+    .settingsToggle svg {
+        height: 20px;
+        width: 20px;
+    }
+
+    .settingsBackdrop {
+        background: rgba(0, 0, 0, 0.5);
+        display: block;
+        inset: 0;
+        position: fixed;
+        z-index: 40;
+    }
+
+    /*
+     * visibility (not display) hides this - the drop button lives inside
+     * PlinkoControls' card, nested inside this panel, and needs to stay
+     * visible/interactive via its own explicit `visibility: visible` even
+     * while this card is closed. `display: none` would remove it from the
+     * render tree entirely and defeat that; see PlinkoControls.module.css.
+     */
+    .settingsPanel {
+        background: linear-gradient(180deg, rgba(20, 10, 35, 0.97), rgba(13, 8, 24, 0.98));
+        border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        left: var(--spacing-md);
+        max-height: 65vh;
+        order: 3;
+        overflow-y: auto;
+        padding: var(--spacing-md);
+        pointer-events: none;
+        position: absolute;
+        right: var(--spacing-md);
+        top: calc(var(--spacing-md) + 48px);
+        visibility: hidden;
+        z-index: 45;
+    }
+
+    .settingsPanel.settingsPanelOpen {
+        pointer-events: auto;
+        visibility: visible;
     }
 }

@@ -10,6 +10,7 @@ interface AuthContextType {
     loading: boolean;
     login: (data: LoginData) => Promise<User>;
     googleLogin: (credential: string) => Promise<User>;
+    updateUsername: (username: string) => Promise<User>;
     register: (data: RegisterData) => Promise<{ email: string; email_sent: boolean }>;
     logout: () => Promise<void>;
     deleteAccount: () => Promise<void>;
@@ -133,6 +134,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return normalized;
     };
 
+    const updateUsername = async (username: string) => {
+        const response = await apiClient.post<{ user: User; message?: string }>(
+            '/api/auth/username/',
+            { username }
+        );
+        const normalized = normalizeUser(response.user);
+        setUser(normalized);
+        localStorage.setItem('user', JSON.stringify(normalized));
+        return normalized;
+    };
+
     const register = async (data: RegisterData) => {
         const response = await apiClient.post<{ message: string; email: string; email_sent: boolean }>(
             '/api/auth/register/',
@@ -245,6 +257,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             loading,
             login,
             googleLogin,
+            updateUsername,
             register,
             logout,
             deleteAccount,

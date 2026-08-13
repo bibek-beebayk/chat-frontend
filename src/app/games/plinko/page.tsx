@@ -36,6 +36,10 @@ export default function PlinkoPage() {
     const [lastRound, setLastRound] = useState<PlinkoRound | null>(null);
     const [error, setError] = useState('');
     const [toast, setToast] = useState<ToastState>(null);
+    // Small-screen only: balance/rows/risk/wager/result live behind this
+    // toggle so the board can stay front and center; irrelevant on desktop,
+    // where that panel is always visible regardless of this flag.
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const canvasRef = useRef<PlinkoCanvasHandle>(null);
 
     // Changing the board configuration makes the previously displayed result
@@ -68,6 +72,7 @@ export default function PlinkoPage() {
         }
         setError('');
         setIsPlaying(true);
+        setIsSettingsOpen(false);
         setLastRound(null);
         try {
             // No drop_offset sent - the ball always launches from top-center now;
@@ -121,10 +126,26 @@ export default function PlinkoPage() {
     }
 
     const multipliers = config.multipliers[String(rows)]?.[riskLevel] || [];
+    const wagerNumber = Number(wagerAmount);
+    const maxWager = Math.min(config.max_wager, balance);
+    const isValidWager = wagerNumber >= config.min_wager && wagerNumber <= maxWager;
 
     return (
         <DashboardLayout>
             <main className={styles.main}>
+                <button
+                    type="button"
+                    className={styles.settingsToggle}
+                    onClick={() => setIsSettingsOpen((open) => !open)}
+                    aria-label={isSettingsOpen ? 'Close game settings' : 'Open game settings'}
+                    aria-expanded={isSettingsOpen}
+                >
+                    <SettingsIcon />
+                </button>
+                {isSettingsOpen && (
+                    <div className={styles.settingsBackdrop} onClick={() => setIsSettingsOpen(false)} />
+                )}
+
                 <div className={styles.layout}>
                     <div className={styles.boardColumn}>
                         <PlinkoCanvas
@@ -142,30 +163,46 @@ export default function PlinkoPage() {
                             <p className={styles.description}>Drop the ball, bet on the bounce.</p>
                         </div>
 
-                        <div className={styles.balanceRow}>
-                            <span>Your balance</span>
-                            <strong>{balance.toLocaleString()} pts</strong>
+                        <div className={`${styles.settingsPanel} ${isSettingsOpen ? styles.settingsPanelOpen : ''}`}>
+                            <div className={styles.balanceRow}>
+                                <span>Your balance</span>
+                                <strong>{balance.toLocaleString()} pts</strong>
+                            </div>
+
+                            <PlinkoControls
+                                config={config}
+                                rows={rows}
+                                riskLevel={riskLevel}
+                                wagerAmount={wagerAmount}
+                                balance={balance}
+                                disabled={isPlaying}
+                                isValidWager={isValidWager}
+                                onRowsChange={setRows}
+                                onRiskChange={setRiskLevel}
+                                onWagerChange={setWagerAmount}
+                                onDrop={handleDrop}
+                            />
+
+                            {error && <p className={styles.errorText}>{error}</p>}
+                            {lastRound && <ResultPanel round={lastRound} />}
                         </div>
-
-                        <PlinkoControls
-                            config={config}
-                            rows={rows}
-                            riskLevel={riskLevel}
-                            wagerAmount={wagerAmount}
-                            balance={balance}
-                            disabled={isPlaying}
-                            onRowsChange={setRows}
-                            onRiskChange={setRiskLevel}
-                            onWagerChange={setWagerAmount}
-                            onDrop={handleDrop}
-                        />
-
-                        {error && <p className={styles.errorText}>{error}</p>}
-                        {lastRound && <ResultPanel round={lastRound} />}
                     </aside>
                 </div>
             </main>
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
         </DashboardLayout>
+    );
+}
+
+function SettingsIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="4" y1="6" x2="20" y2="6" />
+            <line x1="4" y1="12" x2="20" y2="12" />
+            <line x1="4" y1="18" x2="20" y2="18" />
+            <circle cx="9" cy="6" r="2" fill="currentColor" stroke="none" />
+            <circle cx="15" cy="12" r="2" fill="currentColor" stroke="none" />
+            <circle cx="9" cy="18" r="2" fill="currentColor" stroke="none" />
+        </svg>
     );
 }

@@ -192,7 +192,7 @@ export const FloatingChat: React.FC = () => {
     };
 
     // Only for Players/Agents and hide on full chat page
-    if (!user || user.user_type === 'staff' || pathname?.startsWith('/chat') || pathname?.startsWith('/onboarding') || pathname?.startsWith('/post-login')) return null;
+    if (!user || user.user_type === 'staff' || pathname?.startsWith('/chat') || pathname?.startsWith('/username-setup') || pathname?.startsWith('/onboarding') || pathname?.startsWith('/post-login')) return null;
 
     return (
         <div className={styles.container}>

@@ -106,3 +106,25 @@
     background: #ffffff;
     border-color: rgba(var(--color-primary-rgb), 0.14);
 }
+
+/*
+ * Small screens: the settings card around this button (.settingsPanel in
+ * page.module.css) collapses via `visibility: hidden` rather than `display:
+ * none` specifically so this rule can work - `visibility` is inherited, but
+ * an element's own explicit value always wins over an inherited one, so
+ * this button stays visible/interactive and pinned to the viewport even
+ * while the rest of the card around it is hidden. (`display: none` on an
+ * ancestor would remove this from the render tree entirely, position:fixed
+ * or not - it has to be `visibility` for this to work.)
+ */
+@media (max-width: 768px) {
+    .dropButton {
+        bottom: calc(86px + env(safe-area-inset-bottom));
+        left: 0.6rem;
+        pointer-events: auto;
+        position: fixed;
+        right: 0.6rem;
+        visibility: visible;
+        z-index: 60;
+    }
+}

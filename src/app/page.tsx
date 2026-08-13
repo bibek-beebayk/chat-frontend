@@ -54,6 +54,11 @@ export default function HomePage() {
             setStaffError(null);
 
             if (user.user_type === 'player') {
+                if (user.needs_username_setup) {
+                    router.replace('/username-setup');
+                    return;
+                }
+
                 try {
                     const onboardingState = await socialApi.fetchOnboardingState();
                     if (!hasCompletedSocialOnboarding(onboardingState)) {
@@ -229,6 +234,21 @@ export default function HomePage() {
                         </div>
                     </div>
                 </section>
+
+                {user.user_type === 'player' && user.has_usable_password === false && (
+                    <section className={styles.passwordNotice}>
+                        <div className={styles.passwordNoticeIcon}>
+                            <LockIcon />
+                        </div>
+                        <div>
+                            <h2>Set up your password</h2>
+                            <p>You signed in with Google. Add a password so you can also log in with your username or email.</p>
+                        </div>
+                        <button type="button" onClick={() => router.push('/settings?setupPassword=1')}>
+                            Set password
+                        </button>
+                    </section>
+                )}
 
                 <section className={styles.feedPanel}>
                     <header className={styles.feedHeader}>
@@ -653,6 +673,15 @@ function RefreshIcon() {
             <path d="M3 21v-5h5" />
             <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
             <path d="M16 8h5V3" />
+        </svg>
+    );
+}
+
+function LockIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="3" y="11" width="18" height="10" rx="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         </svg>
     );
 }
