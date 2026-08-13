@@ -61,8 +61,6 @@ export interface BoardGeometry {
     rowSpacing: number;
     pegSpacing: number;
     lastRowHalfWidth: number;
-    /** Half-width used only for wall placement - slightly beyond lastRowHalfWidth so the outermost bins have ball clearance from the walls. */
-    wallHalfWidth: number;
     numSlots: number;
     slotWidth: number;
     binY: number;
@@ -121,8 +119,14 @@ export function computeBoardGeometry(rows: number): BoardGeometry {
     // drifting out of alignment toward the edges the way an independently
     // sized tray would.
     const slotWidth = pegSpacing;
+    // The walls are invisible physics-only bodies (never drawn), so their
+    // inner face sits flush with the tray's own outer edge - not pushed out
+    // further "for ball clearance". A margin here used to leave a dead zone
+    // beyond the last bin wide enough for the ball to visibly rest in, with
+    // no tray cell drawn under it at all (the reported bug: the ball landed
+    // outside the last tray while the payout - correctly clamped to that
+    // slot - still paid out as if it had landed inside it).
     const lastRowHalfWidth = traySpan / 2;
-    const wallHalfWidth = lastRowHalfWidth + ballRadius + pegRadius + 8;
 
     const binY = topMargin + triangleSpan + TRAY_GAP;
     const floorY = binY + FLOOR_GAP;
@@ -155,7 +159,6 @@ export function computeBoardGeometry(rows: number): BoardGeometry {
         rowSpacing,
         pegSpacing,
         lastRowHalfWidth,
-        wallHalfWidth,
         numSlots,
         slotWidth,
         binY,
@@ -199,7 +202,7 @@ export function buildBoard(rows: number): PlinkoBoard {
     const world = engine.world;
 
     const geometry = computeBoardGeometry(rows);
-    const { width, height, pegRadius, topMargin, rowSpacing, pegSpacing, lastRowHalfWidth, wallHalfWidth, binY, floorY, binCenters, dividerXs } = geometry;
+    const { width, height, pegRadius, topMargin, rowSpacing, pegSpacing, lastRowHalfWidth, binY, floorY, binCenters, dividerXs } = geometry;
 
     const pegs: Matter.Body[] = [];
     for (let i = 0; i < rows; i += 1) {
@@ -218,11 +221,11 @@ export function buildBoard(rows: number): PlinkoBoard {
     }
     Matter.Composite.add(world, pegs);
 
-    const wallLeft = Matter.Bodies.rectangle(width / 2 - wallHalfWidth - 10, height / 2, 20, height, {
+    const wallLeft = Matter.Bodies.rectangle(width / 2 - lastRowHalfWidth - 10, height / 2, 20, height, {
         isStatic: true,
         label: 'wall',
     });
-    const wallRight = Matter.Bodies.rectangle(width / 2 + wallHalfWidth + 10, height / 2, 20, height, {
+    const wallRight = Matter.Bodies.rectangle(width / 2 + lastRowHalfWidth + 10, height / 2, 20, height, {
         isStatic: true,
         label: 'wall',
     });
