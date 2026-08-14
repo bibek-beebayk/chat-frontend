@@ -30,7 +30,13 @@ const PEG_FRICTION = 0.05;
 const BALL_RESTITUTION = 0.5;
 const BALL_FRICTION = 0.02;
 const BALL_FRICTION_AIR = 0.001;
-const SPAWN_JITTER = 3; // logical units, +/- half this range around the chosen spawn x - small enough that the chosen position still visibly determines the drop
+// Deterministic (seed-derived) initial motion, NOT a position offset - the
+// ball's spawn x must always be exactly the player's chosen/authoritative
+// position, never nudged. These substitute for the horizontal spawn jitter
+// this used to apply directly to x (removed: it silently moved the ball
+// away from the position the player actually selected).
+const INITIAL_VX_JITTER = 0.6; // logical units/step, +/- half this range
+const INITIAL_ANGULAR_VELOCITY_JITTER = 0.06; // rad/step, +/- half this range
 
 export const FREE_DROP_FIXED_DT = 1000 / 60; // must match offline generator exactly
 
@@ -228,7 +234,13 @@ export function spawnXToDropPosition(geometry: FreeDropBoardGeometry, spawnX: nu
     const mid = (geometry.dropRangeMin + geometry.dropRangeMax) / 2;
     const halfRange = (geometry.dropRangeMax - geometry.dropRangeMin) / 2;
     const clampedX = Math.max(geometry.dropRangeMin, Math.min(geometry.dropRangeMax, spawnX));
-    return halfRange === 0 ? 0 : (clampedX - mid) / halfRange;
+    const normalized = halfRange === 0 ? 0 : (clampedX - mid) / halfRange;
+    // Belt-and-suspenders: the math above should already stay within
+    // [-1, 1] exactly, but floating-point rounding can occasionally produce
+    // e.g. -1.0000000000000002, which fails the backend's [-1, 1] range
+    // validation with a confusing error for a drop the player placed
+    // legitimately at the extreme edge.
+    return Math.max(-1, Math.min(1, normalized));
 }
 
 export interface FreeDropBoard {
@@ -300,15 +312,27 @@ export function buildFreeDropBoard(rows: number): FreeDropBoard {
  */
 export function createFreeDropBall(board: FreeDropBoard, seed: number, spawnX: number): Matter.Body {
     const rng = createRng(seed);
-    const jitter = (rng() - 0.5) * SPAWN_JITTER;
     const { ballRadius, spawnY, dropRangeMin, dropRangeMax } = board.geometry;
+    // spawnX is the authoritative position (either the player's exact
+    // drop_position resolved to logical x, or - during offline table
+    // generation - a bucket's representative x) - it is used exactly as
+    // given, never offset. Clamping here only guards against float noise
+    // at the extreme ends of the valid range, not a meaningful adjustment.
     const clampedX = Math.max(dropRangeMin, Math.min(dropRangeMax, spawnX));
-    return Matter.Bodies.circle(clampedX + jitter, spawnY, ballRadius, {
+    const ball = Matter.Bodies.circle(clampedX, spawnY, ballRadius, {
         restitution: BALL_RESTITUTION,
         friction: BALL_FRICTION,
         frictionAir: BALL_FRICTION_AIR,
         label: 'ball',
     });
+    // Deterministic (seed-derived) initial velocity/spin substitutes for
+    // the old horizontal spawn-position jitter - real trajectory variation
+    // without ever moving the ball off its authoritative starting x.
+    const vx = (rng() - 0.5) * INITIAL_VX_JITTER;
+    const angularVelocity = (rng() - 0.5) * INITIAL_ANGULAR_VELOCITY_JITTER;
+    Matter.Body.setVelocity(ball, { x: vx, y: 0 });
+    Matter.Body.setAngularVelocity(ball, angularVelocity);
+    return ball;
 }
 
 /** Which of the rows+1 bins a ball's current x position falls into. */

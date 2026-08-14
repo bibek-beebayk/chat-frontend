@@ -87,6 +87,38 @@ function generateForRowsAndBucket(rows: number, bucketIndex: number): Record<num
     return result;
 }
 
+/**
+ * Independent re-simulation double-check (same pattern already used for
+ * Classic's seed table) - re-runs every collected seed fresh and confirms
+ * it reproduces the exact slot it's filed under. This is the generation-
+ * time reject-bad-entries step: if anything here doesn't reproduce (e.g. a
+ * stale table generated before a physics change, like removing spawn-x
+ * jitter), the script throws instead of writing a JSON file the backend
+ * would treat as authoritative but that doesn't actually match the current
+ * physics.
+ */
+function verifyTable(rows: number, buckets: Record<number, Record<number, SlotEntry>>) {
+    let checked = 0;
+    for (const [bucketStr, slots] of Object.entries(buckets)) {
+        const bucketIndex = Number(bucketStr);
+        const geometry = computeFreeDropBoardGeometry(rows);
+        const spawnX = dropPositionToSpawnX(geometry, dropPositionForBucketIndex(bucketIndex));
+        for (const [slotStr, entry] of Object.entries(slots)) {
+            const expectedSlot = Number(slotStr);
+            for (const seed of entry.seeds) {
+                const actualSlot = simulateFreeDropToSettledSlot(rows, seed, spawnX);
+                if (actualSlot !== expectedSlot) {
+                    throw new Error(
+                        `Verification failed: rows=${rows} bucket=${bucketIndex} seed=${seed} claimed slot=${expectedSlot} but re-simulation landed in slot=${actualSlot}`
+                    );
+                }
+                checked += 1;
+            }
+        }
+    }
+    console.log(`rows=${rows}: verified ${checked} seeds, all reproduce their claimed slot exactly`);
+}
+
 const table: Record<number, Record<number, Record<number, SlotEntry>>> = {};
 for (const rows of FREE_DROP_ROWS_OPTIONS) {
     table[rows] = {};
@@ -100,6 +132,7 @@ for (const rows of FREE_DROP_ROWS_OPTIONS) {
         console.log(`rows=${rows} bucket=${bucketIndex}/${FREE_DROP_DROP_BUCKETS - 1}: ${coverage}`);
     }
     console.log(`rows=${rows}: done in ${((Date.now() - t0) / 1000).toFixed(1)}s`);
+    verifyTable(rows, table[rows]);
 }
 
 const outPath = path.join(__dirname, '../../chat-backend/plinko/free_drop_physics_table.json');

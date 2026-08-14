@@ -121,11 +121,18 @@ export function FreeDropPlinkoGame({ mode, onModeChange }: FreeDropPlinkoGamePro
         setIsSettingsOpen(false);
         setLastRound(null);
         try {
+            // Defensive normalization before the request leaves the client:
+            // dropPosition should already be exactly within [-1, 1] (the
+            // canvas's own drag math clamps it), but floating-point drift
+            // (e.g. -1.0000000000000002) has caused spurious "Validation
+            // Failed" responses for genuinely extreme drops - clamp and
+            // round to a sane precision so that can't happen.
+            const safeDropPosition = Number(Math.max(-1, Math.min(1, dropPosition)).toFixed(6));
             const round = await plinkoApi.playFreeDrop({
                 rows,
                 risk_level: riskLevel,
                 wager_amount: wagerAmount,
-                drop_position: dropPosition,
+                drop_position: safeDropPosition,
             });
             setPendingRound(round);
             // Replay at the server's own (clamped) echoed drop_position, not
@@ -149,7 +156,7 @@ export function FreeDropPlinkoGame({ mode, onModeChange }: FreeDropPlinkoGamePro
     };
     handleDropRef.current = handleDrop;
 
-    const handleLanded = () => {
+    const handleLanded = (matched: boolean) => {
         if (!pendingRound) return;
         setLastRound(pendingRound);
         setIsPlaying(false);
@@ -174,9 +181,18 @@ export function FreeDropPlinkoGame({ mode, onModeChange }: FreeDropPlinkoGamePro
                     handleDropRef.current();
                 }, AUTOPLAY_CONTINUE_DELAY_MS);
             }
-        } else {
+        } else if (matched) {
             popupKeyRef.current += 1;
             setPopup({ kind: 'round', round: pendingRound });
+        } else {
+            // The canvas detected a physics/server visual mismatch (see its
+            // FREE_DROP_PHYSICS_MISMATCH log) - balance/points above are
+            // already correct (the server decided the result before
+            // physics ever ran), but a slot-specific celebratory popup
+            // would visually contradict what the player just watched the
+            // ball do, so show a graceful note instead of pretending
+            // nothing happened.
+            setError("Your last round settled correctly and your balance is up to date, but we couldn't show the exact landing animation for it.");
         }
     };
 

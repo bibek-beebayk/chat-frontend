@@ -45,7 +45,16 @@ interface FreeDropPlinkoCanvasProps {
     /** True while a ball is falling or autoplay is running - repositioning is blocked during both. */
     dragDisabled: boolean;
     onDropPositionChange: (dropPosition: number) => void;
-    onLanded?: () => void;
+    /**
+     * Called once a round finishes settling. `matched` is false if the real
+     * physics landed in a different bin than the server's authoritative
+     * slot (see the FREE_DROP_PHYSICS_MISMATCH log this fires alongside) -
+     * the caller should still treat the round as resolved (balance/points
+     * were already updated server-side before physics ever ran) but should
+     * avoid presenting a specific-slot celebratory result, since the visual
+     * landing wouldn't match it.
+     */
+    onLanded?: (matched: boolean) => void;
 }
 
 function tierForMultiplier(multiplier: number): 'extreme' | 'high' | 'mid' | 'low' {
@@ -68,13 +77,13 @@ export const FreeDropPlinkoCanvas = forwardRef<FreeDropPlinkoCanvasHandle, FreeD
     { rows, multipliers, dropPosition, dragDisabled, onDropPositionChange, onLanded },
     ref
 ) {
-    const [phase, setPhase] = useState<'idle' | 'dropping' | 'landed'>('idle');
+    const [phase, setPhase] = useState<'idle' | 'dropping' | 'landed' | 'mismatch'>('idle');
     const [winningSlot, setWinningSlot] = useState<number | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const railRef = useRef<HTMLDivElement>(null);
     const boardRef = useRef<FreeDropBoard | null>(null);
     const ballRef = useRef<Matter.Body | null>(null);
-    const phaseRef = useRef<'idle' | 'dropping' | 'landed'>('idle');
+    const phaseRef = useRef<'idle' | 'dropping' | 'landed' | 'mismatch'>('idle');
     const winningSlotRef = useRef<number | null>(null);
     const stableFramesRef = useRef(0);
     const pegFlashesRef = useRef<Map<number, number>>(new Map());
@@ -174,32 +183,35 @@ export const FreeDropPlinkoCanvas = forwardRef<FreeDropPlinkoCanvasHandle, FreeD
                     if (isFreeDropNearRestInBin(boardRef.current, ballRef.current)) {
                         stableFramesRef.current += 1;
                         if (stableFramesRef.current > SETTLE_STABLE_FRAMES) {
-                            phaseRef.current = 'landed';
-                            setPhase('landed');
-
-                            // Mismatch check: the server already decided the
-                            // authoritative slot/payout before physics ever
-                            // ran (see FreeDropPlinkoGame.tsx), so this can
-                            // never corrupt the result - it's purely a
-                            // diagnostic signal that the exact spawn x +
-                            // seed didn't reproduce the expected bin
-                            // (possible in principle since the physics_seed
-                            // was verified against a bucket's representative
-                            // x, not necessarily byte-identical to the
-                            // player's exact x - see the offline generator's
-                            // header comment). Never steer/snap to "fix" it.
+                            // Mismatch check BEFORE revealing anything: the
+                            // server already decided the authoritative
+                            // slot/payout before physics ever ran (see
+                            // FreeDropPlinkoGame.tsx), so this can never
+                            // corrupt the economic result - but the visible
+                            // winning-slot highlight must never claim a
+                            // bucket the ball isn't actually sitting in.
+                            // Never steer/snap the ball to "fix" a mismatch.
                             const physicalSlot = freeDropBinIndexForX(boardRef.current, ballRef.current.position.x);
-                            if (physicalSlot !== winningSlotRef.current && landedContextRef.current) {
-                                console.error('[FreeDrop] physics/server slot mismatch', {
-                                    roundId: landedContextRef.current.roundId,
-                                    dropPosition: landedContextRef.current.dropPosition,
-                                    physicsSeed: landedContextRef.current.physicsSeed,
+                            const matched = physicalSlot === winningSlotRef.current;
+
+                            if (!matched) {
+                                const ctx = landedContextRef.current;
+                                console.error('FREE_DROP_PHYSICS_MISMATCH', {
+                                    roundId: ctx?.roundId,
+                                    rows,
+                                    dropPosition: ctx?.dropPosition,
+                                    physicsSeed: ctx?.physicsSeed,
                                     expectedSlot: winningSlotRef.current,
                                     physicalSlot,
+                                    ballFinalX: ballRef.current.position.x,
+                                    boardWidth: boardRef.current.geometry.width,
+                                    boardHeight: boardRef.current.geometry.height,
                                 });
                             }
 
-                            onLandedRef.current?.();
+                            phaseRef.current = matched ? 'landed' : 'mismatch';
+                            setPhase(phaseRef.current);
+                            onLandedRef.current?.(matched);
                         }
                     } else {
                         stableFramesRef.current = 0;
