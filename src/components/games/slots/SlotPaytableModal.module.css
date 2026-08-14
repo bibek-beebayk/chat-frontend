@@ -1,0 +1,87 @@
+.muted {
+    color: var(--color-text-muted);
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.content h3 {
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+    font-weight: 800;
+    margin: 0 0 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.symbolGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.symbolRow {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: var(--radius-md);
+    display: flex;
+    gap: 0.6rem;
+    padding: 0.45rem 0.6rem;
+}
+
+.symbolGlyph {
+    font-size: 1.5rem;
+    width: 1.8rem;
+}
+
+.symbolLabel {
+    color: var(--color-text-secondary);
+    flex: 1;
+    font-size: 0.85rem;
+}
+
+.symbolMultiplier {
+    color: var(--color-accent);
+    font-size: 0.9rem;
+    font-weight: 800;
+}
+
+.paylineGrid {
+    display: grid;
+    gap: 0.6rem;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+}
+
+.paylineCard {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: var(--radius-md);
+    padding: 0.6rem;
+    text-align: center;
+}
+
+.paylineLabel {
+    color: var(--color-text-secondary);
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+}
+
+.paylineDiagram {
+    color: var(--color-accent);
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    line-height: 1.3;
+    margin: 0;
+}
+
+.rulesList {
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.6;
+    margin: 0;
+    padding-left: 1.1rem;
+}

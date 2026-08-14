@@ -20,6 +20,12 @@
     text-transform: uppercase;
 }
 
+.riskWagerRow {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
 .optionRow {
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.14);
@@ -55,44 +61,9 @@
     opacity: 0.6;
 }
 
-.autoplayControls {
-    display: grid;
+.actionRow {
+    display: flex;
     gap: 0.5rem;
-}
-
-.autoplaySwitch {
-    background: rgba(255, 255, 255, 0.14);
-    border: 0;
-    border-radius: 999px;
-    box-sizing: border-box;
-    height: 24px;
-    justify-self: start;
-    padding: 3px;
-    transition: background 160ms ease;
-    width: 42px;
-}
-
-.autoplaySwitch:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-}
-
-.autoplaySwitchActive {
-    background: linear-gradient(135deg, var(--plinko-cyan, #35d5ff), var(--plinko-pink, #ff3fb0));
-}
-
-.autoplaySwitchKnob {
-    background: #fff;
-    border-radius: 999px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
-    display: block;
-    height: 18px;
-    transition: transform 160ms ease;
-    width: 18px;
-}
-
-.autoplaySwitchActive .autoplaySwitchKnob {
-    transform: translateX(18px);
 }
 
 .dropButton {
@@ -100,6 +71,7 @@
     border: 0;
     border-radius: 999px;
     color: #0c0720;
+    flex: 2 1 0;
     font-size: 0.95rem;
     font-weight: 900;
     min-height: 48px;
@@ -109,6 +81,52 @@
 .dropButton:disabled {
     cursor: not-allowed;
     opacity: 0.55;
+}
+
+.autoplayButton {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    color: var(--color-text-primary);
+    flex: 1 1 0;
+    font-size: 0.85rem;
+    font-weight: 800;
+    min-height: 48px;
+    padding: 0.5rem;
+    white-space: nowrap;
+}
+
+.autoplayButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.autoplayButtonActive {
+    background: linear-gradient(135deg, var(--plinko-cyan, #35d5ff), var(--plinko-pink, #ff3fb0));
+    border-color: transparent;
+    color: #0c0720;
+}
+
+.autoplayModalOptions {
+    display: flex;
+    gap: 0.6rem;
+}
+
+.autoplayModalOption {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    flex: 1 1 0;
+    font-size: 0.9rem;
+    font-weight: 800;
+    min-height: 48px;
+    padding: 0.7rem;
+}
+
+.autoplayModalOption:hover {
+    background: rgba(var(--color-primary-rgb), 0.18);
+    border-color: rgba(var(--color-primary-rgb), 0.4);
 }
 
 :global(html[data-theme='light']) .controls {
@@ -127,28 +145,50 @@
     color: var(--color-text-secondary);
 }
 
-:global(html[data-theme='light']) .autoplaySwitch {
-    background: rgba(15, 23, 42, 0.14);
+:global(html[data-theme='light']) .autoplayButton {
+    background: rgba(15, 23, 42, 0.06);
+    border-color: rgba(15, 23, 42, 0.14);
 }
 
 /*
- * Small screens: the settings card around this button (.settingsPanel in
- * page.module.css) collapses via `visibility: hidden` rather than `display:
- * none` specifically so this rule can work - `visibility` is inherited, but
- * an element's own explicit value always wins over an inherited one, so
- * this button stays visible/interactive and pinned to the viewport even
- * while the rest of the card around it is hidden. (`display: none` on an
- * ancestor would remove this from the render tree entirely, position:fixed
- * or not - it has to be `visibility` for this to work.)
+ * Small screens: risk/wager sit side by side (more compact, since the
+ * ImmersiveGameShell header + inline controls need to fit without
+ * scrolling), and Drop+Autoplay pin to the bottom of the viewport as one
+ * row instead of living inside the settings card.
  */
 @media (max-width: 768px) {
-    .dropButton {
-        bottom: calc(86px + env(safe-area-inset-bottom));
+    .riskWagerRow {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    .field > span {
+        font-size: 0.68rem;
+    }
+
+    .optionBtn {
+        font-size: 0.76rem;
+        min-height: 34px;
+        padding: 0.35rem 0.25rem;
+    }
+
+    /* Reserve room so the last inline field isn't hidden behind the fixed
+       action row below (which is lifted out of normal flow). */
+    .controls {
+        padding-bottom: calc(70px + env(safe-area-inset-bottom));
+    }
+
+    .actionRow {
+        bottom: calc(0.6rem + env(safe-area-inset-bottom));
         left: 0.6rem;
-        pointer-events: auto;
         position: fixed;
         right: 0.6rem;
-        visibility: visible;
         z-index: 60;
+    }
+
+    .dropButton,
+    .autoplayButton {
+        min-height: 46px;
     }
 }

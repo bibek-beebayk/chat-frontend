@@ -1,0 +1,249 @@
+.wrap {
+    display: grid;
+    gap: var(--spacing-lg);
+    grid-template-columns: 1fr;
+    justify-content: center;
+    margin: 0 auto;
+    max-width: 920px;
+}
+
+@media (min-width: 860px) {
+    .wrap {
+        grid-template-columns: minmax(0, 460px) minmax(240px, 320px);
+    }
+}
+
+.errorPanel {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--radius-lg);
+    color: var(--color-text-primary);
+    margin: var(--spacing-lg) auto;
+    max-width: 480px;
+    padding: var(--spacing-lg);
+    text-align: center;
+}
+
+.boardColumn {
+    display: flex;
+    justify-content: center;
+}
+
+.boardCard {
+    background:
+        radial-gradient(ellipse 70% 60% at 50% 0%, rgba(var(--color-accent-rgb), 0.14), transparent 60%),
+        linear-gradient(180deg, rgba(20, 10, 35, 0.92), rgba(10, 6, 20, 0.96));
+    border: 1px solid rgba(var(--color-accent-rgb), 0.28);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding: var(--spacing-lg);
+    width: 100%;
+}
+
+.boardHeader {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+}
+
+.title {
+    background: linear-gradient(135deg, var(--color-accent), #fff2c9);
+    background-clip: text;
+    color: transparent;
+    font-size: 1.3rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    margin: 0;
+}
+
+.balance {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+}
+
+.balanceLabel {
+    color: var(--color-text-muted);
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.balanceValue {
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.gridWrap {
+    background:
+        radial-gradient(ellipse 90% 80% at 50% 12%, rgba(255, 221, 122, 0.1), transparent 60%),
+        repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0px, rgba(0, 0, 0, 0.3) 2px, transparent 2px, transparent 14px),
+        linear-gradient(180deg, #2b0a0a 0%, #4a0f0f 45%, #1c0606 100%);
+    border: 2px solid rgba(var(--color-accent-rgb), 0.55);
+    border-radius: var(--radius-lg);
+    box-shadow:
+        inset 0 0 28px rgba(0, 0, 0, 0.65),
+        inset 0 0 0 1px rgba(255, 221, 122, 0.15);
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    padding: 0.9rem 0.7rem;
+}
+
+@media (max-width: 600px) {
+    .boardCard {
+        gap: 0.65rem;
+        padding: var(--spacing-md) var(--spacing-sm);
+    }
+
+    .title {
+        font-size: 1.05rem;
+    }
+
+    .balanceLabel {
+        font-size: 0.58rem;
+    }
+
+    .balanceValue {
+        font-size: 0.85rem;
+    }
+
+    .gridWrap {
+        height: 228px;
+        padding: 0.5rem 0.4rem;
+    }
+
+    .gridWrap > div {
+        transform: scale(0.76);
+        transform-origin: top center;
+    }
+
+    .resultArea {
+        min-height: 34px;
+    }
+
+    .winBanner,
+    .lossBanner {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.85rem;
+    }
+
+    .winPayout {
+        font-size: 0.88rem;
+    }
+}
+
+.resultArea {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    min-height: 44px;
+}
+
+.resultError {
+    color: #fca5a5;
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.lossBanner {
+    align-items: center;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 999px;
+    display: flex;
+    gap: 0.6rem;
+    padding: 0.5rem 1.1rem;
+}
+
+.lossLabel {
+    color: #fca5a5;
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+}
+
+.lossAmount {
+    color: #fca5a5;
+    font-size: 0.85rem;
+    font-weight: 800;
+}
+
+.winBanner {
+    align-items: center;
+    background: rgba(var(--color-accent-rgb), 0.12);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.35);
+    border-radius: 999px;
+    display: flex;
+    gap: 0.6rem;
+    padding: 0.5rem 1.1rem;
+}
+
+.winBannerMedium {
+    background: rgba(var(--color-accent-rgb), 0.2);
+    box-shadow: 0 0 20px rgba(var(--color-accent-rgb), 0.35);
+}
+
+.winBannerBig {
+    animation: bigWinPulse 1100ms ease-in-out infinite;
+    background: rgba(var(--color-accent-rgb), 0.28);
+    box-shadow: 0 0 30px rgba(var(--color-accent-rgb), 0.55);
+}
+
+@keyframes bigWinPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+}
+
+.winLabel {
+    color: var(--color-accent);
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+}
+
+.winPayout {
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    font-weight: 900;
+}
+
+.winMultiplier {
+    background: var(--color-accent);
+    border-radius: 999px;
+    color: #241305;
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 0.1rem 0.5rem;
+}
+
+.footerLinks {
+    display: flex;
+    justify-content: center;
+}
+
+.linkBtn {
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 0.4rem;
+    text-decoration: underline;
+}
+
+.sideColumn {
+    display: flex;
+    flex-direction: column;
+}
+
+/* On mobile the ImmersiveGameShell's own info button already opens the
+   Paytable modal, so this footer link would be a redundant duplicate
+   trigger - desktop has no such header button, so it stays there. */
+@media (max-width: 768px) {
+    .footerLinks {
+        display: none;
+    }
+}

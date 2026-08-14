@@ -1,0 +1,91 @@
+.panel {
+    background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
+    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+}
+
+.title {
+    color: var(--color-text-primary);
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    margin: 0 0 0.7rem;
+    text-transform: uppercase;
+}
+
+.muted {
+    color: var(--color-text-muted);
+    font-size: 0.82rem;
+    margin: 0;
+}
+
+.errorState {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.retryBtn {
+    align-self: flex-start;
+    background: rgba(var(--color-primary-rgb), 0.16);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.35rem 0.8rem;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.row {
+    align-items: center;
+    display: flex;
+    font-size: 0.8rem;
+    gap: 0.5rem;
+    padding: 0.4rem 0;
+}
+
+.row + .row {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.wager {
+    color: var(--color-text-secondary);
+}
+
+.arrow {
+    color: var(--color-text-muted);
+}
+
+.payout {
+    color: var(--color-text-secondary);
+    font-weight: 700;
+}
+
+.payoutWin {
+    color: var(--color-accent);
+}
+
+.multiplier {
+    background: rgba(var(--color-accent-rgb), 0.16);
+    border-radius: 999px;
+    color: var(--color-accent);
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 0.1rem 0.45rem;
+}
+
+.time {
+    color: var(--color-text-muted);
+    font-size: 0.7rem;
+    margin-left: auto;
+}

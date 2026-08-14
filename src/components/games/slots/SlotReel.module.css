@@ -1,0 +1,45 @@
+.viewport {
+    background: linear-gradient(180deg, rgba(8, 4, 18, 0.9), rgba(20, 10, 35, 0.75));
+    border-radius: var(--radius-md);
+    height: 300px;
+    overflow: hidden;
+    position: relative;
+    width: 100px;
+}
+
+.track {
+    display: flex;
+    flex-direction: column;
+    will-change: transform;
+}
+
+.tile {
+    align-items: center;
+    display: flex;
+    height: 100px;
+    justify-content: center;
+    width: 100px;
+}
+
+.glyph {
+    font-size: 3rem;
+    line-height: 1;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.seven {
+    background: linear-gradient(180deg, #ffe98a, var(--color-accent));
+    background-clip: text;
+    color: transparent;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight: 900;
+    filter: drop-shadow(0 0 8px rgba(var(--color-accent-rgb), 0.6));
+}
+
+.crown {
+    filter: drop-shadow(0 0 8px rgba(var(--color-accent-rgb), 0.5));
+}
+
+.gem {
+    filter: drop-shadow(0 0 6px rgba(var(--color-primary-rgb), 0.5));
+}

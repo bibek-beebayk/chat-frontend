@@ -1,0 +1,15 @@
+.page {
+    padding: var(--spacing-lg) var(--spacing-md);
+}
+
+@media (max-width: 600px) {
+    .page {
+        padding: var(--spacing-md) var(--spacing-sm);
+    }
+}
+
+.emptyState {
+    color: var(--color-text-secondary);
+    padding: var(--spacing-xl);
+    text-align: center;
+}

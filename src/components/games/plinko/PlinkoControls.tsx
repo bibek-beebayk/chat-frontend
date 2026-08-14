@@ -1,5 +1,6 @@
 'use client';
 
+import { Modal } from '@/components/ui/Modal';
 import { PlinkoConfig, PlinkoRiskLevel, PlinkoRows, PlinkoWager } from '@/types';
 import styles from './PlinkoControls.module.css';
 
@@ -19,16 +20,18 @@ interface PlinkoControlsProps {
     onWagerChange: (value: PlinkoWager) => void;
     onDrop: () => void;
     onToggleAutoplay: () => void;
+    onCloseAutoplayMenu: () => void;
     onSelectAutoplayCount: (count: number) => void;
 }
 
 /**
- * Drop stays inside the same `.controls` card as the fields (not a separate
- * component) so its position/spacing relative to the card is identical on
- * desktop. On small screens, the card around it collapses via `visibility`
- * (not `display`) so this button - which explicitly sets its own
- * `visibility: visible` - can stay pinned and interactive even while the
- * rest of the card is hidden. See PlinkoControls.module.css.
+ * Drop and Autoplay share one `.actionRow` - on desktop they're inline at
+ * the bottom of the card; on small screens `.actionRow` lifts out via
+ * `position: fixed` to pin to the bottom of the viewport (see
+ * PlinkoControls.module.css), while the rest of the card stays in normal
+ * flow above it. Autoplay opens a round-count picker as a Modal rather than
+ * an inline switch+menu, so "start autoplay" always looks and behaves the
+ * same regardless of screen size.
  */
 export function PlinkoControls({
     config,
@@ -44,13 +47,14 @@ export function PlinkoControls({
     onWagerChange,
     onDrop,
     onToggleAutoplay,
+    onCloseAutoplayMenu,
     onSelectAutoplayCount,
 }: PlinkoControlsProps) {
     const autoplayActive = autoplayRemaining !== null;
-    // While autoplay is running, the switch must stay clickable (to stop
+    // While autoplay is running, the button must stay clickable (to stop
     // it) even though every other control is disabled - only gate opening
     // the picker on the normal disabled/wager-validity checks.
-    const autoplayToggleDisabled = !autoplayActive && (disabled || !isValidWager);
+    const autoplayButtonDisabled = !autoplayActive && (disabled || !isValidWager);
 
     return (
         <div className={styles.controls}>
@@ -73,74 +77,72 @@ export function PlinkoControls({
                 </div>
             )}
 
-            <div className={styles.field}>
-                <span>Risk</span>
-                <div className={styles.optionRow}>
-                    {config.risk_options.map((option) => (
+            <div className={styles.riskWagerRow}>
+                <div className={styles.field}>
+                    <span>Risk</span>
+                    <div className={styles.optionRow}>
+                        {config.risk_options.map((option) => (
+                            <button
+                                key={option}
+                                type="button"
+                                className={`${styles.optionBtn} ${riskLevel === option ? styles.optionActive : ''}`}
+                                onClick={() => onRiskChange(option)}
+                                disabled={disabled}
+                            >
+                                {option.charAt(0).toUpperCase() + option.slice(1)}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className={styles.field}>
+                    <span>Wager</span>
+                    <div className={styles.optionRow}>
+                        {config.wager_options.map((option) => (
+                            <button
+                                key={option}
+                                type="button"
+                                className={`${styles.optionBtn} ${wagerAmount === option ? styles.optionActive : ''}`}
+                                onClick={() => onWagerChange(option)}
+                                disabled={disabled}
+                            >
+                                {option}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            <div className={styles.actionRow}>
+                <button type="button" className={styles.dropButton} onClick={onDrop} disabled={disabled || !isValidWager}>
+                    {autoplayActive ? 'Autoplay...' : disabled ? 'Dropping...' : 'Drop'}
+                </button>
+
+                <button
+                    type="button"
+                    className={`${styles.autoplayButton} ${autoplayActive ? styles.autoplayButtonActive : ''}`}
+                    onClick={onToggleAutoplay}
+                    disabled={autoplayButtonDisabled}
+                    aria-pressed={autoplayActive}
+                >
+                    {autoplayActive ? `Stop (${autoplayRemaining})` : 'Autoplay'}
+                </button>
+            </div>
+
+            <Modal isOpen={autoplayMenuOpen && !autoplayActive} onClose={onCloseAutoplayMenu} title="Autoplay - Select Rounds">
+                <div className={styles.autoplayModalOptions}>
+                    {AUTOPLAY_OPTIONS.map((count) => (
                         <button
-                            key={option}
+                            key={count}
                             type="button"
-                            className={`${styles.optionBtn} ${riskLevel === option ? styles.optionActive : ''}`}
-                            onClick={() => onRiskChange(option)}
-                            disabled={disabled}
+                            className={styles.autoplayModalOption}
+                            onClick={() => onSelectAutoplayCount(count)}
                         >
-                            {option.charAt(0).toUpperCase() + option.slice(1)}
+                            {count} rounds
                         </button>
                     ))}
                 </div>
-            </div>
-
-            <div className={styles.field}>
-                <span>Wager (points)</span>
-                <div className={styles.optionRow}>
-                    {config.wager_options.map((option) => (
-                        <button
-                            key={option}
-                            type="button"
-                            className={`${styles.optionBtn} ${wagerAmount === option ? styles.optionActive : ''}`}
-                            onClick={() => onWagerChange(option)}
-                            disabled={disabled}
-                        >
-                            {option}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            <div className={styles.field}>
-                <span>Autoplay{autoplayActive ? ` · ${autoplayRemaining} left` : ''}</span>
-                <div className={styles.autoplayControls}>
-                    <button
-                        type="button"
-                        className={`${styles.autoplaySwitch} ${autoplayActive ? styles.autoplaySwitchActive : ''}`}
-                        onClick={onToggleAutoplay}
-                        disabled={autoplayToggleDisabled}
-                        aria-pressed={autoplayActive}
-                        aria-label={autoplayActive ? 'Stop autoplay' : 'Start autoplay'}
-                    >
-                        <span className={styles.autoplaySwitchKnob} />
-                    </button>
-
-                    {autoplayMenuOpen && !autoplayActive && (
-                        <div className={styles.optionRow}>
-                            {AUTOPLAY_OPTIONS.map((count) => (
-                                <button
-                                    key={count}
-                                    type="button"
-                                    className={styles.optionBtn}
-                                    onClick={() => onSelectAutoplayCount(count)}
-                                >
-                                    {count}
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            <button type="button" className={styles.dropButton} onClick={onDrop} disabled={disabled || !isValidWager}>
-                {autoplayActive ? 'Autoplay...' : disabled ? 'Dropping...' : 'Drop'}
-            </button>
+            </Modal>
         </div>
     );
 }

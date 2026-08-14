@@ -10,6 +10,7 @@ import styles from './page.module.css';
 
 const GAME_ROUTES: Record<string, string> = {
     plinko: '/games/plinko',
+    slots: '/games/slots',
 };
 
 export default function GamesPage() {

@@ -13,6 +13,14 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+/* A game page wrapped in ImmersiveGameShell hides the top bar on mobile so
+   only the game itself is on screen - desktop is unaffected. */
+@media (max-width: 768px) {
+    :global(body.game-immersive-mobile) .topNav {
+        display: none;
+    }
+}
+
 .leftSection {
     display: flex;
     align-items: center;

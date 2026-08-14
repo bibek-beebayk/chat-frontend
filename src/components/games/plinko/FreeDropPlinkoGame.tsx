@@ -2,11 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { ImmersiveGameShell } from '@/components/games/shared/ImmersiveGameShell';
 import { FreeDropPlinkoCanvas, FreeDropPlinkoCanvasHandle } from '@/components/games/plinko/FreeDropPlinkoCanvas';
 import { PlinkoControls } from '@/components/games/plinko/PlinkoControls';
 import { PlinkoPopupState, PlinkoResultPopup } from '@/components/games/plinko/PlinkoResultPopup';
 import { ResultPanel } from '@/components/games/plinko/ResultPanel';
 import { PlinkoModeSelector } from '@/components/games/plinko/shared/PlinkoModeSelector';
+import { PlinkoRulesModal } from '@/components/games/plinko/shared/PlinkoRulesModal';
 import { playWinChime, unlockAudio, WinTier } from '@/components/games/plinko/audio';
 import { emitPointsUpdated, usePointsBalance } from '@/hooks/usePointsBalance';
 import { formatPoints } from '@/lib/points';
@@ -53,7 +55,7 @@ export function FreeDropPlinkoGame({ mode, onModeChange }: FreeDropPlinkoGamePro
     const [error, setError] = useState('');
     const [popup, setPopup] = useState<PlinkoPopupState>(null);
     const closePopup = useCallback(() => setPopup(null), []);
-    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [rulesOpen, setRulesOpen] = useState(false);
     const [autoplayRemaining, setAutoplayRemaining] = useState<number | null>(null);
     const [autoplayMenuOpen, setAutoplayMenuOpen] = useState(false);
     const canvasRef = useRef<FreeDropPlinkoCanvasHandle>(null);
@@ -118,7 +120,6 @@ export function FreeDropPlinkoGame({ mode, onModeChange }: FreeDropPlinkoGamePro
         }
         setError('');
         setIsPlaying(true);
-        setIsSettingsOpen(false);
         setLastRound(null);
         try {
             // Defensive normalization before the request leaves the client:
@@ -214,7 +215,9 @@ export function FreeDropPlinkoGame({ mode, onModeChange }: FreeDropPlinkoGamePro
     if (!config) {
         return (
             <DashboardLayout>
-                <div className={styles.loadingArea}><div className="spinner"></div></div>
+                <ImmersiveGameShell gameName="Plinko" onInfoClick={() => setRulesOpen(true)}>
+                    <div className={styles.loadingArea}><div className="spinner"></div></div>
+                </ImmersiveGameShell>
             </DashboardLayout>
         );
     }
@@ -225,20 +228,8 @@ export function FreeDropPlinkoGame({ mode, onModeChange }: FreeDropPlinkoGamePro
 
     return (
         <DashboardLayout>
+            <ImmersiveGameShell gameName="Plinko" onInfoClick={() => setRulesOpen(true)}>
             <main className={styles.main}>
-                <button
-                    type="button"
-                    className={styles.settingsToggle}
-                    onClick={() => setIsSettingsOpen((open) => !open)}
-                    aria-label={isSettingsOpen ? 'Close game settings' : 'Open game settings'}
-                    aria-expanded={isSettingsOpen}
-                >
-                    <SettingsIcon />
-                </button>
-                {isSettingsOpen && (
-                    <div className={styles.settingsBackdrop} onClick={() => setIsSettingsOpen(false)} />
-                )}
-
                 <div className={styles.layout}>
                     <div className={styles.boardColumn}>
                         <FreeDropPlinkoCanvas
@@ -260,9 +251,15 @@ export function FreeDropPlinkoGame({ mode, onModeChange }: FreeDropPlinkoGamePro
                             <p className={styles.description}>Drag the ball, choose your drop, bet on the bounce.</p>
                         </div>
 
-                        <div className={`${styles.settingsPanel} ${isSettingsOpen ? styles.settingsPanelOpen : ''}`}>
+                        <div className={styles.modeSelectorWrap}>
                             <PlinkoModeSelector mode={mode} disabled={controlsDisabled} onChange={onModeChange} />
+                        </div>
 
+                        <div className={styles.compactResultWrap}>
+                            {lastRound && <ResultPanel round={lastRound} compact />}
+                        </div>
+
+                        <div className={styles.settingsPanel}>
                             <div className={styles.balanceRow}>
                                 <span>Your balance</span>
                                 <strong>{formatPoints(balance)} pts</strong>
@@ -282,28 +279,22 @@ export function FreeDropPlinkoGame({ mode, onModeChange }: FreeDropPlinkoGamePro
                                 onWagerChange={setWagerAmount}
                                 onDrop={handleDrop}
                                 onToggleAutoplay={handleToggleAutoplay}
+                                onCloseAutoplayMenu={() => setAutoplayMenuOpen(false)}
                                 onSelectAutoplayCount={handleSelectAutoplayCount}
                             />
 
                             {error && <p className={styles.errorText}>{error}</p>}
-                            {lastRound && <ResultPanel round={lastRound} />}
+                            {lastRound && (
+                                <div className={styles.fullResultWrap}>
+                                    <ResultPanel round={lastRound} />
+                                </div>
+                            )}
                         </div>
                     </aside>
                 </div>
             </main>
+            <PlinkoRulesModal isOpen={rulesOpen} onClose={() => setRulesOpen(false)} mode={mode} multipliers={multipliers} />
+            </ImmersiveGameShell>
         </DashboardLayout>
-    );
-}
-
-function SettingsIcon() {
-    return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="4" y1="6" x2="20" y2="6" />
-            <line x1="4" y1="12" x2="20" y2="12" />
-            <line x1="4" y1="18" x2="20" y2="18" />
-            <circle cx="9" cy="6" r="2" fill="currentColor" stroke="none" />
-            <circle cx="15" cy="12" r="2" fill="currentColor" stroke="none" />
-            <circle cx="9" cy="18" r="2" fill="currentColor" stroke="none" />
-        </svg>
     );
 }

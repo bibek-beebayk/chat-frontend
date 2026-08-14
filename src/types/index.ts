@@ -515,6 +515,57 @@ export interface PlinkoRound {
     created_at: string;
 }
 
+export type SlotSymbolId = 'coin' | 'gem' | 'cards' | 'bell' | 'crown' | 'seven';
+
+export interface SlotSymbolInfo {
+    id: SlotSymbolId;
+    label: string;
+}
+
+// Each entry is [row_for_reel0, row_for_reel1, row_for_reel2], row 0 = top,
+// 1 = middle, 2 = bottom - matches slots/constants.py::PAYLINES exactly.
+export type SlotPayline = [number, number, number];
+
+export interface SlotConfig {
+    enabled: boolean;
+    game_version: string;
+    min_wager: number;
+    max_wager: number;
+    wager_presets: number[];
+    symbols: SlotSymbolInfo[];
+    // Multiplier per symbol, serialized as a string (Decimal) - Number() before arithmetic.
+    paytable: Record<SlotSymbolId, string>;
+    paylines: SlotPayline[];
+    // Real reel strip content/order per reel - lets the frontend animate
+    // through the actual strip instead of faking symbols. Exposing the
+    // order is safe: it never reveals which stop the server will pick.
+    reel_strips: SlotSymbolId[][];
+}
+
+export interface SlotWinningLine {
+    line_index: number;
+    symbol: SlotSymbolId;
+    // Both Decimal, serialized as strings - Number() before arithmetic.
+    multiplier: string;
+    payout: string;
+}
+
+export interface SlotRound {
+    round_id: number;
+    game_version: string;
+    wager: number;
+    reel_stops: [number, number, number];
+    // grid[reel][row] = symbol id, row 0 = top, 1 = middle, 2 = bottom.
+    grid: SlotSymbolId[][];
+    winning_lines: SlotWinningLine[];
+    // Decimal fields - serialize as strings, Number() before arithmetic.
+    total_multiplier: string;
+    payout: string;
+    net: string;
+    balance: string;
+    created_at: string;
+}
+
 export interface ActivityEvent {
     id: number;
     kind: 'account' | 'post' | 'comment' | 'event' | 'reward' | string;

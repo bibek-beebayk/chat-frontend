@@ -7,6 +7,8 @@ import { PlinkoControls } from '@/components/games/plinko/PlinkoControls';
 import { PlinkoPopupState, PlinkoResultPopup } from '@/components/games/plinko/PlinkoResultPopup';
 import { ResultPanel } from '@/components/games/plinko/ResultPanel';
 import { PlinkoModeSelector } from '@/components/games/plinko/shared/PlinkoModeSelector';
+import { PlinkoRulesModal } from '@/components/games/plinko/shared/PlinkoRulesModal';
+import { ImmersiveGameShell } from '@/components/games/shared/ImmersiveGameShell';
 import { playWinChime, unlockAudio, WinTier } from '@/components/games/plinko/audio';
 import { emitPointsUpdated, usePointsBalance } from '@/hooks/usePointsBalance';
 import { formatPoints } from '@/lib/points';
@@ -50,15 +52,12 @@ export function ClassicPlinkoGame({ mode, onModeChange }: ClassicPlinkoGameProps
     const [lastRound, setLastRound] = useState<PlinkoRound | null>(null);
     const [error, setError] = useState('');
     const [popup, setPopup] = useState<PlinkoPopupState>(null);
+    const [rulesOpen, setRulesOpen] = useState(false);
     // Stable identity so the popup's auto-dismiss timer (keyed on this prop)
     // doesn't get reset by unrelated page re-renders - autoplay re-renders
     // this page every ~1.1s, and an inline arrow here would recreate on
     // every one of those.
     const closePopup = useCallback(() => setPopup(null), []);
-    // Small-screen only: balance/rows/risk/wager/result live behind this
-    // toggle so the board can stay front and center; irrelevant on desktop,
-    // where that panel is always visible regardless of this flag.
-    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     // null = autoplay off. A number is the rounds still left to run - the
     // picker (5/10/20) is shown separately via autoplayMenuOpen, before a
     // count is chosen and the session actually starts.
@@ -146,7 +145,6 @@ export function ClassicPlinkoGame({ mode, onModeChange }: ClassicPlinkoGameProps
         }
         setError('');
         setIsPlaying(true);
-        setIsSettingsOpen(false);
         setLastRound(null);
         try {
             // No drop_offset sent - the ball always launches from top-center now;
@@ -229,7 +227,9 @@ export function ClassicPlinkoGame({ mode, onModeChange }: ClassicPlinkoGameProps
     if (!config) {
         return (
             <DashboardLayout>
-                <div className={styles.loadingArea}><div className="spinner"></div></div>
+                <ImmersiveGameShell gameName="Plinko" onInfoClick={() => setRulesOpen(true)}>
+                    <div className={styles.loadingArea}><div className="spinner"></div></div>
+                </ImmersiveGameShell>
             </DashboardLayout>
         );
     }
@@ -242,20 +242,8 @@ export function ClassicPlinkoGame({ mode, onModeChange }: ClassicPlinkoGameProps
 
     return (
         <DashboardLayout>
+            <ImmersiveGameShell gameName="Plinko" onInfoClick={() => setRulesOpen(true)}>
             <main className={styles.main}>
-                <button
-                    type="button"
-                    className={styles.settingsToggle}
-                    onClick={() => setIsSettingsOpen((open) => !open)}
-                    aria-label={isSettingsOpen ? 'Close game settings' : 'Open game settings'}
-                    aria-expanded={isSettingsOpen}
-                >
-                    <SettingsIcon />
-                </button>
-                {isSettingsOpen && (
-                    <div className={styles.settingsBackdrop} onClick={() => setIsSettingsOpen(false)} />
-                )}
-
                 <div className={styles.layout}>
                     <div className={styles.boardColumn}>
                         <PlinkoCanvas
@@ -274,9 +262,15 @@ export function ClassicPlinkoGame({ mode, onModeChange }: ClassicPlinkoGameProps
                             <p className={styles.description}>Drop the ball, bet on the bounce.</p>
                         </div>
 
-                        <div className={`${styles.settingsPanel} ${isSettingsOpen ? styles.settingsPanelOpen : ''}`}>
+                        <div className={styles.modeSelectorWrap}>
                             <PlinkoModeSelector mode={mode} disabled={controlsDisabled} onChange={onModeChange} />
+                        </div>
 
+                        <div className={styles.compactResultWrap}>
+                            {lastRound && <ResultPanel round={lastRound} compact />}
+                        </div>
+
+                        <div className={styles.settingsPanel}>
                             <div className={styles.balanceRow}>
                                 <span>Your balance</span>
                                 <strong>{formatPoints(balance)} pts</strong>
@@ -296,28 +290,22 @@ export function ClassicPlinkoGame({ mode, onModeChange }: ClassicPlinkoGameProps
                                 onWagerChange={setWagerAmount}
                                 onDrop={handleDrop}
                                 onToggleAutoplay={handleToggleAutoplay}
+                                onCloseAutoplayMenu={() => setAutoplayMenuOpen(false)}
                                 onSelectAutoplayCount={handleSelectAutoplayCount}
                             />
 
                             {error && <p className={styles.errorText}>{error}</p>}
-                            {lastRound && <ResultPanel round={lastRound} />}
+                            {lastRound && (
+                                <div className={styles.fullResultWrap}>
+                                    <ResultPanel round={lastRound} />
+                                </div>
+                            )}
                         </div>
                     </aside>
                 </div>
             </main>
+            <PlinkoRulesModal isOpen={rulesOpen} onClose={() => setRulesOpen(false)} mode={mode} multipliers={multipliers} />
+            </ImmersiveGameShell>
         </DashboardLayout>
-    );
-}
-
-function SettingsIcon() {
-    return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="4" y1="6" x2="20" y2="6" />
-            <line x1="4" y1="12" x2="20" y2="12" />
-            <line x1="4" y1="18" x2="20" y2="18" />
-            <circle cx="9" cy="6" r="2" fill="currentColor" stroke="none" />
-            <circle cx="15" cy="12" r="2" fill="currentColor" stroke="none" />
-            <circle cx="9" cy="18" r="2" fill="currentColor" stroke="none" />
-        </svg>
     );
 }

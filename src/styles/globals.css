@@ -310,4 +310,17 @@ html[data-theme='light'] select option:checked {
   body.has-mobile-bottom-nav {
     padding-bottom: calc(86px + env(safe-area-inset-bottom));
   }
+
+  /* A game page wrapped in ImmersiveGameShell hides the top bar, bottom
+     nav, support chat bubble, and footer so only the game itself is on
+     screen - the reserved bottom-nav padding above must go with it, and
+     the footer (a plain, non-CSS-module element) is targeted directly here
+     rather than in its own module.css. Desktop is unaffected. */
+  body.game-immersive-mobile.has-mobile-bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  body.game-immersive-mobile footer {
+    display: none;
+  }
 }

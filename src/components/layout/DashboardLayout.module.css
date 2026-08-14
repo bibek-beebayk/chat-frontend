@@ -77,6 +77,13 @@
         padding-bottom: 100px; /* Space for bottom nav */
     }
 
+    /* A game page wrapped in ImmersiveGameShell hides the bottom nav on
+       mobile - the space reserved for it here would otherwise sit unused
+       and work against that shell's "fit without scrolling" layout. */
+    :global(body.game-immersive-mobile) .contentArea {
+        padding-bottom: var(--spacing-sm);
+    }
+
     .rightSidebar {
         width: 100%;
     }

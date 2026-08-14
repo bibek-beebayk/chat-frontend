@@ -34,6 +34,12 @@
     display: none;
 }
 
+/* A game page wrapped in ImmersiveGameShell hides the bottom nav on mobile
+   so only the game itself is on screen - desktop is unaffected. */
+:global(body.game-immersive-mobile) .nav {
+    display: none;
+}
+
 .item {
     display: flex;
     flex-direction: column;

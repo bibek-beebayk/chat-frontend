@@ -44,3 +44,15 @@
     border-right-color: rgba(var(--color-primary-rgb), 0.14);
     color: var(--color-text-secondary);
 }
+
+@media (max-width: 768px) {
+    .modeRow {
+        margin: 0;
+    }
+
+    .modeBtn {
+        font-size: 0.72rem;
+        min-height: 28px;
+        padding: 0.3rem;
+    }
+}

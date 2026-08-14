@@ -113,6 +113,12 @@
     margin: 0;
 }
 
+/* Desktop keeps the full ResultPanel inside .settingsPanel - this compact
+   strip only matters on mobile (see the max-width:768px block below). */
+.compactResultWrap {
+    display: none;
+}
+
 :global(html[data-theme='light']) .balanceRow {
     background: linear-gradient(180deg, #ffffff, #fbf8ff);
     border-color: rgba(var(--color-primary-rgb), 0.14);
@@ -149,98 +155,69 @@
 }
 
 /*
- * Small screens: title/info compact at the top, board front-and-center in
- * the middle, Drop pinned to the bottom of the viewport, everything else
- * (balance/rows/risk/wager/result) tucked behind a top-right settings
- * toggle. `.sidebar` dissolves via display:contents so its former children
- * (sidebarHeader / settingsPanel / the drop button) become direct grid
- * items of `.layout` and can be reordered independently with `order` -
- * matches the existing single-column breakpoint above, just restructured.
+ * Small screens: the ImmersiveGameShell header already frees up enough
+ * space to show every control inline, no more collapsing behind a toggle.
+ * `.sidebar` dissolves via display:contents so its former children
+ * (sidebarHeader / modeSelectorWrap / settingsPanel) become direct grid
+ * items of `.layout` and can be reordered independently with `order` - the
+ * old page title is hidden (redundant with the shell's own game-name
+ * header) and the mode selector takes its place at the top instead.
+ *
+ * The whole page is sized to the viewport (minus the shell's sticky header,
+ * ~56px including its own margins) so nothing needs to scroll - the board
+ * is the flexible element (PlinkoCanvas already measures its container via
+ * ResizeObserver and shrinks to fit), everything else is a fixed/auto-sized
+ * row around it.
  */
 @media (max-width: 768px) {
+    .main {
+        height: calc(100dvh - 56px);
+        overflow: hidden;
+        padding: 0.5rem 0.6rem;
+    }
+
+    .layout {
+        display: grid;
+        grid-template-rows: auto auto minmax(120px, 1fr) auto;
+        height: 100%;
+        max-width: 100%;
+        gap: 0.4rem;
+    }
+
     .sidebar {
         display: contents;
     }
 
     .sidebarHeader {
+        display: none;
+    }
+
+    .modeSelectorWrap {
         order: 1;
-        padding-right: 52px;
     }
 
-    .sidebarHeader h1 {
-        font-size: 1.15rem;
-        margin: 0.1rem 0 0.15rem;
-    }
-
-    .eyebrow {
-        font-size: 0.66rem;
-    }
-
-    .description {
-        font-size: 0.8rem;
-    }
-
-    .boardColumn {
+    .compactResultWrap {
+        display: block;
+        min-height: 22px;
         order: 2;
     }
 
-    .settingsToggle {
-        align-items: center;
-        background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-        border: 0;
-        border-radius: 999px;
-        box-shadow: var(--shadow-sm);
-        color: #fff;
-        display: flex;
-        height: 40px;
-        justify-content: center;
-        position: absolute;
-        right: var(--spacing-md);
-        top: var(--spacing-md);
-        width: 40px;
-        z-index: 50;
-    }
-
-    .settingsToggle svg {
-        height: 20px;
-        width: 20px;
-    }
-
-    .settingsBackdrop {
-        background: rgba(0, 0, 0, 0.5);
-        display: block;
-        inset: 0;
-        position: fixed;
-        z-index: 40;
-    }
-
-    /*
-     * visibility (not display) hides this - the drop button lives inside
-     * PlinkoControls' card, nested inside this panel, and needs to stay
-     * visible/interactive via its own explicit `visibility: visible` even
-     * while this card is closed. `display: none` would remove it from the
-     * render tree entirely and defeat that; see PlinkoControls.module.css.
-     */
-    .settingsPanel {
-        background: linear-gradient(180deg, rgba(20, 10, 35, 0.97), rgba(13, 8, 24, 0.98));
-        border: 1px solid rgba(var(--color-primary-rgb), 0.2);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-md);
-        left: var(--spacing-md);
-        max-height: 65vh;
+    .boardColumn {
         order: 3;
-        overflow-y: auto;
-        padding: var(--spacing-md);
-        pointer-events: none;
-        position: absolute;
-        right: var(--spacing-md);
-        top: calc(var(--spacing-md) + 48px);
-        visibility: hidden;
-        z-index: 45;
+        min-height: 0;
     }
 
-    .settingsPanel.settingsPanelOpen {
-        pointer-events: auto;
-        visibility: visible;
+    .settingsPanel {
+        order: 4;
+    }
+
+    .balanceRow {
+        display: none;
+    }
+
+    /* The compact strip above the board already covers this - no need for
+       the full stats card again at the bottom on mobile. */
+    .fullResultWrap {
+        display: none;
     }
 }

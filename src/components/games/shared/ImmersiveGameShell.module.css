@@ -1,0 +1,76 @@
+.shell {
+    display: contents;
+}
+
+.header {
+    align-items: center;
+    display: none;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.5rem;
+}
+
+.leftGroup {
+    align-items: center;
+    display: flex;
+    gap: 0.4rem;
+}
+
+.backButton,
+.infoButton {
+    align-items: center;
+    background: rgba(20, 10, 35, 0.85);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.3);
+    border-radius: 50%;
+    color: var(--color-text-primary);
+    display: inline-flex;
+    flex-shrink: 0;
+    height: 34px;
+    justify-content: center;
+    text-decoration: none;
+    width: 34px;
+}
+
+.gameName {
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+    font-weight: 800;
+    margin: 0;
+    overflow: hidden;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.balancePill {
+    align-items: center;
+    background: linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.28), rgba(var(--color-accent-rgb), 0.12));
+    background-color: #3a2c05;
+    border: 1.5px solid rgba(var(--color-accent-rgb), 0.7);
+    border-radius: 999px;
+    color: var(--color-text-primary);
+    display: inline-flex;
+    flex-shrink: 0;
+    font-size: 0.76rem;
+    font-weight: 800;
+    gap: 0.3rem;
+    height: 34px;
+    justify-content: center;
+    padding: 0 0.6rem;
+}
+
+.balancePill svg {
+    color: var(--color-accent);
+    flex-shrink: 0;
+}
+
+/* Desktop keeps the normal sidebar/top-bar navigation - this header only
+   matters once that chrome is hidden on mobile. */
+@media (max-width: 768px) {
+    .header {
+        display: grid;
+        margin: 0.6rem 0.6rem 0.4rem;
+        position: sticky;
+        top: 0.6rem;
+        z-index: 20;
+    }
+}

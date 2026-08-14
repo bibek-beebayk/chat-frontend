@@ -10,6 +10,14 @@
     font-family: var(--font-inter, sans-serif);
 }
 
+/* A game page wrapped in ImmersiveGameShell hides the support chat bubble
+   on mobile so only the game itself is on screen - desktop is unaffected. */
+@media (max-width: 768px) {
+    :global(body.game-immersive-mobile) .container {
+        display: none;
+    }
+}
+
 /* Minimized Bubble (Launcher) */
 .launcher {
     width: auto;

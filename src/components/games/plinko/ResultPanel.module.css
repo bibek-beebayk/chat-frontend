@@ -45,3 +45,35 @@
 .loss strong {
     color: #fca5a5;
 }
+
+.compactPanel {
+    align-items: center;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    overflow: hidden;
+    padding: 0.15rem 0;
+}
+
+.compactMultiplier {
+    color: var(--color-accent);
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    font-weight: 900;
+}
+
+.compactStat {
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    font-size: 0.68rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.compactPositive {
+    color: #86efac;
+}
+
+.compactNegative {
+    color: #fca5a5;
+}

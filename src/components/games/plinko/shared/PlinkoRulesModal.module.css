@@ -1,0 +1,37 @@
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.content h3 {
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    margin: 0 0 0.6rem;
+    text-transform: uppercase;
+}
+
+.rulesList {
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin: 0;
+    padding-left: 1.1rem;
+}
+
+.multiplierRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.multiplierChip {
+    background: rgba(var(--color-accent-rgb), 0.16);
+    border-radius: 999px;
+    color: var(--color-accent);
+    font-size: 0.78rem;
+    font-weight: 800;
+    padding: 0.3rem 0.65rem;
+}
