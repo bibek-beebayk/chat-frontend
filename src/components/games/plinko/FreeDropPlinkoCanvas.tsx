@@ -7,15 +7,13 @@ import {
     FREE_DROP_LOGICAL_WIDTH,
     FreeDropBoard,
     buildFreeDropBoard,
-    bucketIndexForDropPosition,
     computeFreeDropBoardGeometry,
     createFreeDropBall,
-    dropPositionForBucketIndex,
     dropPositionToSpawnX,
+    freeDropBinIndexForX,
     isFreeDropNearRestInBin,
     spawnXToDropPosition,
 } from './freeDropPhysics';
-import { FREE_DROP_SEED_TABLE } from './freeDropSeedTable';
 import { playPegHit, unlockAudio } from './audio';
 import styles from './FreeDropPlinkoCanvas.module.css';
 
@@ -36,7 +34,7 @@ interface Particle {
 }
 
 export interface FreeDropPlinkoCanvasHandle {
-    play: (rows: number, slotIndex: number, dropPosition: number) => void;
+    play: (rows: number, slotIndex: number, dropPosition: number, physicsSeed: number, roundId?: number) => void;
 }
 
 interface FreeDropPlinkoCanvasProps {
@@ -94,6 +92,9 @@ export const FreeDropPlinkoCanvas = forwardRef<FreeDropPlinkoCanvasHandle, FreeD
     dropPositionRef.current = dropPosition;
     const draggingRef = useRef(false);
     const pointerIdRef = useRef<number | null>(null);
+    // Diagnostic context for the mismatch check below - not used for
+    // anything economic, just so a mismatch log is actually actionable.
+    const landedContextRef = useRef<{ roundId?: number; dropPosition: number; physicsSeed: number } | null>(null);
 
     // Rebuild the physics world whenever the row count changes - same
     // collision-driven flash/particle/sound wiring as Classic.
@@ -175,6 +176,29 @@ export const FreeDropPlinkoCanvas = forwardRef<FreeDropPlinkoCanvasHandle, FreeD
                         if (stableFramesRef.current > SETTLE_STABLE_FRAMES) {
                             phaseRef.current = 'landed';
                             setPhase('landed');
+
+                            // Mismatch check: the server already decided the
+                            // authoritative slot/payout before physics ever
+                            // ran (see FreeDropPlinkoGame.tsx), so this can
+                            // never corrupt the result - it's purely a
+                            // diagnostic signal that the exact spawn x +
+                            // seed didn't reproduce the expected bin
+                            // (possible in principle since the physics_seed
+                            // was verified against a bucket's representative
+                            // x, not necessarily byte-identical to the
+                            // player's exact x - see the offline generator's
+                            // header comment). Never steer/snap to "fix" it.
+                            const physicalSlot = freeDropBinIndexForX(boardRef.current, ballRef.current.position.x);
+                            if (physicalSlot !== winningSlotRef.current && landedContextRef.current) {
+                                console.error('[FreeDrop] physics/server slot mismatch', {
+                                    roundId: landedContextRef.current.roundId,
+                                    dropPosition: landedContextRef.current.dropPosition,
+                                    physicsSeed: landedContextRef.current.physicsSeed,
+                                    expectedSlot: winningSlotRef.current,
+                                    physicalSlot,
+                                });
+                            }
+
                             onLandedRef.current?.();
                         }
                     } else {
@@ -339,33 +363,25 @@ export const FreeDropPlinkoCanvas = forwardRef<FreeDropPlinkoCanvasHandle, FreeD
     }
 
     useImperativeHandle(ref, () => ({
-        play(playRows: number, slotIndex: number, forDropPosition: number) {
+        play(playRows: number, slotIndex: number, forDropPosition: number, physicsSeed: number, roundId?: number) {
             if (phaseRef.current === 'dropping') return; // guard against double-trigger
             const board = boardRef.current;
             if (!board || board.rows !== playRows) return;
 
-            // The seed table is only verified per-bucket, not per exact
-            // continuous position (see freeDropPhysics.ts /
-            // generate-free-drop-plinko-seeds.ts) - snap to the nearest
-            // bucket for the lookup. A handful of (bucket, slot)
-            // combinations are physically unreachable from that bucket's
-            // own spawn x within any practical search budget (an empirically
-            // observed resonance/channeling effect against this exact peg
-            // grid), so each seed entry carries its OWN `bucket` field
-            // recording which bucket's spawn x it must actually be replayed
-            // at - almost always the requested bucket, but occasionally a
-            // neighboring one for those rare entries. Always use the
-            // entry's own bucket, never the requested one, so playback
-            // always reproduces a genuine verified physics run.
-            const bucketIndex = bucketIndexForDropPosition(forDropPosition);
-            const seeds = FREE_DROP_SEED_TABLE[playRows]?.[bucketIndex]?.[slotIndex];
-            const entry = seeds && seeds.length > 0 ? seeds[Math.floor(Math.random() * seeds.length)] : { seed: 1, bucket: bucketIndex };
-            const spawnX = dropPositionToSpawnX(board.geometry, dropPositionForBucketIndex(entry.bucket));
+            // The ball spawns at the player's EXACT chosen position - never
+            // snapped to a bucket, never substituted, never a different
+            // seed picked client-side. The backend already decided both the
+            // authoritative slot and the physics_seed to use before this is
+            // ever called (see FreeDropPlinkoGame.tsx / free_drop_services.py)
+            // - this is purely a replay of that decision, using genuine
+            // Matter.js physics with no steering once released.
+            const spawnX = dropPositionToSpawnX(board.geometry, forDropPosition);
+            landedContextRef.current = { roundId, dropPosition: forDropPosition, physicsSeed };
 
             if (ballRef.current) {
                 Matter.Composite.remove(board.world, ballRef.current);
             }
-            const ball = createFreeDropBall(board, entry.seed, spawnX);
+            const ball = createFreeDropBall(board, physicsSeed, spawnX);
             Matter.Composite.add(board.world, ball);
             ballRef.current = ball;
             winningSlotRef.current = slotIndex;

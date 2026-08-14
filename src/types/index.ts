@@ -444,6 +444,9 @@ export interface PlinkoRound {
     // Free Drop only - the normalized [-1, 1] horizontal position the
     // player chose before dropping. null for Classic rounds.
     drop_position: number | null;
+    // Free Drop only - the server-selected deterministic physics seed used
+    // to spawn/replay the Matter.js ball at drop_position. null for Classic.
+    physics_seed: number | null;
     balance_after: string;
     created_at: string;
 }

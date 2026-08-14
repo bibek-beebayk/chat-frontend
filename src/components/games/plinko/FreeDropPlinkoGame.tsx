@@ -129,9 +129,18 @@ export function FreeDropPlinkoGame({ mode, onModeChange }: FreeDropPlinkoGamePro
             });
             setPendingRound(round);
             // Replay at the server's own (clamped) echoed drop_position, not
-            // the raw client state - keeps the visual spawn consistent with
-            // what was actually authoritative for this round.
-            canvasRef.current?.play(round.rows, round.slot_index, round.drop_position ?? dropPosition);
+            // the raw client state - keeps the visual spawn exactly
+            // consistent with the position that determined this round's
+            // authoritative outcome server-side. physics_seed is likewise
+            // used exactly as returned - the client never picks its own
+            // seed or slot.
+            canvasRef.current?.play(
+                round.rows,
+                round.slot_index,
+                round.drop_position ?? dropPosition,
+                round.physics_seed ?? 1,
+                round.id
+            );
         } catch (err: any) {
             setError(err?.message || 'Unable to play Plinko right now.');
             setIsPlaying(false);

@@ -11,12 +11,14 @@
  * a triangle, and there's an extra dimension: the player's chosen
  * horizontal drop position, which becomes the ball's actual spawn x.
  *
- * The landing slot itself is still decided by the same random-walk
- * abstraction the backend uses (`rows` bounces -> `rows + 1` possible
- * slots, see plinko/free_drop_constants.py's PEGS_PER_ROW comment) - this
- * geometry's peg columns are for visual/physical authenticity, matched to
- * a pre-verified seed exactly the way Classic's are (see
- * freeDropSeedTable.ts / generate-free-drop-plinko-seeds.ts).
+ * The landing slot itself is decided server-side, from the REAL empirical
+ * distribution of outcomes this geometry produces (see
+ * scripts/generate-free-drop-physics-table.ts, which runs this exact module
+ * many times per drop-position bucket and ships the result to the Django
+ * backend as free_drop_physics_table.json - free_drop_services.py picks a
+ * slot and a verified physics_seed from that data, and the frontend just
+ * replays that seed at the player's exact drop position, no bucket
+ * resolution or snapping at runtime).
  */
 import Matter from 'matter-js';
 import { createRng } from './shared/rng';
