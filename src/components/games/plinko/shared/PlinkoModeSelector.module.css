@@ -1,0 +1,46 @@
+.modeRow {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: var(--radius-md);
+    display: flex;
+    margin: 0.3rem 0 0.6rem;
+    overflow: hidden;
+}
+
+.modeBtn {
+    background: transparent;
+    border: 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--color-text-secondary);
+    flex: 1 1 0;
+    font-size: 0.82rem;
+    font-weight: 850;
+    letter-spacing: 0.02em;
+    min-height: 40px;
+    padding: 0.5rem;
+    text-transform: uppercase;
+}
+
+.modeBtn:last-child {
+    border-right: 0;
+}
+
+.modeActive {
+    background: linear-gradient(135deg, var(--plinko-cyan, #35d5ff), var(--plinko-purple, #8b3fe8), var(--plinko-pink, #ff3fb0));
+    color: #0c0720;
+}
+
+.modeBtn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+:global(html[data-theme='light']) .modeRow {
+    background: rgba(248, 244, 255, 0.82);
+    border-color: rgba(var(--color-primary-rgb), 0.16);
+}
+
+:global(html[data-theme='light']) .modeBtn {
+    border-right-color: rgba(var(--color-primary-rgb), 0.14);
+    color: var(--color-text-secondary);
+}

@@ -415,6 +415,8 @@ export type PlinkoRiskLevel = 'low' | 'medium' | 'high';
 
 export type PlinkoWager = 5 | 10;
 
+export type PlinkoMode = 'classic' | 'free_drop';
+
 export interface PlinkoConfig {
     rows_options: PlinkoRows[];
     risk_options: PlinkoRiskLevel[];
@@ -422,8 +424,14 @@ export interface PlinkoConfig {
     wager_options: PlinkoWager[];
 }
 
+// Same shape as PlinkoConfig today (rows_options currently [8] for both
+// modes), kept as its own type since Free Drop's rows/multiplier options
+// are backed by a separate backend table and may diverge later.
+export type FreeDropConfig = PlinkoConfig;
+
 export interface PlinkoRound {
     id: number;
+    mode: PlinkoMode;
     rows: PlinkoRows;
     risk_level: PlinkoRiskLevel;
     wager_amount: number;
@@ -433,6 +441,9 @@ export interface PlinkoRound {
     payout_amount: string;
     path: number[];
     drop_offset: number;
+    // Free Drop only - the normalized [-1, 1] horizontal position the
+    // player chose before dropping. null for Classic rounds.
+    drop_position: number | null;
     balance_after: string;
     created_at: string;
 }
