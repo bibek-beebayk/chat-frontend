@@ -20,7 +20,7 @@ export function PlinkoRulesModal({ isOpen, onClose, mode, multipliers }: PlinkoR
                     <ul className={styles.rulesList}>
                         <li>Choose your rows, risk level, and wager, then drop the ball.</li>
                         <li>The ball bounces down through the pegs and lands in one of the slots at the bottom.</li>
-                        <li>Each slot has a multiplier - your payout is your wager x that slot's multiplier.</li>
+                        <li>Each slot has a multiplier - your payout is your wager x that slot&apos;s multiplier.</li>
                         {mode === 'free_drop' && (
                             <li>Free Drop: drag the ball left/right before dropping to choose your starting position - it shifts the odds toward the side you drop from.</li>
                         )}
