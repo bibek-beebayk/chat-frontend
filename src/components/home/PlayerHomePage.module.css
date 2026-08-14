@@ -1,0 +1,106 @@
+.grid {
+    display: grid;
+    gap: var(--spacing-lg);
+    grid-template-columns: 1fr 1fr 1fr 300px;
+    grid-template-areas:
+        "welcome    welcome    welcome    events"
+        "progress   hero       streak     events"
+        "playCta    hero       rewardsCta friends"
+        "promo      promo      promo      friends"
+        "challenges rewards    continue   activity"
+        "community  community  community  activity";
+}
+
+.welcome {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    grid-area: welcome;
+}
+.progress { grid-area: progress; }
+.streak { grid-area: streak; }
+.hero { grid-area: hero; }
+.playCtaArea { grid-area: playCta; }
+.rewardsCtaArea { grid-area: rewardsCta; }
+.promo { grid-area: promo; }
+.challenges { grid-area: challenges; }
+.rewards { grid-area: rewards; }
+.continue { grid-area: continue; }
+.events { grid-area: events; }
+.friends { grid-area: friends; }
+.community { grid-area: community; }
+.activity { grid-area: activity; }
+
+.playCta,
+.rewardsCta {
+    align-items: center;
+    border-radius: var(--radius-md);
+    display: flex;
+    height: 100%;
+    font-size: 0.92rem;
+    font-weight: 800;
+    justify-content: center;
+    padding: 0.85rem 1rem;
+    text-decoration: none;
+}
+
+.playCta {
+    background: linear-gradient(135deg, var(--color-accent), #ffdd7a);
+    box-shadow: 0 8px 22px rgba(var(--color-accent-rgb), 0.28);
+    color: #241305;
+}
+
+.rewardsCta {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    box-shadow: 0 8px 22px rgba(var(--color-primary-rgb), 0.3);
+    color: #fff;
+}
+
+/* Tablet: right column collapses into the main flow; two-column body */
+@media (max-width: 1099px) {
+    .grid {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+            "welcome    welcome"
+            "progress   streak"
+            "playCta    rewardsCta"
+            "hero       hero"
+            "promo      promo"
+            "challenges rewards"
+            "continue   continue"
+            "events     friends"
+            "community  community"
+            "activity   activity";
+    }
+}
+
+/* Mobile: single column, reprioritized order, hero omitted entirely */
+@media (max-width: 767px) {
+    .grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-md);
+        grid-template-areas:
+            "welcome    welcome"
+            "progress   progress"
+            "playCta    rewardsCta"
+            "streak     streak"
+            "promo      promo"
+            "challenges challenges"
+            "rewards    rewards"
+            "continue   continue"
+            "events     events"
+            "friends    friends"
+            "community  community"
+            "activity   activity";
+    }
+
+    .hero {
+        display: none;
+    }
+
+    .playCta,
+    .rewardsCta {
+        font-size: 0.86rem;
+        padding: 0.75rem 0.6rem;
+    }
+}

@@ -40,14 +40,17 @@ export default function RewardsPage() {
         }
         setLoading(true);
         try {
-            const [balanceData, ledgerData, requests] = await Promise.all([
+            // listRedemptions() hits the staff-only redemption_list_view (it
+            // returns every player's requests) - a player would always get a
+            // 403 there. balance.active_redemption_request is the player's
+            // own pending/approved request, scoped server-side.
+            const [balanceData, ledgerData] = await Promise.all([
                 pointsApi.getBalance(),
                 pointsApi.getLedger(),
-                pointsApi.listRedemptions(),
             ]);
             setBalance(balanceData);
             setLedger(ledgerData);
-            setActiveRequest(requests.find((item) => item.status === 'pending' || item.status === 'approved') || null);
+            setActiveRequest(balanceData.active_redemption_request || null);
         } catch {
             // leave existing state on transient errors
         } finally {

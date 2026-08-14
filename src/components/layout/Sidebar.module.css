@@ -19,31 +19,6 @@
     display: block;
 }
 
-.createPostBtnWrapper {
-    margin-bottom: var(--spacing-lg);
-}
-
-.createPostBtn {
-    width: 100%;
-    background: rgba(var(--color-primary-rgb), 0.1);
-    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
-    color: var(--color-primary-light);
-    border-radius: var(--radius-lg);
-    padding: 0.8rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    font-weight: 600;
-    transition: all var(--transition-fast);
-}
-
-.createPostBtn:hover {
-    background: rgba(var(--color-primary-rgb), 0.2);
-    border-color: rgba(var(--color-primary-rgb), 0.6);
-    box-shadow: 0 0 15px rgba(var(--color-primary-rgb), 0.2);
-}
-
 .navContainer {
     flex: 1;
     display: flex;
@@ -154,8 +129,7 @@
     border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.themeToggle,
-.logoutButton {
+.themeToggle {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -170,15 +144,6 @@
 .themeToggle:hover {
     background: rgba(255, 255, 255, 0.05);
     color: var(--color-text-primary);
-}
-
-.logoutButton {
-    color: var(--color-text-muted);
-}
-
-.logoutButton:hover {
-    background: rgba(239, 68, 68, 0.12);
-    color: #f87171;
 }
 
 .footerLinks {

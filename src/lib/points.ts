@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/api';
-import { PointsBalance, PointsLedgerEntry, PointsRedemptionRequest, PointsRedemptionStatus } from '@/types';
+import { PointsBalance, PointsInfo, PointsLedgerEntry, PointsRedemptionRequest, PointsRedemptionStatus } from '@/types';
 
 function unwrapList(data: PointsRedemptionRequest[] | { results: PointsRedemptionRequest[] }): PointsRedemptionRequest[] {
     return Array.isArray(data) ? data : data.results || [];
@@ -13,6 +13,10 @@ export function formatPoints(value: number | string): string {
 export const pointsApi = {
     getBalance(): Promise<PointsBalance> {
         return apiClient.get<PointsBalance>('/api/points/balance/');
+    },
+
+    getInfo(): Promise<PointsInfo> {
+        return apiClient.get<PointsInfo>('/api/points/info/');
     },
 
     getLedger(): Promise<PointsLedgerEntry[]> {

@@ -1,0 +1,208 @@
+.card {
+    background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
+    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: var(--spacing-lg);
+    height: 100%;
+}
+
+.header {
+    align-items: center;
+    display: flex;
+    gap: 0.4rem;
+}
+
+.header h3 {
+    color: var(--color-text-primary);
+    font-size: 0.8rem;
+    font-weight: 850;
+    letter-spacing: 0.05em;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.flame {
+    font-size: 1rem;
+}
+
+.dayCount {
+    color: var(--color-text-primary);
+    font-size: 1.8rem;
+    font-weight: 900;
+    margin: 0;
+}
+
+.subtext {
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+    margin: 0 0 0.2rem;
+}
+
+.pipRow {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.pip {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 50%;
+    color: var(--color-text-muted);
+    display: flex;
+    flex: 1 1 0;
+    aspect-ratio: 1;
+    font-size: 0.7rem;
+    font-weight: 700;
+    justify-content: center;
+}
+
+.pipDone {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    color: #14061f;
+}
+
+.errorText {
+    color: #fca5a5;
+    font-size: 0.86rem;
+    margin: 0;
+}
+
+.retryBtn {
+    align-self: flex-start;
+    background: rgba(var(--color-primary-rgb), 0.16);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0.4rem 0.9rem;
+}
+
+.pendingText {
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+    margin: 0;
+}
+
+.redeemBtn {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    border: 0;
+    border-radius: var(--radius-md);
+    color: #14061f;
+    font-size: 0.8rem;
+    font-weight: 800;
+    padding: 0.5rem 0.9rem;
+}
+
+.modalBackdrop {
+    align-items: center;
+    background: rgba(5, 2, 12, 0.7);
+    display: flex;
+    inset: 0;
+    justify-content: center;
+    padding: var(--spacing-md);
+    position: fixed;
+    z-index: 1300;
+}
+
+.modal {
+    background: linear-gradient(160deg, #241640, #150b2c);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    max-width: 360px;
+    padding: var(--spacing-lg);
+    width: 100%;
+}
+
+.modalHeader {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+}
+
+.modalHeader h4 {
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    margin: 0;
+}
+
+.modalHeader button {
+    background: rgba(255, 255, 255, 0.08);
+    border: 0;
+    border-radius: 999px;
+    color: #fff;
+    cursor: pointer;
+    height: 26px;
+    width: 26px;
+}
+
+.modal p {
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    margin: 0;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.field span {
+    color: var(--color-text-muted);
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.field input {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    padding: 0.55rem 0.7rem;
+}
+
+.modalActions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.modalActions button {
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 0.45rem 0.9rem;
+}
+
+.modalActions button[type='button'] {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+}
+
+.modalActions button[type='submit'] {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    border: 0;
+    color: #14061f;
+}
+
+.modalActions button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+:global(html[data-theme='light']) .card {
+    background: linear-gradient(180deg, #ffffff, #f8f7fc);
+    border-color: rgba(var(--color-primary-rgb), 0.14);
+}

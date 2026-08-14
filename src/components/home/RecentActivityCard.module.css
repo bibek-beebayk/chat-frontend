@@ -1,0 +1,105 @@
+.widget {
+    background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
+    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    height: 100%;
+    padding: var(--spacing-lg);
+}
+
+.widgetHeader h3 {
+    color: var(--color-text-primary);
+    font-size: 0.8rem;
+    font-weight: 850;
+    letter-spacing: 0.05em;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.activityList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.activityItem {
+    align-items: flex-start;
+    display: flex;
+    gap: 0.6rem;
+}
+
+.activityAvatar {
+    border-radius: 50%;
+    height: 28px;
+    margin-top: 2px;
+    object-fit: cover;
+    width: 28px;
+}
+
+.activityAvatarFallback {
+    align-items: center;
+    background: rgba(var(--color-primary-rgb), 0.18);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    border-radius: 50%;
+    color: var(--color-text-primary);
+    display: flex;
+    flex-shrink: 0;
+    font-size: 0.68rem;
+    font-weight: 800;
+    height: 28px;
+    justify-content: center;
+    margin-top: 2px;
+    width: 28px;
+}
+
+.activityInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.activityInfo p {
+    color: var(--color-text-secondary);
+    font-size: 0.76rem;
+    line-height: 1.35;
+    margin: 0;
+}
+
+.activityInfo strong {
+    color: var(--color-text-primary);
+}
+
+.activityTime {
+    color: var(--color-text-muted);
+    display: block;
+    font-size: 0.68rem;
+    margin-top: 0.2rem;
+}
+
+.emptyState {
+    align-items: center;
+    color: var(--color-text-muted);
+    display: flex;
+    flex-direction: column;
+    font-size: 0.82rem;
+    gap: 0.5rem;
+    padding: var(--spacing-md) 0;
+    text-align: center;
+}
+
+.retryBtn {
+    background: rgba(var(--color-primary-rgb), 0.16);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.35rem 0.8rem;
+}
+
+:global(html[data-theme='light']) .widget {
+    background: linear-gradient(180deg, #ffffff, #f8f7fc);
+    border-color: rgba(var(--color-primary-rgb), 0.14);
+}

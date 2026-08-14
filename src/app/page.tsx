@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { RightSidebar } from '@/components/layout/RightSidebar';
+import { PlayerHomePage } from '@/components/home/PlayerHomePage';
 import { analyticsApi } from '@/lib/analytics';
 import { postApi } from '@/lib/posts';
 import { rewardsApi } from '@/lib/rewards';
@@ -69,6 +70,13 @@ export default function HomePage() {
                     router.replace('/onboarding');
                     return;
                 }
+
+                // PlayerHomePage owns all of its own data via
+                // usePlayerDashboardData() - the homeStats/pinnedPosts
+                // fetches below are for the agent homepage only.
+                setPostsLoading(false);
+                setStatsLoading(false);
+                return;
             }
 
             if (user.user_type === 'staff') {
@@ -201,6 +209,14 @@ export default function HomePage() {
         );
     }
 
+    if (user.user_type === 'player') {
+        return (
+            <DashboardLayout>
+                <PlayerHomePage />
+            </DashboardLayout>
+        );
+    }
+
     return (
         <DashboardLayout rightSidebar={<RightSidebar />}>
             <div className={styles.home}>
@@ -234,21 +250,6 @@ export default function HomePage() {
                         </div>
                     </div>
                 </section>
-
-                {user.user_type === 'player' && user.has_usable_password === false && (
-                    <section className={styles.passwordNotice}>
-                        <div className={styles.passwordNoticeIcon}>
-                            <LockIcon />
-                        </div>
-                        <div>
-                            <h2>Set up your password</h2>
-                            <p>You signed in with Google. Add a password so you can also log in with your username or email.</p>
-                        </div>
-                        <button type="button" onClick={() => router.push('/settings?setupPassword=1')}>
-                            Set password
-                        </button>
-                    </section>
-                )}
 
                 <section className={styles.feedPanel}>
                     <header className={styles.feedHeader}>
@@ -673,15 +674,6 @@ function RefreshIcon() {
             <path d="M3 21v-5h5" />
             <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
             <path d="M16 8h5V3" />
-        </svg>
-    );
-}
-
-function LockIcon() {
-    return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="3" y="11" width="18" height="10" rx="2" />
-            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         </svg>
     );
 }

@@ -24,74 +24,11 @@
     color: var(--color-text-primary);
 }
 
-.mobileLogo {
-    display: none;
-}
-
-.logoImage {
-    height: 30px;
-    width: auto;
-}
-
 .rightSection {
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
     margin-left: auto;
-}
-
-.downloadLink {
-    align-items: center;
-    background: rgba(var(--color-primary-rgb), 0.12);
-    border: 1px solid rgba(var(--color-primary-rgb), 0.25);
-    border-radius: 999px;
-    color: var(--color-text-primary);
-    display: inline-flex;
-    font-size: 0.84rem;
-    font-weight: 800;
-    gap: 0.45rem;
-    min-height: 40px;
-    padding: 0.5rem 0.78rem;
-    text-decoration: none;
-    transition: all var(--transition-fast);
-    white-space: nowrap;
-}
-
-.downloadLink:hover {
-    background: rgba(var(--color-primary-rgb), 0.18);
-    border-color: rgba(var(--color-primary-rgb), 0.42);
-    color: var(--color-primary-light);
-}
-
-.downloadLink svg {
-    flex-shrink: 0;
-}
-
-.pointsBadge {
-    align-items: center;
-    background: rgba(var(--color-accent-rgb), 0.14);
-    border: 1px solid rgba(var(--color-accent-rgb), 0.3);
-    border-radius: 999px;
-    color: var(--color-text-primary);
-    display: inline-flex;
-    font-size: 0.84rem;
-    font-weight: 800;
-    gap: 0.4rem;
-    min-height: 40px;
-    padding: 0.5rem 0.78rem;
-    text-decoration: none;
-    transition: all var(--transition-fast);
-    white-space: nowrap;
-}
-
-.pointsBadge:hover {
-    background: rgba(var(--color-accent-rgb), 0.22);
-    border-color: rgba(var(--color-accent-rgb), 0.5);
-}
-
-.pointsBadge svg {
-    color: var(--color-accent);
-    flex-shrink: 0;
 }
 
 .iconBtn {
@@ -129,6 +66,10 @@
     border: 2px solid var(--color-bg-primary);
 }
 
+.profileMenuWrap {
+    position: relative;
+}
+
 .profileSection {
     display: flex;
     align-items: center;
@@ -142,6 +83,80 @@
 
 .profileSection:hover {
     background: rgba(255, 255, 255, 0.1);
+}
+
+.chevron {
+    transition: transform var(--transition-fast);
+}
+
+.chevronOpen {
+    transform: rotate(180deg);
+}
+
+.profileMenu {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    min-width: 200px;
+    overflow: hidden;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.5rem);
+    z-index: 60;
+}
+
+.profileMenuHeader {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    flex-direction: column;
+    padding: 0.75rem 0.9rem;
+}
+
+.profileMenuName {
+    color: var(--color-text-primary);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.profileMenuRole {
+    color: var(--color-text-muted);
+    font-size: 0.72rem;
+}
+
+.profileMenuItem {
+    align-items: center;
+    background: none;
+    border: 0;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    display: flex;
+    font: inherit;
+    font-size: 0.85rem;
+    gap: 0.65rem;
+    padding: 0.65rem 0.9rem;
+    text-align: left;
+    text-decoration: none;
+    width: 100%;
+}
+
+.profileMenuItem svg {
+    flex-shrink: 0;
+}
+
+.profileMenuItem:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-text-primary);
+}
+
+.profileMenuLogout {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--color-text-muted);
+}
+
+.profileMenuLogout:hover {
+    background: rgba(239, 68, 68, 0.12);
+    color: #f87171;
 }
 
 .avatar {
@@ -193,10 +208,6 @@
         display: block;
     }
 
-    .mobileLogo {
-        display: block;
-    }
-    
     .profileInfo {
         display: none; /* Hide username/level on mobile */
     }
@@ -214,19 +225,5 @@
 @media (max-width: 560px) {
     .rightSection {
         gap: 0.55rem;
-    }
-
-    .downloadLink {
-        width: 40px;
-        padding: 0;
-        justify-content: center;
-    }
-
-    .downloadLink span {
-        display: none;
-    }
-
-    .pointsBadge {
-        padding: 0.5rem 0.6rem;
     }
 }

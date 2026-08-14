@@ -1,0 +1,60 @@
+.badge {
+    align-items: center;
+    border-radius: 50%;
+    box-shadow: var(--shadow-sm);
+    display: inline-flex;
+    flex-shrink: 0;
+    justify-content: center;
+}
+
+.badge svg {
+    height: 55%;
+    width: 55%;
+}
+
+.sm {
+    height: 28px;
+    width: 28px;
+}
+
+.md {
+    height: 44px;
+    width: 44px;
+}
+
+.lg {
+    height: 68px;
+    width: 68px;
+}
+
+.bronze {
+    background: linear-gradient(145deg, #cd7f32, #8a4b1f);
+    color: #fff2e6;
+}
+
+.silver {
+    background: linear-gradient(145deg, #e6e9ee, #9aa3ad);
+    color: #1a1d22;
+}
+
+.gold {
+    background: linear-gradient(145deg, var(--color-accent), #a5730a);
+    color: #241800;
+}
+
+.platinum {
+    background: linear-gradient(145deg, #d9f1ff, #6fa8bf);
+    color: #0c2530;
+}
+
+.diamond {
+    background: linear-gradient(145deg, #b9e7ff, #3fa8e0);
+    color: #06202f;
+    box-shadow: var(--shadow-sm), 0 0 14px rgba(63, 168, 224, 0.45);
+}
+
+.rollin_elite {
+    background: linear-gradient(145deg, var(--color-accent), var(--color-primary) 55%, var(--color-secondary));
+    color: #fffbe8;
+    box-shadow: var(--shadow-sm), 0 0 18px rgba(var(--color-primary-rgb), 0.55);
+}

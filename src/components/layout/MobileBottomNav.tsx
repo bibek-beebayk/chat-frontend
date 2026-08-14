@@ -60,6 +60,33 @@ export const MobileBottomNav: React.FC = () => {
             ];
         }
 
+        if (user.user_type === 'player') {
+            return [
+                {
+                    href: '/',
+                    label: 'Home',
+                    icon: <HomeIcon />,
+                },
+                {
+                    href: '/games',
+                    label: 'Games',
+                    icon: <GamesIcon />,
+                },
+                {
+                    href: '/chat',
+                    matchPaths: ['/chat', '/chats'],
+                    label: 'Chat',
+                    icon: <ChatIcon />,
+                    badge: unreadCount,
+                },
+                {
+                    href: '/posts',
+                    label: 'Feed',
+                    icon: <PostsIcon />,
+                },
+            ];
+        }
+
         return [
             {
                 href: '/',
@@ -162,6 +189,16 @@ function ConnectionsIcon() {
         </svg>
     );
 }
+
+function GamesIcon() {
+    return (
+        <svg viewBox="0 0 24 24" className={styles.icon} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="6" width="20" height="12" rx="2" ry="2" />
+            <path d="M12 12h.01M16 12h.01M8 12h.01" />
+        </svg>
+    );
+}
+
 
 function DashboardIcon() {
     return (

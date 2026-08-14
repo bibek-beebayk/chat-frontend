@@ -38,8 +38,9 @@ export const postApi = {
         return Array.isArray(data) ? data : data.results || [];
     },
 
-    async listFeed(): Promise<Post[]> {
-        const data = await apiClient.get<Post[] | { results: Post[] }>('/api/posts/feed/');
+    async listFeed(options?: { limit?: number }): Promise<Post[]> {
+        const suffix = options?.limit ? `?limit=${options.limit}` : '';
+        const data = await apiClient.get<Post[] | { results: Post[] }>(`/api/posts/feed/${suffix}`);
         return Array.isArray(data) ? data : data.results || [];
     },
 

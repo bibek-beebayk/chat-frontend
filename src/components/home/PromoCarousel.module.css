@@ -1,0 +1,115 @@
+.wrapper {
+    position: relative;
+}
+
+.track {
+    display: grid;
+    gap: var(--spacing-md);
+    grid-auto-columns: minmax(260px, 1fr);
+    grid-auto-flow: column;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+.track::-webkit-scrollbar {
+    display: none;
+}
+
+.slide {
+    background: linear-gradient(160deg, rgba(139, 63, 232, 0.22), rgba(13, 8, 24, 0.92));
+    border: 1px solid rgba(var(--color-primary-rgb), 0.22);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-height: 130px;
+    padding: var(--spacing-md);
+    scroll-snap-align: start;
+    text-decoration: none;
+}
+
+.slide h3 {
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    margin: 0;
+}
+
+.slide p {
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    margin: 0;
+}
+
+.eyebrow {
+    color: var(--color-accent);
+    font-size: 0.68rem;
+    font-weight: 850;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.progressTrack {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    height: 6px;
+    margin-top: auto;
+    overflow: hidden;
+}
+
+.progressFill {
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    border-radius: 999px;
+    height: 100%;
+}
+
+.cta {
+    color: var(--color-accent);
+    font-size: 0.78rem;
+    font-weight: 800;
+    margin-top: auto;
+}
+
+.controls {
+    display: none;
+}
+
+@media (min-width: 900px) {
+    .controls {
+        display: flex;
+        gap: 0.4rem;
+        justify-content: flex-end;
+        margin-top: 0.5rem;
+    }
+
+    .navBtn {
+        align-items: center;
+        background: rgba(var(--color-primary-rgb), 0.16);
+        border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+        border-radius: 50%;
+        color: var(--color-text-primary);
+        cursor: pointer;
+        display: flex;
+        font-size: 1.1rem;
+        height: 32px;
+        justify-content: center;
+        width: 32px;
+    }
+}
+
+:global(html[data-theme='light']) .slide {
+    background: linear-gradient(160deg, rgba(139, 63, 232, 0.08), #ffffff);
+    border-color: rgba(var(--color-primary-rgb), 0.2);
+}
+
+:global(html[data-theme='light']) .progressTrack {
+    background: rgba(var(--color-primary-rgb), 0.12);
+}
+
+:global(html[data-theme='light']) .eyebrow,
+:global(html[data-theme='light']) .cta {
+    color: #b45309;
+}

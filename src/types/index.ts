@@ -93,6 +93,26 @@ export interface Event {
     is_active: boolean;
     is_registered?: boolean;
     eligibility_status?: 'pending' | 'approved' | 'rejected' | null;
+    // Backend EventSerializer already returns these; previously unused/untyped on the frontend.
+    base_prize_pool?: string;
+    prize_increment?: string;
+    max_prize_pool?: string;
+    current_prize_pool?: string;
+    participants_count?: number;
+}
+
+export type PresenceStatus = 'ONLINE' | 'IDLE' | 'OFFLINE' | 'DISCONNECTED';
+
+// Only the connections API enriches a nested user with presence - the base
+// User type deliberately does not carry this, matching the backend's
+// scoped ConnectionUserSerializer (not a change to the shared UserSerializer).
+export interface UserWithPresence extends User {
+    presence_status: PresenceStatus;
+}
+
+export interface ConnectionWithPresence extends Omit<SocialConnection, 'requester' | 'receiver'> {
+    requester: UserWithPresence;
+    receiver: UserWithPresence;
 }
 
 // Room types
@@ -372,8 +392,52 @@ export interface PointsBalance {
     // preserve precision - parse with Number() before display/arithmetic.
     balance: string;
     lifetime_earned: number;
+    active_redemption_request?: PointsRedemptionRequest | null;
     updated_at: string;
 }
+
+export interface PointsEarnAction {
+    slug: string;
+    label: string;
+    points_value: number;
+    description: string;
+}
+
+export interface PointsInfo {
+    min_redemption_points: number;
+    rp_to_credit_rate: string;
+    earn_actions: PointsEarnAction[];
+}
+
+export type RankSlug = 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'rollin_elite';
+
+export interface XpStatus {
+    total_xp: number;
+    rank: RankSlug;
+    rank_label: string;
+    rank_min_xp: number;
+    next_rank: RankSlug | null;
+    next_rank_xp: number | null;
+    xp_to_next_rank: number;
+    rank_progress_percent: number;
+    updated_at: string;
+}
+
+export interface DailyProgressItem {
+    slug: string;
+    label: string;
+    xp_value: number;
+    target_count: number;
+    current_count: number;
+    completed: boolean;
+}
+
+// Discriminated union (not a fixed tuple) so PromoCarousel stays reusable
+// for future promo types (e.g. referrals) without a refactor.
+export type PromoCard =
+    | { kind: 'challenge'; slug: string; label: string; current: number; target: number; xpValue: number; href: string }
+    | { kind: 'streak'; currentStreak: number; targetDays: number; rewardAmount: number; href: string }
+    | { kind: 'static'; title: string; body: string; ctaLabel?: string; href?: string };
 
 export interface PointsLedgerEntry {
     id: number;

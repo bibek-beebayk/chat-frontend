@@ -1,0 +1,75 @@
+.card {
+    background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
+    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    padding: var(--spacing-lg);
+    height: 100%;
+}
+
+.headerRow {
+    align-items: center;
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.rankLabel {
+    color: var(--color-text-primary);
+    font-size: 1.1rem;
+    font-weight: 850;
+    letter-spacing: 0.03em;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.xpLine {
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+    margin: 0.15rem 0 0;
+}
+
+.progressTrack {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    height: 10px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.progressFill {
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    border-radius: 999px;
+    height: 100%;
+    transition: width 400ms ease;
+}
+
+.footerText {
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+.errorText {
+    color: #fca5a5;
+    font-size: 0.86rem;
+    margin: 0;
+}
+
+.retryBtn {
+    align-self: flex-start;
+    background: rgba(var(--color-primary-rgb), 0.16);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0.4rem 0.9rem;
+}
+
+:global(html[data-theme='light']) .card {
+    background: linear-gradient(180deg, #ffffff, #f8f7fc);
+    border-color: rgba(var(--color-primary-rgb), 0.14);
+}
