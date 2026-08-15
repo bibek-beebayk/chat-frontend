@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { DailyProgressItem } from '@/types';
+import { displayLabelForDailyProgressItem } from '@/lib/xp';
 import { SkeletonText } from '@/components/ui/Skeleton';
 import styles from './DailyChallengesCard.module.css';
 
@@ -53,7 +54,7 @@ export function DailyChallengesCard({ items, loading, error, onRetry, limit, hid
                         const row = (
                             <div className={styles.rowContent}>
                                 <div className={styles.rowTop}>
-                                    <span className={styles.label}>{item.label}</span>
+                                    <span className={styles.label}>{displayLabelForDailyProgressItem(item)}</span>
                                     {item.completed ? (
                                         <span className={styles.completedTag}>✓ Completed</span>
                                     ) : (

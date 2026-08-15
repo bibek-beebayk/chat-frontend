@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useMemo } from 'react';
 import { usePlayerDashboardData } from '@/hooks/usePlayerDashboardData';
+import { displayLabelForDailyProgressItem } from '@/lib/xp';
 import { PromoCard } from '@/types';
 import { WelcomeBanner } from './WelcomeBanner';
 import { PasswordSetupNotice } from './PasswordSetupNotice';
@@ -37,7 +38,7 @@ export function PlayerHomePage() {
             cards.push({
                 kind: 'challenge',
                 slug: roundsChallenge.slug,
-                label: roundsChallenge.label,
+                label: displayLabelForDailyProgressItem(roundsChallenge),
                 current: roundsChallenge.current_count,
                 target: roundsChallenge.target_count,
                 xpValue: roundsChallenge.xp_value,
