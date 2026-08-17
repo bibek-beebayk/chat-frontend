@@ -1,0 +1,62 @@
+.wrap {
+    background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
+    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.9rem 1rem;
+}
+
+.label {
+    color: var(--color-text-muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.empty {
+    color: var(--color-text-muted);
+    font-size: 0.82rem;
+}
+
+.track {
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+    padding-bottom: 0.15rem;
+    scrollbar-width: none;
+}
+
+.track::-webkit-scrollbar {
+    display: none;
+}
+
+.chip {
+    border-radius: 999px;
+    flex-shrink: 0;
+    font-size: 0.78rem;
+    font-weight: 800;
+    padding: 0.35rem 0.7rem;
+    white-space: nowrap;
+}
+
+.chipCold {
+    background: rgba(239, 68, 68, 0.14);
+    border: 1px solid rgba(239, 68, 68, 0.32);
+    color: #f87171;
+}
+
+.chipWarm {
+    background: rgba(var(--color-primary-rgb), 0.18);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.35);
+    color: var(--color-primary-light);
+}
+
+.chipHot {
+    background: rgba(var(--brand-gold-rgb, 245 197 66), 0.2);
+    border: 1px solid rgba(var(--brand-gold-rgb, 245 197 66), 0.45);
+    color: var(--brand-gold, #f5c542);
+}

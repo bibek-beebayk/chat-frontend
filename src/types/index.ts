@@ -567,6 +567,50 @@ export interface SlotRound {
     created_at: string;
 }
 
+export interface RocketConfig {
+    enabled: boolean;
+    game_version: string;
+    // Decimal fields - serialize as strings, Number() before arithmetic.
+    min_wager: string;
+    max_wager: string;
+    wager_quick_amounts: number[];
+    min_auto_cashout_multiplier: string;
+    max_auto_cashout_multiplier: string;
+    auto_cashout_quick_options: string[];
+    countdown_seconds: string;
+    growth_rate: string;
+    accel_exponent: string;
+}
+
+export type RocketRoundStatus = 'active' | 'cashed_out' | 'crashed';
+export type RocketRoundPhase = 'countdown' | 'running' | 'cashed_out' | 'crashed';
+
+export interface RocketRoundState {
+    round_id: number;
+    status: RocketRoundStatus;
+    phase: RocketRoundPhase;
+    // Decimal fields - serialize as strings, Number() before arithmetic.
+    wager_amount: string;
+    auto_cashout_multiplier: string | null;
+    multiplier: string;
+    seconds_remaining: string | null;
+    started_at: string;
+    cashout_multiplier: string | null;
+    payout_amount: string;
+    balance_after: string | null;
+    created_at: string;
+    resolved_at: string | null;
+}
+
+export interface RocketHistoryItem {
+    round_id: number;
+    status: RocketRoundStatus;
+    wager_amount: string;
+    result_multiplier: string | null;
+    payout_amount: string;
+    created_at: string;
+}
+
 export interface ActivityEvent {
     id: number;
     kind: 'account' | 'post' | 'comment' | 'event' | 'reward' | string;

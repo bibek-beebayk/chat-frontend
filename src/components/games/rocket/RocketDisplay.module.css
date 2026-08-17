@@ -1,0 +1,186 @@
+.stage {
+    align-items: center;
+    background:
+        radial-gradient(ellipse 90% 60% at 50% 100%, rgba(var(--brand-gold-rgb, 245 197 66), 0.14), transparent 65%),
+        radial-gradient(ellipse 70% 50% at 50% 0%, rgba(var(--color-primary-rgb), 0.22), transparent 60%),
+        linear-gradient(180deg, #1a0f38 0%, #120a26 55%, #0a0616 100%);
+    border: 1px solid rgba(var(--brand-gold-rgb, 245 197 66), 0.28);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg), inset 0 0 40px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    height: 300px;
+    justify-content: flex-end;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+
+.stars {
+    inset: 0;
+    position: absolute;
+}
+
+.star {
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 4px 1px rgba(255, 255, 255, 0.6);
+    height: 2px;
+    opacity: 0.5;
+    position: absolute;
+    width: 2px;
+    animation: twinkle 3.2s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 0.15; }
+    50% { opacity: 0.85; }
+}
+
+.rocketTrack {
+    bottom: 46px;
+    height: calc(100% - 90px);
+    left: 0;
+    position: absolute;
+    right: 0;
+    transition: none;
+}
+
+.exhaust {
+    background: linear-gradient(180deg, rgba(var(--brand-gold-rgb, 245 197 66), 0.85), rgba(var(--color-primary-rgb), 0.5), transparent);
+    border-radius: 50%;
+    bottom: calc(var(--flight-progress, 0) * 100% - 6px);
+    filter: blur(3px);
+    height: 26px;
+    left: calc(18% + var(--flight-progress, 0) * 46%);
+    opacity: 0;
+    position: absolute;
+    transform: translate(-50%, 0);
+    transition: bottom 120ms linear, left 120ms linear;
+    width: 10px;
+}
+
+.exhaustActive {
+    animation: flicker 220ms ease-in-out infinite alternate;
+    opacity: 1;
+}
+
+@keyframes flicker {
+    from { height: 22px; opacity: 0.75; }
+    to { height: 34px; opacity: 1; }
+}
+
+.rocket {
+    bottom: calc(var(--flight-progress, 0) * 100%);
+    filter: drop-shadow(0 0 10px rgba(var(--brand-gold-rgb, 245 197 66), 0.85)) drop-shadow(0 0 22px rgba(var(--brand-gold-rgb, 245 197 66), 0.5));
+    font-size: 2.4rem;
+    left: calc(18% + var(--flight-progress, 0) * 46%);
+    line-height: 1;
+    position: absolute;
+    transform: translate(-50%, 50%) rotate(-38deg);
+    transition: bottom 120ms linear, left 120ms linear;
+}
+
+.rocketCrashed {
+    animation: crashSpin 700ms ease-in forwards;
+}
+
+@keyframes crashSpin {
+    to {
+        filter: drop-shadow(0 0 14px rgba(239, 68, 68, 0.9));
+        opacity: 0.35;
+        transform: translate(-50%, 50%) rotate(140deg) scale(0.85);
+    }
+}
+
+.rocketCashedOut {
+    filter: drop-shadow(0 0 14px rgba(var(--brand-gold-rgb, 245 197 66), 1)) drop-shadow(0 0 28px rgba(var(--brand-gold-rgb, 245 197 66), 0.7));
+}
+
+.readout {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 1rem 1rem 1.35rem;
+    position: relative;
+    text-align: center;
+    z-index: 2;
+}
+
+.multiplierValue {
+    color: var(--color-text-primary);
+    font-size: 3rem;
+    font-weight: 900;
+    letter-spacing: 0.01em;
+    text-shadow: 0 0 24px rgba(var(--brand-gold-rgb, 245 197 66), 0.5);
+}
+
+.countdownLabel {
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.countdownValue {
+    color: var(--brand-gold, #f5c542);
+    font-size: 3.2rem;
+    font-weight: 900;
+    text-shadow: 0 0 26px rgba(var(--brand-gold-rgb, 245 197 66), 0.6);
+}
+
+.crashedLabel {
+    color: #f87171;
+    font-size: 0.9rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+}
+
+.multiplierValueCrashed {
+    color: #f87171;
+    font-size: 2.6rem;
+    font-weight: 900;
+    text-shadow: 0 0 20px rgba(239, 68, 68, 0.45);
+}
+
+.successLabel {
+    color: #4ade80;
+    font-size: 0.9rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+}
+
+.multiplierValueSuccess {
+    color: var(--brand-gold, #f5c542);
+    font-size: 2.6rem;
+    font-weight: 900;
+    text-shadow: 0 0 24px rgba(var(--brand-gold-rgb, 245 197 66), 0.55);
+}
+
+.resultLine {
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    font-weight: 650;
+}
+
+@media (max-width: 600px) {
+    .stage {
+        height: 250px;
+    }
+
+    .rocket {
+        font-size: 2rem;
+    }
+
+    .multiplierValue,
+    .countdownValue {
+        font-size: 2.5rem;
+    }
+
+    .multiplierValueCrashed,
+    .multiplierValueSuccess {
+        font-size: 2.1rem;
+    }
+}

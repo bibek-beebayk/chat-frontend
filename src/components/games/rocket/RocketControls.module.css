@@ -1,0 +1,165 @@
+.controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.fieldHeader {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+}
+
+.fieldHeader > span:first-child {
+    color: var(--color-text-muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.statusTag {
+    color: var(--color-primary-light);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.autoCashoutHeader {
+    align-items: center;
+    color: var(--color-text-muted);
+    display: flex;
+    font-size: 0.72rem;
+    font-weight: 800;
+    justify-content: space-between;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.autoCashoutHeader input[type='checkbox'] {
+    accent-color: var(--brand-gold, #f5c542);
+    height: 18px;
+    width: 18px;
+}
+
+.amountInput {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-size: 1.05rem;
+    font-weight: 800;
+    padding: 0.6rem 0.75rem;
+    width: 100%;
+}
+
+.amountInput:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.quickRow {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.quickBtn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    flex: 1;
+    font-size: 0.78rem;
+    font-weight: 800;
+    padding: 0.4rem 0.2rem;
+}
+
+.quickBtn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.quickBtnActive {
+    background: linear-gradient(135deg, var(--brand-gold, #f5c542), #ffdd7a);
+    border-color: transparent;
+    color: #241305;
+}
+
+.returnRow {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: var(--radius-md);
+    display: flex;
+    justify-content: space-between;
+    padding: 0.55rem 0.8rem;
+}
+
+.returnRow span {
+    color: var(--color-text-muted);
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.returnRow strong {
+    color: var(--brand-gold, #f5c542);
+    font-size: 1rem;
+    font-weight: 900;
+}
+
+.playBtn,
+.cashOutBtn {
+    border: 0;
+    border-radius: var(--radius-lg);
+    font-size: 1.05rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    min-height: 58px;
+    transition: all var(--transition-fast);
+}
+
+.playBtn {
+    background: linear-gradient(120deg, var(--color-primary), var(--brand-gold, #f5c542));
+    box-shadow: 0 8px 22px rgba(var(--brand-gold-rgb, 245 197 66), 0.28);
+    color: #1a1025;
+    text-transform: uppercase;
+}
+
+.playBtn:disabled {
+    box-shadow: none;
+    cursor: not-allowed;
+    filter: grayscale(0.4);
+    opacity: 0.6;
+}
+
+.cashOutBtn {
+    background: linear-gradient(120deg, #22c55e, #4ade80);
+    box-shadow: 0 8px 26px rgba(34, 197, 94, 0.4);
+    color: #06210f;
+    animation: pulseCashout 1100ms ease-in-out infinite;
+}
+
+@keyframes pulseCashout {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.015); }
+}
+
+.cashOutBtn:disabled {
+    animation: none;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+@media (max-width: 600px) {
+    .playBtn,
+    .cashOutBtn {
+        min-height: 54px;
+        font-size: 0.98rem;
+    }
+}
