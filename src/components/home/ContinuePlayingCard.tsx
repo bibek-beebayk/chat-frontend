@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { PlinkoRound } from '@/types';
+import { PlinkoRound, SlotRound } from '@/types';
 import { SkeletonText } from '@/components/ui/Skeleton';
 import styles from './ContinuePlayingCard.module.css';
 
 interface ContinuePlayingCardProps {
-    rounds: PlinkoRound[] | null;
+    plinkoRounds: PlinkoRound[] | null;
+    slotsRounds: SlotRound[] | null;
     loading: boolean;
     error: string | null;
     onRetry: () => void;
@@ -17,14 +18,22 @@ const MODE_LABEL: Record<string, string> = {
     free_drop: 'Plinko: Free Drop',
 };
 
+interface Entry {
+    key: string;
+    label: string;
+    href: string;
+    createdAt: string;
+}
+
 /**
- * Plinko is the only functionally seeded/playable game today (the generic
- * multi-game list has exactly one real row) - this derives "recently
- * played" from real round history, grouped by mode, rather than inventing
- * other games.
+ * Derives "recently played" from real round history across every playable
+ * game (Plinko's two modes + Slots), not just Plinko - this used to be
+ * Plinko-only back when it was the sole playable game, but Slots (Rollin
+ * 3x3) shipped later and this card was never updated to include it.
  */
-export function ContinuePlayingCard({ rounds, loading, error, onRetry }: ContinuePlayingCardProps) {
-    const entries = rounds ? mostRecentPerMode(rounds) : [];
+export function ContinuePlayingCard({ plinkoRounds, slotsRounds, loading, error, onRetry }: ContinuePlayingCardProps) {
+    const hasAnyData = plinkoRounds !== null || slotsRounds !== null;
+    const entries = buildEntries(plinkoRounds, slotsRounds);
 
     return (
         <div className={styles.card}>
@@ -32,9 +41,9 @@ export function ContinuePlayingCard({ rounds, loading, error, onRetry }: Continu
                 <h3>Continue Playing</h3>
             </div>
 
-            {loading && !rounds ? (
+            {loading && !hasAnyData ? (
                 <div className={styles.track}><SkeletonText lines={3} /></div>
-            ) : error && !rounds ? (
+            ) : error && !hasAnyData ? (
                 <div className={styles.emptyState}>
                     <p>Unable to load recent games.</p>
                     <button type="button" className={styles.retryBtn} onClick={onRetry}>Retry</button>
@@ -47,11 +56,11 @@ export function ContinuePlayingCard({ rounds, loading, error, onRetry }: Continu
             ) : (
                 <div className={styles.track}>
                     {entries.map((entry) => (
-                        <div key={entry.mode} className={styles.tile}>
+                        <div key={entry.key} className={styles.tile}>
                             <div className={styles.thumb} aria-hidden="true">🎰</div>
-                            <span className={styles.label}>{MODE_LABEL[entry.mode] || entry.mode}</span>
-                            <span className={styles.status}>Last played {formatRelativeTime(entry.created_at)}</span>
-                            <Link href="/games/plinko" className={styles.playBtn}>Play</Link>
+                            <span className={styles.label}>{entry.label}</span>
+                            <span className={styles.status}>Last played {formatRelativeTime(entry.createdAt)}</span>
+                            <Link href={entry.href} className={styles.playBtn}>Play</Link>
                         </div>
                     ))}
                 </div>
@@ -60,15 +69,33 @@ export function ContinuePlayingCard({ rounds, loading, error, onRetry }: Continu
     );
 }
 
-function mostRecentPerMode(rounds: PlinkoRound[]): PlinkoRound[] {
-    const byMode = new Map<string, PlinkoRound>();
-    for (const round of rounds) {
-        const existing = byMode.get(round.mode);
-        if (!existing || new Date(round.created_at) > new Date(existing.created_at)) {
-            byMode.set(round.mode, round);
+function buildEntries(plinkoRounds: PlinkoRound[] | null, slotsRounds: SlotRound[] | null): Entry[] {
+    const entries: Entry[] = [];
+
+    if (plinkoRounds) {
+        const byMode = new Map<string, PlinkoRound>();
+        for (const round of plinkoRounds) {
+            const existing = byMode.get(round.mode);
+            if (!existing || new Date(round.created_at) > new Date(existing.created_at)) {
+                byMode.set(round.mode, round);
+            }
+        }
+        for (const round of byMode.values()) {
+            entries.push({
+                key: `plinko-${round.mode}`,
+                label: MODE_LABEL[round.mode] || round.mode,
+                href: '/games/plinko',
+                createdAt: round.created_at,
+            });
         }
     }
-    return Array.from(byMode.values()).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+    if (slotsRounds && slotsRounds.length > 0) {
+        const latest = slotsRounds.reduce((a, b) => (new Date(b.created_at) > new Date(a.created_at) ? b : a));
+        entries.push({ key: 'slots', label: 'Rollin 3x3', href: '/games/slots', createdAt: latest.created_at });
+    }
+
+    return entries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
 function formatRelativeTime(value: string): string {

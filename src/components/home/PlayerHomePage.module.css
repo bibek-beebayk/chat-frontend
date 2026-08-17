@@ -7,6 +7,7 @@
         "progress   hero       streak     events"
         "playCta    hero       rewardsCta friends"
         "promo      promo      promo      friends"
+        "mission    mission    mission    friends"
         "challenges rewards    continue   activity"
         "community  community  community  activity";
 }
@@ -57,7 +58,7 @@
 }
 
 .playCta {
-    align-items: center;
+    align-items: stretch;
     background-image: url('/golden-decoration.png');
     background-position: center;
     background-repeat: no-repeat;
@@ -69,21 +70,36 @@
     border-radius: var(--radius-md);
     box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
     display: flex;
-    gap: 0.65rem;
+    flex-direction: column;
+    gap: 0.5rem;
     height: 100%;
+    justify-content: center;
     overflow: hidden;
     padding: 0.7rem 0.9rem;
     position: relative;
     text-decoration: none;
 }
 
+/* Desktop/tablet: this card only ever occupies one of three ~equal columns
+   (a few hundred px at most) - too narrow to fit crown+title+badge+subtitle
+   +button on one row without severe truncation, so it stacks: icon+text on
+   top, button below. Mobile (full page width) has plenty of room for the
+   original single-row layout, restored in the max-width:767px block below. */
+.playCtaTop {
+    align-items: center;
+    display: flex;
+    gap: 0.5rem;
+    min-width: 0;
+    position: relative;
+}
+
 .playCtaCrown {
     filter: drop-shadow(0 0 6px rgba(var(--brand-gold-rgb), 0.6));
     flex-shrink: 0;
-    height: 34px;
+    height: 30px;
     object-fit: contain;
     position: relative;
-    width: 34px;
+    width: 30px;
 }
 
 .playCtaBody {
@@ -133,7 +149,7 @@
 }
 
 .playCtaBtn {
-    align-self: center;
+    align-self: flex-start;
     background: transparent;
     border: 1.5px solid var(--brand-gold);
     border-radius: var(--radius-md);
@@ -157,6 +173,7 @@
             "playCta    rewardsCta"
             "hero       hero"
             "promo      promo"
+            "mission    mission"
             "challenges rewards"
             "continue   continue"
             "events     friends"
@@ -202,7 +219,26 @@
         display: block;
     }
 
+    /* Restores the original single-row layout (icon, text, button all
+       inline) - the full-width mobile card has plenty of room for it,
+       unlike the narrow desktop/tablet column this card shares CSS with. */
     .playCta {
+        align-items: center;
+        flex-direction: row;
+        gap: 0.65rem;
         padding: 0.65rem 0.75rem;
+    }
+
+    .playCtaTop {
+        flex: 1;
+    }
+
+    .playCtaCrown {
+        height: 34px;
+        width: 34px;
+    }
+
+    .playCtaBtn {
+        align-self: center;
     }
 }

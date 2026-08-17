@@ -30,7 +30,7 @@ import styles from './PlayerHomePage.module.css';
  * a separate mobile component tree.
  */
 export function PlayerHomePage() {
-    const { streak, dailyProgress, events, onlineFriends, recentActivity, recentGames, posts, refetchSection } =
+    const { streak, dailyProgress, events, onlineFriends, recentActivity, recentGames, recentSlotsGames, posts, refetchSection } =
         usePlayerDashboardData();
 
     const promoCards = useMemo<PromoCard[]>(() => {
@@ -80,14 +80,16 @@ export function PlayerHomePage() {
 
             <div className={styles.playCtaArea}>
                 <a href="https://demo.hi-rollin.online/" target="_blank" rel="noopener noreferrer" className={styles.playCta}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/hi-rollin_logo_2.png" alt="" className={styles.playCtaCrown} />
-                    <div className={styles.playCtaBody}>
-                        <div className={styles.playCtaTitleRow}>
-                            <span className={styles.playCtaTitle}>Play Hi-Rollin</span>
-                            <span className={styles.playCtaLiveTag}>Live</span>
+                    <div className={styles.playCtaTop}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src="/hi-rollin_logo_2.png" alt="" className={styles.playCtaCrown} />
+                        <div className={styles.playCtaBody}>
+                            <div className={styles.playCtaTitleRow}>
+                                <span className={styles.playCtaTitle}>Play Hi-Rollin</span>
+                                <span className={styles.playCtaLiveTag}>Live</span>
+                            </div>
+                            <span className={styles.playCtaSubtitle}>Compete, climb, win big every season</span>
                         </div>
-                        <span className={styles.playCtaSubtitle}>Compete, climb, win big every season</span>
                     </div>
                     <span className={styles.playCtaBtn}>Play Now</span>
                 </a>
@@ -123,10 +125,14 @@ export function PlayerHomePage() {
             </div>
             <div className={styles.continue}>
                 <ContinuePlayingCard
-                    rounds={recentGames.data}
-                    loading={recentGames.loading}
-                    error={recentGames.error}
-                    onRetry={() => refetchSection('recentGames')}
+                    plinkoRounds={recentGames.data}
+                    slotsRounds={recentSlotsGames.data}
+                    loading={recentGames.loading || recentSlotsGames.loading}
+                    error={recentGames.error && recentSlotsGames.error ? recentGames.error : null}
+                    onRetry={() => {
+                        refetchSection('recentGames');
+                        refetchSection('recentSlotsGames');
+                    }}
                 />
             </div>
 

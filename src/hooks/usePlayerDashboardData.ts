@@ -7,6 +7,7 @@ import { eventsApi } from '@/lib/events';
 import { plinkoApi } from '@/lib/plinko';
 import { postApi } from '@/lib/posts';
 import { rewardsApi } from '@/lib/rewards';
+import { slotsApi } from '@/lib/slots';
 import { socialApi } from '@/lib/social';
 import { xpApi } from '@/lib/xp';
 import {
@@ -17,6 +18,7 @@ import {
     LoginStreakStatus,
     PlinkoRound,
     Post,
+    SlotRound,
 } from '@/types';
 
 const STREAK_POLL_MS = 30000;
@@ -27,7 +29,7 @@ export interface SectionState<T> {
     error: string | null;
 }
 
-type SectionKey = 'streak' | 'dailyProgress' | 'events' | 'onlineFriends' | 'recentActivity' | 'recentGames' | 'posts';
+type SectionKey = 'streak' | 'dailyProgress' | 'events' | 'onlineFriends' | 'recentActivity' | 'recentGames' | 'recentSlotsGames' | 'posts';
 
 export interface PlayerDashboardData {
     streak: SectionState<LoginStreakStatus>;
@@ -36,6 +38,7 @@ export interface PlayerDashboardData {
     onlineFriends: SectionState<ConnectionWithPresence[]>;
     recentActivity: SectionState<ActivityEvent[]>;
     recentGames: SectionState<PlinkoRound[]>;
+    recentSlotsGames: SectionState<SlotRound[]>;
     posts: SectionState<Post[]>;
     refetchSection: (key: SectionKey) => void;
 }
@@ -62,6 +65,7 @@ export function usePlayerDashboardData(): PlayerDashboardData {
     const [onlineFriends, setOnlineFriends] = useState<SectionState<ConnectionWithPresence[]>>(EMPTY_SECTION);
     const [recentActivity, setRecentActivity] = useState<SectionState<ActivityEvent[]>>(EMPTY_SECTION);
     const [recentGames, setRecentGames] = useState<SectionState<PlinkoRound[]>>(EMPTY_SECTION);
+    const [recentSlotsGames, setRecentSlotsGames] = useState<SectionState<SlotRound[]>>(EMPTY_SECTION);
     const [posts, setPosts] = useState<SectionState<Post[]>>(EMPTY_SECTION);
 
     const fetchStreak = useCallback(async () => {
@@ -133,6 +137,17 @@ export function usePlayerDashboardData(): PlayerDashboardData {
         }
     }, [isPlayer]);
 
+    const fetchRecentSlotsGames = useCallback(async () => {
+        if (!isPlayer) return;
+        setRecentSlotsGames((prev) => ({ ...prev, loading: true, error: null }));
+        try {
+            const data = await slotsApi.getHistory();
+            setRecentSlotsGames({ data, loading: false, error: null });
+        } catch (err: any) {
+            setRecentSlotsGames({ data: null, loading: false, error: err?.message || 'Unable to load recent games.' });
+        }
+    }, [isPlayer]);
+
     const fetchPosts = useCallback(async () => {
         if (!isPlayer) return;
         setPosts((prev) => ({ ...prev, loading: true, error: null }));
@@ -151,6 +166,7 @@ export function usePlayerDashboardData(): PlayerDashboardData {
         onlineFriends: fetchOnlineFriends,
         recentActivity: fetchRecentActivity,
         recentGames: fetchRecentGames,
+        recentSlotsGames: fetchRecentSlotsGames,
         posts: fetchPosts,
     });
     fetchersRef.current = {
@@ -160,6 +176,7 @@ export function usePlayerDashboardData(): PlayerDashboardData {
         onlineFriends: fetchOnlineFriends,
         recentActivity: fetchRecentActivity,
         recentGames: fetchRecentGames,
+        recentSlotsGames: fetchRecentSlotsGames,
         posts: fetchPosts,
     };
 
@@ -170,6 +187,7 @@ export function usePlayerDashboardData(): PlayerDashboardData {
         fetchOnlineFriends();
         fetchRecentActivity();
         fetchRecentGames();
+        fetchRecentSlotsGames();
         fetchPosts();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isPlayer]);
@@ -186,5 +204,5 @@ export function usePlayerDashboardData(): PlayerDashboardData {
         fetchersRef.current[key]();
     }, []);
 
-    return { streak, dailyProgress, events, onlineFriends, recentActivity, recentGames, posts, refetchSection };
+    return { streak, dailyProgress, events, onlineFriends, recentActivity, recentGames, recentSlotsGames, posts, refetchSection };
 }
