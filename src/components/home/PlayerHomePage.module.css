@@ -1,7 +1,7 @@
 .grid {
     display: grid;
     gap: var(--spacing-lg);
-    grid-template-columns: 1fr 1fr 1fr 300px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 300px);
     grid-template-areas:
         "welcome    welcome    welcome    events"
         "progress   hero       streak     events"
@@ -23,6 +23,7 @@
 .playCtaArea { grid-area: playCta; }
 .rewardsCtaArea { grid-area: rewardsCta; }
 .promo { grid-area: promo; }
+.mission { grid-area: mission; }
 .challenges { grid-area: challenges; }
 .rewards { grid-area: rewards; }
 .continue { grid-area: continue; }
@@ -31,7 +32,14 @@
 .community { grid-area: community; }
 .activity { grid-area: activity; }
 
-.playCta,
+/* Mobile-only unified Rank/Streak/RP card - see PlayerStatsBar.tsx. Hidden
+   above the mobile breakpoint, where .progress/.streak (their separate,
+   original full-size cards) render instead. */
+.statsBar {
+    display: none;
+    grid-area: statsBar;
+}
+
 .rewardsCta {
     align-items: center;
     border-radius: var(--radius-md);
@@ -39,27 +47,110 @@
     height: 100%;
     font-size: 0.92rem;
     font-weight: 800;
+    gap: 0.5rem;
     justify-content: center;
     padding: 0.85rem 1rem;
     text-decoration: none;
-}
-
-.playCta {
-    background: linear-gradient(135deg, var(--color-accent), #ffdd7a);
-    box-shadow: 0 8px 22px rgba(var(--color-accent-rgb), 0.28);
-    color: #241305;
-}
-
-.rewardsCta {
     background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
     box-shadow: 0 8px 22px rgba(var(--color-primary-rgb), 0.3);
     color: #fff;
 }
 
+.playCta {
+    align-items: center;
+    background-image: url('/golden-decoration.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    /* Stretched to fill exactly (not cover) so the gold corner flourishes
+       and border baked into the image stay fully visible regardless of how
+       wide/short this banner ends up at a given breakpoint, instead of
+       being cropped. */
+    background-size: 100% 100%;
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+    display: flex;
+    gap: 0.65rem;
+    height: 100%;
+    overflow: hidden;
+    padding: 0.7rem 0.9rem;
+    position: relative;
+    text-decoration: none;
+}
+
+.playCtaCrown {
+    filter: drop-shadow(0 0 6px rgba(var(--brand-gold-rgb), 0.6));
+    flex-shrink: 0;
+    height: 34px;
+    object-fit: contain;
+    position: relative;
+    width: 34px;
+}
+
+.playCtaBody {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+    position: relative;
+}
+
+.playCtaTitleRow {
+    align-items: center;
+    display: flex;
+    gap: 0.4rem;
+}
+
+.playCtaTitle {
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 900;
+    letter-spacing: 0.01em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.playCtaLiveTag {
+    background: rgba(239, 68, 68, 0.18);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    border-radius: 999px;
+    color: #f87171;
+    flex-shrink: 0;
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    padding: 0.08rem 0.42rem;
+    text-transform: uppercase;
+}
+
+.playCtaSubtitle {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.7rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.playCtaBtn {
+    align-self: center;
+    background: transparent;
+    border: 1.5px solid var(--brand-gold);
+    border-radius: var(--radius-md);
+    box-shadow: 0 0 10px rgba(var(--brand-gold-rgb), 0.55), inset 0 0 8px rgba(var(--brand-gold-rgb), 0.18);
+    color: var(--brand-gold);
+    flex-shrink: 0;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 0.35rem 0.6rem;
+    position: relative;
+    white-space: nowrap;
+}
+
 /* Tablet: right column collapses into the main flow; two-column body */
 @media (max-width: 1099px) {
     .grid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         grid-template-areas:
             "welcome    welcome"
             "progress   streak"
@@ -74,33 +165,44 @@
     }
 }
 
-/* Mobile: single column, reprioritized order, hero omitted entirely */
+/* Mobile: single column, reprioritized order matching the reference design -
+   the unified stats bar + single full-width CTA replace the separate
+   progress/streak cards and two-button CTA row used above this breakpoint;
+   a "Today's Mission" banner (same dailyProgress data as the Daily
+   Challenges row right below it) is promoted above the fold. Hero is
+   omitted entirely per the design brief's "functionality over decoration"
+   rule for small screens. */
 @media (max-width: 767px) {
     .grid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: var(--spacing-md);
         grid-template-areas:
-            "welcome    welcome"
-            "progress   progress"
-            "playCta    rewardsCta"
-            "streak     streak"
-            "promo      promo"
-            "challenges challenges"
-            "rewards    rewards"
-            "continue   continue"
-            "events     events"
-            "friends    friends"
-            "community  community"
-            "activity   activity";
+            "welcome"
+            "statsBar"
+            "playCta"
+            "promo"
+            "mission"
+            "challenges"
+            "rewards"
+            "continue"
+            "events"
+            "friends"
+            "community"
+            "activity";
     }
 
-    .hero {
+    .hero,
+    .progress,
+    .streak,
+    .rewardsCtaArea {
         display: none;
     }
 
-    .playCta,
-    .rewardsCta {
-        font-size: 0.86rem;
-        padding: 0.75rem 0.6rem;
+    .statsBar {
+        display: block;
+    }
+
+    .playCta {
+        padding: 0.65rem 0.75rem;
     }
 }

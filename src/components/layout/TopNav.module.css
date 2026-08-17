@@ -32,6 +32,27 @@
     color: var(--color-text-primary);
 }
 
+.mobileLogo {
+    align-items: center;
+    display: none; /* Hidden on desktop - Sidebar already carries the brand there */
+    gap: 0.35rem;
+    text-decoration: none;
+}
+
+.mobileLogo span:first-child {
+    filter: drop-shadow(0 0 6px rgba(var(--brand-gold-rgb), 0.6));
+    font-size: 1.2rem;
+}
+
+.mobileLogoText {
+    background: linear-gradient(135deg, var(--brand-gold), #fff2c9);
+    background-clip: text;
+    color: transparent;
+    font-size: 1.15rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+}
+
 .rightSection {
     display: flex;
     align-items: center;
@@ -216,6 +237,10 @@
         display: block;
     }
 
+    .mobileLogo {
+        display: flex;
+    }
+
     .profileInfo {
         display: none; /* Hide username/level on mobile */
     }
@@ -233,5 +258,68 @@
 @media (max-width: 560px) {
     .rightSection {
         gap: 0.55rem;
+    }
+}
+
+/* Phone-sized viewports: shrink the whole bar (height, icons, logo, badge,
+   avatar) rather than just the desktop/tablet sizes squeezed into less
+   space - matches the compact chrome the rest of the mobile UI already uses. */
+@media (max-width: 768px) {
+    .topNav {
+        height: 52px;
+        padding: 0 0.6rem;
+    }
+
+    .leftSection {
+        gap: 0.5rem;
+    }
+
+    .hamburgerBtn svg {
+        height: 20px;
+        width: 20px;
+    }
+
+    .mobileLogo {
+        gap: 0.25rem;
+    }
+
+    .mobileLogo span:first-child {
+        font-size: 0.95rem;
+    }
+
+    .mobileLogoText {
+        font-size: 0.92rem;
+    }
+
+    .rightSection {
+        gap: 0.4rem;
+    }
+
+    .iconBtn {
+        height: 32px;
+        width: 32px;
+    }
+
+    .iconBtn svg {
+        height: 17px;
+        width: 17px;
+    }
+
+    .notificationBadge {
+        border-width: 1.5px;
+        font-size: 0.56rem;
+        height: 14px;
+        width: 14px;
+    }
+
+    .avatar {
+        height: 26px;
+        width: 26px;
+        font-size: 0.7rem;
+    }
+
+    .chevron {
+        height: 14px;
+        width: 14px;
     }
 }

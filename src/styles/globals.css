@@ -8,6 +8,16 @@
   --color-secondary: hsl(280, 100%, 60%);
   --color-accent: hsl(45, 100%, 55%);
 
+  /* Fixed brand gold - ThemeContext.tsx lets a player pick their own accent
+     color (defaulting to violet, see ACCENT_OPTIONS), overwriting
+     --color-accent/--color-accent-rgb at runtime via inline style properties
+     set on <html>. That's correct for ordinary UI accents (links, buttons),
+     but reward/currency cues (RP star, streak fire, crowns, "featured" CTAs)
+     are meant to always read as gold regardless of theme choice - this
+     token is never touched by that override, so it stays gold for everyone. */
+  --brand-gold: #f5c542;
+  --brand-gold-rgb: 245 197 66;
+
   /* Background colors */
   --color-bg-primary: #0B0814; /* Deep space dark purple */
   --color-bg-secondary: #130D26; /* Card background */
@@ -313,14 +323,18 @@ html[data-theme='light'] select option:checked {
 
   /* A game page wrapped in ImmersiveGameShell hides the top bar, bottom
      nav, support chat bubble, and footer so only the game itself is on
-     screen - the reserved bottom-nav padding above must go with it, and
-     the footer (a plain, non-CSS-module element) is targeted directly here
-     rather than in its own module.css. Desktop is unaffected. */
+     screen - the reserved bottom-nav padding above must go with it.
+     Desktop is unaffected. */
   body.game-immersive-mobile.has-mobile-bottom-nav {
     padding-bottom: env(safe-area-inset-bottom);
   }
 
-  body.game-immersive-mobile footer {
+  /* The text footer is redundant with the persistent bottom nav on mobile
+     (an app-like chrome, not a page that scrolls to a website footer) - hide
+     it everywhere the bottom nav is showing, not just in immersive game
+     mode. The footer is a plain, non-CSS-module element, targeted directly
+     here rather than in its own module.css. */
+  body.has-mobile-bottom-nav footer {
     display: none;
   }
 }

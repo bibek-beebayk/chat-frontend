@@ -37,9 +37,14 @@ export default function GamesPage() {
                             const route = GAME_ROUTES[game.slug];
                             return (
                                 <article key={game.id} className={styles.gameCard}>
-                                    <div className={styles.gameIcon} aria-hidden="true">
-                                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="6" width="20" height="12" rx="2" ry="2"></rect><path d="M12 12h.01M16 12h.01M8 12h.01"></path></svg>
-                                    </div>
+                                    {game.thumbnail ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img src={game.thumbnail} alt={`${game.name} thumbnail`} className={styles.gameThumbnail} />
+                                    ) : (
+                                        <div className={styles.gameIcon} aria-hidden="true">
+                                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="6" width="20" height="12" rx="2" ry="2"></rect><path d="M12 12h.01M16 12h.01M8 12h.01"></path></svg>
+                                        </div>
+                                    )}
                                     <h3>{game.name}</h3>
                                     {game.description && <p>{game.description}</p>}
                                     {route ? (

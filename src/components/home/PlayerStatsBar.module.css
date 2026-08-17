@@ -1,0 +1,115 @@
+.card {
+    background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
+    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    padding: 0.75rem 0.7rem;
+}
+
+.headerRow {
+    display: flex;
+    gap: 0.35rem;
+}
+
+.col {
+    align-items: center;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+    text-align: center;
+}
+
+.colBody {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+    width: 100%;
+}
+
+/* Fixed-size slot so the badge/emoji/svg icons - each with different
+   natural dimensions - all occupy identical space, keeping the label/value
+   text beneath them aligned across all three columns. */
+.iconSlot {
+    align-items: center;
+    display: flex;
+    height: 28px;
+    justify-content: center;
+}
+
+.colLabel {
+    color: var(--color-text-muted);
+    font-size: 0.52rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.colValue {
+    color: var(--color-text-primary);
+    font-size: 0.72rem;
+    font-weight: 850;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.divider {
+    background: rgba(var(--color-primary-rgb), 0.2);
+    flex-shrink: 0;
+    width: 1px;
+}
+
+.emojiIcon {
+    flex-shrink: 0;
+    font-size: 1.05rem;
+}
+
+.starIcon {
+    color: var(--color-primary-light);
+    flex-shrink: 0;
+}
+
+.detailBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.progressTrack {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    height: 8px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.progressFill {
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    border-radius: 999px;
+    height: 100%;
+    transition: width 400ms ease;
+}
+
+.detailCaption {
+    color: var(--color-text-muted);
+    font-size: 0.7rem;
+}
+
+.rewardsLink {
+    color: var(--color-primary-light);
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+:global(html[data-theme='light']) .card {
+    background: linear-gradient(180deg, #ffffff, #f8f7fc);
+    border-color: rgba(var(--color-primary-rgb), 0.14);
+}

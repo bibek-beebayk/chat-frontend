@@ -18,37 +18,50 @@
 }
 
 .slide {
-    background: linear-gradient(160deg, rgba(139, 63, 232, 0.22), rgba(13, 8, 24, 0.92));
-    border: 1px solid rgba(var(--color-primary-rgb), 0.22);
+    background:
+        radial-gradient(circle at 85% 20%, rgba(var(--color-accent-rgb), 0.28), transparent 55%),
+        linear-gradient(160deg, rgba(139, 63, 232, 0.32), rgba(13, 8, 24, 0.94));
+    border: 1px solid rgba(var(--color-primary-rgb), 0.28);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md);
     color: inherit;
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
-    min-height: 130px;
-    padding: var(--spacing-md);
+    gap: 0.5rem;
+    justify-content: center;
+    min-height: 190px;
+    overflow: hidden;
+    padding: var(--spacing-lg);
+    position: relative;
     scroll-snap-align: start;
     text-decoration: none;
 }
 
 .slide h3 {
-    color: var(--color-text-primary);
-    font-size: 1rem;
+    background: linear-gradient(135deg, #ffffff, var(--brand-gold) 80%);
+    background-clip: text;
+    color: transparent;
+    font-size: 1.35rem;
+    font-weight: 900;
+    line-height: 1.15;
     margin: 0;
 }
 
 .slide p {
     color: var(--color-text-secondary);
-    font-size: 0.82rem;
+    font-size: 0.84rem;
     margin: 0;
 }
 
 .eyebrow {
-    color: var(--color-accent);
-    font-size: 0.68rem;
+    align-self: flex-start;
+    background: rgba(var(--color-primary-rgb), 0.32);
+    border-radius: 999px;
+    color: var(--color-text-primary);
+    font-size: 0.64rem;
     font-weight: 850;
     letter-spacing: 0.06em;
+    padding: 0.2rem 0.6rem;
     text-transform: uppercase;
 }
 
@@ -71,6 +84,17 @@
     font-size: 0.78rem;
     font-weight: 800;
     margin-top: auto;
+}
+
+.ctaBtn {
+    align-self: flex-start;
+    background: linear-gradient(135deg, var(--brand-gold), #ffdd7a);
+    border-radius: 999px;
+    color: #241305;
+    font-size: 0.8rem;
+    font-weight: 800;
+    margin-top: 0.2rem;
+    padding: 0.5rem 1.1rem;
 }
 
 .controls {

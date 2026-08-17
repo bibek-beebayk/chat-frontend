@@ -14,6 +14,8 @@ interface LoginStreakCardProps {
     error: string | null;
     onRetry: () => void;
     onRedeemed: () => void;
+    /** Renders without its own card background/border/padding, for embedding as one column of PlayerStatsBar. The redeem modal/logic is unchanged. */
+    embedded?: boolean;
 }
 
 /**
@@ -24,7 +26,7 @@ interface LoginStreakCardProps {
  * flow (mirroring RightSidebar's modal) since players no longer see that
  * sidebar widget - this is the one place the action needs to live for them.
  */
-export function LoginStreakCard({ streak, loading, error, onRetry, onRedeemed }: LoginStreakCardProps) {
+export function LoginStreakCard({ streak, loading, error, onRetry, onRedeemed, embedded }: LoginStreakCardProps) {
     const { user } = useAuth();
     const [modalOpen, setModalOpen] = useState(false);
     const [username, setUsername] = useState('');
@@ -34,7 +36,7 @@ export function LoginStreakCard({ streak, loading, error, onRetry, onRedeemed }:
 
     if (loading && !streak) {
         return (
-            <div className={styles.card}>
+            <div className={embedded ? styles.embedded : styles.card}>
                 <Skeleton width="50%" height="1rem" />
                 <Skeleton width="30%" height="1.6rem" />
                 <Skeleton height="1.6rem" />
@@ -44,7 +46,7 @@ export function LoginStreakCard({ streak, loading, error, onRetry, onRedeemed }:
 
     if (error && !streak) {
         return (
-            <div className={styles.card}>
+            <div className={embedded ? styles.embedded : styles.card}>
                 <p className={styles.errorText}>Unable to load your streak.</p>
                 <button type="button" className={styles.retryBtn} onClick={onRetry}>Retry</button>
             </div>
@@ -84,12 +86,16 @@ export function LoginStreakCard({ streak, loading, error, onRetry, onRedeemed }:
     };
 
     return (
-        <div className={styles.card}>
-            <div className={styles.header}>
-                <span className={styles.flame} aria-hidden="true">🔥</span>
-                <h3>Login Streak</h3>
-            </div>
-            <p className={styles.dayCount}>{streak.current_streak} {streak.current_streak === 1 ? 'Day' : 'Days'}</p>
+        <div className={embedded ? styles.embedded : styles.card}>
+            {!embedded && (
+                <div className={styles.header}>
+                    <span className={styles.flame} aria-hidden="true">🔥</span>
+                    <h3>Login Streak</h3>
+                </div>
+            )}
+            {!embedded && (
+                <p className={styles.dayCount}>{streak.current_streak} {streak.current_streak === 1 ? 'Day' : 'Days'}</p>
+            )}
             <p className={styles.subtext}>
                 {streak.reward_available
                     ? `${rewardLabel} ready to redeem.`

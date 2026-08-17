@@ -83,3 +83,39 @@
 :global(html[data-theme='light']) .suits {
     color: rgba(88, 28, 135, 0.32);
 }
+
+/* Phone-sized viewports: a short brand strip instead of the full-size card -
+   same content, much less vertical space so it doesn't compete with the
+   functional cards above/below it. */
+@media (max-width: 767px) {
+    .panel {
+        flex-direction: row;
+        gap: 0.6rem;
+        justify-content: center;
+        min-height: 0;
+        padding: 0.65rem;
+    }
+
+    .crown {
+        font-size: 1.5rem;
+    }
+
+    .wordmark {
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .rollin {
+        font-size: 1.15rem;
+        letter-spacing: 0.05em;
+    }
+
+    .community {
+        font-size: 0.52rem;
+        letter-spacing: 0.22em;
+    }
+
+    .suits {
+        display: none;
+    }
+}

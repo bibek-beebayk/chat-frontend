@@ -24,6 +24,15 @@ const ACTION_HREF: Record<string, string> = {
     daily_challenge_rounds: '/games/plinko',
 };
 
+// Cycled by index (not slug-semantic) purely to give each tile in the
+// horizontal row a distinct color/glyph, matching the reference design's
+// varied icon badges - there's no meaning tied to a particular color.
+const TILE_STYLES: { icon: string; className: string }[] = [
+    { icon: '♠', className: 'tileViolet' },
+    { icon: '♥', className: 'tileGreen' },
+    { icon: '♦', className: 'tileGold' },
+];
+
 export function DailyChallengesCard({ items, loading, error, onRetry, limit, hideViewAll }: DailyChallengesCardProps) {
     const visible = limit && items ? items.slice(0, limit) : items;
 
@@ -35,7 +44,7 @@ export function DailyChallengesCard({ items, loading, error, onRetry, limit, hid
             </div>
 
             {loading && !items ? (
-                <div className={styles.rows}>
+                <div className={styles.track}>
                     <SkeletonText lines={2} />
                     <SkeletonText lines={2} />
                 </div>
@@ -47,20 +56,20 @@ export function DailyChallengesCard({ items, loading, error, onRetry, limit, hid
             ) : !visible || visible.length === 0 ? (
                 <div className={styles.emptyState}>No challenges configured right now.</div>
             ) : (
-                <div className={styles.rows}>
-                    {visible.map((item) => {
+                <div className={styles.track}>
+                    {visible.map((item, index) => {
                         const percent = item.target_count > 0 ? Math.min(100, Math.round((item.current_count / item.target_count) * 100)) : (item.completed ? 100 : 0);
                         const href = ACTION_HREF[item.slug];
-                        const row = (
-                            <div className={styles.rowContent}>
-                                <div className={styles.rowTop}>
-                                    <span className={styles.label}>{displayLabelForDailyProgressItem(item)}</span>
-                                    {item.completed ? (
-                                        <span className={styles.completedTag}>✓ Completed</span>
-                                    ) : (
-                                        <span className={styles.xpTag}>+{item.xp_value} XP</span>
-                                    )}
-                                </div>
+                        const tileStyle = TILE_STYLES[index % TILE_STYLES.length];
+                        const tile = (
+                            <div className={styles.tileContent}>
+                                <span className={`${styles.tileIcon} ${styles[tileStyle.className]}`} aria-hidden="true">{tileStyle.icon}</span>
+                                <span className={styles.label}>{displayLabelForDailyProgressItem(item)}</span>
+                                {item.completed ? (
+                                    <span className={styles.completedTag}>✓ Completed</span>
+                                ) : (
+                                    <span className={styles.xpTag}>+{item.xp_value} XP</span>
+                                )}
                                 {!item.completed && item.target_count > 1 && (
                                     <>
                                         <div className={styles.progressTrack}>
@@ -72,9 +81,9 @@ export function DailyChallengesCard({ items, loading, error, onRetry, limit, hid
                             </div>
                         );
                         return href && !item.completed ? (
-                            <Link key={item.slug} href={href} className={styles.row}>{row}</Link>
+                            <Link key={item.slug} href={href} className={styles.tile}>{tile}</Link>
                         ) : (
-                            <div key={item.slug} className={styles.row}>{row}</div>
+                            <div key={item.slug} className={styles.tile}>{tile}</div>
                         );
                     })}
                 </div>

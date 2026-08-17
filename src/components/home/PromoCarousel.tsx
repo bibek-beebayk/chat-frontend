@@ -48,12 +48,13 @@ function PromoCardSlide({ card }: { card: PromoCard }) {
         const percent = card.target > 0 ? Math.min(100, Math.round((card.current / card.target) * 100)) : 0;
         return (
             <Link href={card.href} className={`${styles.slide} ${styles.challenge}`}>
-                <span className={styles.eyebrow}>Challenge</span>
+                <span className={styles.eyebrow}>Featured</span>
                 <h3>{card.label}</h3>
                 <p>{card.current} / {card.target} complete · +{card.xpValue} XP</p>
                 <div className={styles.progressTrack}>
                     <div className={styles.progressFill} style={{ width: `${percent}%` }} />
                 </div>
+                <span className={styles.ctaBtn}>Play Now</span>
             </Link>
         );
     }

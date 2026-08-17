@@ -471,6 +471,7 @@ export interface Game {
     name: string;
     slug: string;
     description?: string;
+    thumbnail: string | null;
     is_active: boolean;
 }
 

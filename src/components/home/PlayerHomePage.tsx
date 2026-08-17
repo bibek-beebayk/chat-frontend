@@ -9,6 +9,8 @@ import { WelcomeBanner } from './WelcomeBanner';
 import { PasswordSetupNotice } from './PasswordSetupNotice';
 import { PlayerProgressCard } from './PlayerProgressCard';
 import { LoginStreakCard } from './LoginStreakCard';
+import { PlayerStatsBar } from './PlayerStatsBar';
+import { TodaysMissionBanner } from './TodaysMissionBanner';
 import { HeroPanel } from './HeroPanel';
 import { PromoCarousel } from './PromoCarousel';
 import { DailyChallengesCard } from './DailyChallengesCard';
@@ -65,10 +67,30 @@ export function PlayerHomePage() {
                     onRedeemed={() => refetchSection('streak')}
                 />
             </div>
+            <div className={styles.statsBar}>
+                <PlayerStatsBar
+                    streak={streak.data}
+                    streakLoading={streak.loading}
+                    streakError={streak.error}
+                    onRetryStreak={() => refetchSection('streak')}
+                    onStreakRedeemed={() => refetchSection('streak')}
+                />
+            </div>
             <div className={styles.hero}><HeroPanel /></div>
 
             <div className={styles.playCtaArea}>
-                <a href="https://demo.hi-rollin.online/" target="_blank" rel="noopener noreferrer" className={styles.playCta}>Play Hi-Rollin</a>
+                <a href="https://demo.hi-rollin.online/" target="_blank" rel="noopener noreferrer" className={styles.playCta}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/hi-rollin_logo_2.png" alt="" className={styles.playCtaCrown} />
+                    <div className={styles.playCtaBody}>
+                        <div className={styles.playCtaTitleRow}>
+                            <span className={styles.playCtaTitle}>Play Hi-Rollin</span>
+                            <span className={styles.playCtaLiveTag}>Live</span>
+                        </div>
+                        <span className={styles.playCtaSubtitle}>Compete, climb, win big every season</span>
+                    </div>
+                    <span className={styles.playCtaBtn}>Play Now</span>
+                </a>
             </div>
             <div className={styles.rewardsCtaArea}>
                 <Link href="/rewards" className={styles.rewardsCta}>View Rewards</Link>
@@ -77,6 +99,10 @@ export function PlayerHomePage() {
             {promoCards.length > 0 && (
                 <div className={styles.promo}><PromoCarousel cards={promoCards} /></div>
             )}
+
+            <div className={styles.mission}>
+                <TodaysMissionBanner items={dailyProgress.data} />
+            </div>
 
             <div className={styles.challenges}>
                 <DailyChallengesCard

@@ -56,14 +56,14 @@
 }
 
 .item.active {
-    color: var(--color-accent);
-    background: rgba(var(--color-accent-rgb), 0.16);
-    border: 1px solid rgba(var(--color-accent-rgb), 0.38);
+    color: var(--brand-gold);
+    background: rgba(var(--brand-gold-rgb), 0.16);
+    border: 1px solid rgba(var(--brand-gold-rgb), 0.38);
 }
 
 .item.active:hover {
-    color: var(--color-accent);
-    background: rgba(var(--color-accent-rgb), 0.16);
+    color: var(--brand-gold);
+    background: rgba(var(--brand-gold-rgb), 0.16);
 }
 
 .iconWrap {

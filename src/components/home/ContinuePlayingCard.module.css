@@ -19,56 +19,65 @@
     text-transform: uppercase;
 }
 
-.rows {
-    display: flex;
-    flex-direction: column;
-    gap: 0.7rem;
+.track {
+    display: grid;
+    gap: var(--spacing-sm);
+    grid-auto-columns: minmax(140px, 1fr);
+    grid-auto-flow: column;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
 }
 
-.row {
-    align-items: center;
+.track::-webkit-scrollbar {
+    display: none;
+}
+
+.tile {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
+    border-radius: var(--radius-lg);
     display: flex;
-    gap: 0.6rem;
+    flex-direction: column;
+    gap: 0.3rem;
+    overflow: hidden;
+    padding-bottom: var(--spacing-sm);
+    scroll-snap-align: start;
 }
 
 .thumb {
     align-items: center;
-    background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.3), rgba(var(--color-accent-rgb), 0.2));
-    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.4), rgba(var(--color-accent-rgb), 0.28));
     display: flex;
-    flex-shrink: 0;
-    font-size: 1.2rem;
-    height: 40px;
+    font-size: 2rem;
+    height: 72px;
     justify-content: center;
-    width: 40px;
-}
-
-.rowBody {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    min-width: 0;
+    width: 100%;
 }
 
 .label {
     color: var(--color-text-primary);
     font-size: 0.85rem;
-    font-weight: 650;
+    font-weight: 700;
+    padding: 0 var(--spacing-sm);
 }
 
 .status {
     color: var(--color-text-muted);
-    font-size: 0.74rem;
+    font-size: 0.7rem;
+    padding: 0 var(--spacing-sm);
 }
 
 .playBtn {
     background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
     border-radius: var(--radius-md);
     color: #14061f;
-    flex-shrink: 0;
-    font-size: 0.76rem;
+    font-size: 0.78rem;
     font-weight: 800;
-    padding: 0.4rem 0.8rem;
+    margin: 0.2rem var(--spacing-sm) 0;
+    padding: 0.45rem 0;
+    text-align: center;
     text-decoration: none;
 }
 

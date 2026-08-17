@@ -1,9 +1,9 @@
 import styles from './HeroPanel.module.css';
 
 /**
- * Presentational-only branding panel - no fetch, no game logic. De-emphasized
- * entirely on narrow mobile (see PlayerHomePage.module.css) per the design
- * brief's "functionality over decoration" rule for small screens.
+ * Presentational-only branding panel - no fetch, no game logic. Omitted
+ * entirely on narrow mobile (see PlayerHomePage.module.css) - not needed
+ * there.
  */
 export function HeroPanel() {
     return (

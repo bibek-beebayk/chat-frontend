@@ -10,6 +10,13 @@
     height: 100%;
 }
 
+.embedded {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    width: 100%;
+}
+
 .header {
     align-items: center;
     display: flex;

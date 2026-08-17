@@ -33,7 +33,7 @@ export function ContinuePlayingCard({ rounds, loading, error, onRetry }: Continu
             </div>
 
             {loading && !rounds ? (
-                <div className={styles.rows}><SkeletonText lines={3} /></div>
+                <div className={styles.track}><SkeletonText lines={3} /></div>
             ) : error && !rounds ? (
                 <div className={styles.emptyState}>
                     <p>Unable to load recent games.</p>
@@ -45,14 +45,12 @@ export function ContinuePlayingCard({ rounds, loading, error, onRetry }: Continu
                     <Link href="/games" className={styles.exploreLink}>Explore games</Link>
                 </div>
             ) : (
-                <div className={styles.rows}>
+                <div className={styles.track}>
                     {entries.map((entry) => (
-                        <div key={entry.mode} className={styles.row}>
+                        <div key={entry.mode} className={styles.tile}>
                             <div className={styles.thumb} aria-hidden="true">🎰</div>
-                            <div className={styles.rowBody}>
-                                <span className={styles.label}>{MODE_LABEL[entry.mode] || entry.mode}</span>
-                                <span className={styles.status}>Last played {formatRelativeTime(entry.created_at)}</span>
-                            </div>
+                            <span className={styles.label}>{MODE_LABEL[entry.mode] || entry.mode}</span>
+                            <span className={styles.status}>Last played {formatRelativeTime(entry.created_at)}</span>
                             <Link href="/games/plinko" className={styles.playBtn}>Play</Link>
                         </div>
                     ))}

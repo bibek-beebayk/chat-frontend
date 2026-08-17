@@ -36,6 +36,14 @@
     width: 46px;
 }
 
+.gameThumbnail {
+    border-radius: var(--radius-md);
+    display: block;
+    height: 120px;
+    object-fit: cover;
+    width: 100%;
+}
+
 .gameCard h3 {
     color: var(--color-text-primary);
     font-size: 1.05rem;
