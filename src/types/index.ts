@@ -594,6 +594,12 @@ export interface RocketRoundState {
     auto_cashout_multiplier: string | null;
     multiplier: string;
     seconds_remaining: string | null;
+    // Server-authoritative "elapsed flight seconds" snapshot at the moment
+    // this response was generated (null unless status=active) - anchor a
+    // local performance.now()-based interpolation clock to this instead of
+    // computing elapsed time from started_at + Date.now(), which assumes
+    // client/server wall clocks agree.
+    elapsed_seconds: string | null;
     started_at: string;
     cashout_multiplier: string | null;
     payout_amount: string;

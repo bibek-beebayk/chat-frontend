@@ -1,122 +1,183 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { RocketConfig, RocketRoundState } from '@/types';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { RocketHistoryItem, RocketRoundState } from '@/types';
+import { crossedMilestone, FlightStage } from './flightIntensity';
+import { RocketAsset } from './RocketAsset';
+import { RocketHistoryStrip } from './RocketHistoryStrip';
+import { RocketSyncState } from './useRocketSync';
 import styles from './RocketDisplay.module.css';
 
 interface RocketDisplayProps {
-    round: RocketRoundState | null;
-    config: RocketConfig | null;
+    currentRound: RocketRoundState | null;
+    resultRound: RocketRoundState | null;
+    visualPhase: 'countdown' | 'running' | null;
+    sync: RocketSyncState;
+    history: RocketHistoryItem[];
+    soundMuted: boolean;
+    onToggleMute: () => void;
 }
 
-/**
- * The exact same formula as rocket/services.py::multiplier_at_elapsed - not
- * a decision-making function, purely a smooth visual interpolation between
- * ~150ms polls. Every poll response re-syncs the display to the
- * authoritative server multiplier, so this can never drift into showing a
- * value the server hasn't actually reached; it only fills the gaps between
- * polls with the identical public curve the server itself uses.
- */
-function computeMultiplier(elapsedSeconds: number, growthRate: number, accelExponent: number): number {
-    if (elapsedSeconds <= 0) return 1;
-    return Math.exp(growthRate * Math.pow(elapsedSeconds, accelExponent));
+function usePrefersReducedMotion(): boolean {
+    const [reduced, setReduced] = useState(false);
+    useEffect(() => {
+        const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
+        setReduced(mql.matches);
+        const onChange = () => setReduced(mql.matches);
+        mql.addEventListener('change', onChange);
+        return () => mql.removeEventListener('change', onChange);
+    }, []);
+    return reduced;
 }
 
-// Maps a multiplier to a 0-1 vertical flight progress for the rocket icon -
-// log-scaled so the (common) low-multiplier range still reads as visible
-// motion, while very rare, very high multipliers saturate near the top of
-// the travel range instead of flying off-screen.
-function flightProgress(multiplier: number): number {
-    return Math.min(1, Math.log10(Math.max(1, multiplier)) / 2.5);
-}
+// Fixed, precomputed positions (not re-randomized per render) for the
+// bounded set of decorative star/particle elements - kept small so this
+// stays cheap on mobile regardless of flight intensity.
+const FAR_STARS = Array.from({ length: 14 }, (_, i) => ({ left: (i * 29) % 100, top: (i * 41 + 5) % 100, delay: (i % 5) * 0.5 }));
+const NEAR_STARS = Array.from({ length: 10 }, (_, i) => ({ left: (i * 37 + 12) % 100, top: (i * 53 + 8) % 100, delay: (i % 4) * 0.35 }));
+const DOWNWARD_PARTICLES = Array.from({ length: 8 }, (_, i) => ({ left: 20 + (i * 8) % 60, delay: (i % 6) * 0.28 }));
+const SPEED_LINES = Array.from({ length: 6 }, (_, i) => ({ left: 10 + i * 15, delay: (i % 3) * 0.15 }));
+const CRASH_PARTICLES = Array.from({ length: 12 }, (_, i) => ({ angle: (360 / 12) * i, delay: (i % 4) * 0.02 }));
 
-export function RocketDisplay({ round, config }: RocketDisplayProps) {
-    const [liveMultiplier, setLiveMultiplier] = useState(1);
-    const rafRef = useRef<number | null>(null);
+export function RocketDisplay({ currentRound, resultRound, visualPhase, sync, history, soundMuted, onToggleMute }: RocketDisplayProps) {
+    const reducedMotion = usePrefersReducedMotion();
+    const previousMultiplierRef = useRef(1);
+    const [milestone, setMilestone] = useState<number | null>(null);
+    const milestoneTimerRef = useRef<number | null>(null);
+
+    const isRunning = visualPhase === 'running' && !resultRound;
+    const isCountdown = visualPhase === 'countdown' && !resultRound;
+    const isCrashed = resultRound?.status === 'crashed';
+    const isCashedOut = resultRound?.status === 'cashed_out';
+    const isIdle = !currentRound && !resultRound;
+
+    const liveMultiplier = isRunning ? sync.displayMultiplier : 1;
 
     useEffect(() => {
-        if (rafRef.current !== null) {
-            cancelAnimationFrame(rafRef.current);
-            rafRef.current = null;
-        }
-
-        if (!round || round.phase !== 'running' || !config) {
-            setLiveMultiplier(round ? Number(round.multiplier) : 1);
+        if (!isRunning) {
+            previousMultiplierRef.current = 1;
             return;
         }
+        const crossed = crossedMilestone(previousMultiplierRef.current, liveMultiplier);
+        previousMultiplierRef.current = liveMultiplier;
+        if (crossed !== null) {
+            setMilestone(crossed);
+            if (milestoneTimerRef.current !== null) window.clearTimeout(milestoneTimerRef.current);
+            milestoneTimerRef.current = window.setTimeout(() => setMilestone(null), 700);
+        }
+    }, [isRunning, liveMultiplier]);
 
-        const startedAtMs = new Date(round.started_at).getTime();
-        const growthRate = Number(config.growth_rate);
-        const accelExponent = Number(config.accel_exponent);
+    useEffect(() => () => {
+        if (milestoneTimerRef.current !== null) window.clearTimeout(milestoneTimerRef.current);
+    }, []);
 
-        const tick = () => {
-            const elapsed = (Date.now() - startedAtMs) / 1000;
-            setLiveMultiplier(computeMultiplier(elapsed, growthRate, accelExponent));
-            rafRef.current = requestAnimationFrame(tick);
-        };
-        rafRef.current = requestAnimationFrame(tick);
+    const stage: FlightStage = isRunning ? sync.intensity.stage : 'launch';
+    const intensity = isRunning ? sync.intensity.value : 0;
 
-        return () => {
-            if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-        };
-    }, [round, config]);
+    // Intensity is log-scaled against the multiplier, so it stays near 0 for
+    // most of a round's actual duration (most rounds crash below 2x). Tying
+    // background scroll speed to intensity alone made flight look static
+    // for the common case. Running flight gets its own speed floor instead,
+    // set the moment launch happens, then ramps further with intensity.
+    const speedMult = isRunning ? 1.6 + intensity * 3.4 : 0.5;
 
-    const phase = round?.phase;
-    const progress = flightProgress(phase === 'running' ? liveMultiplier : Number(round?.multiplier ?? 1));
-    const isCrashed = phase === 'crashed';
-    const isCashedOut = phase === 'cashed_out';
-    const isCountdown = phase === 'countdown';
-    const isRunning = phase === 'running';
+    const stageStyle = useMemo(() => ({
+        '--intensity': intensity,
+        '--speed-mult': speedMult.toFixed(2),
+    } as React.CSSProperties), [intensity, speedMult]);
 
     return (
-        <div className={styles.stage}>
-            <div className={styles.stars} aria-hidden="true">
-                {STAR_POSITIONS.map((s, i) => (
-                    <span key={i} className={styles.star} style={{ left: `${s.left}%`, top: `${s.top}%`, animationDelay: `${s.delay}s` }} />
+        <div
+            className={`${styles.stage} ${reducedMotion ? styles.reducedMotion : ''} ${milestone ? styles.milestonePulse : ''}`}
+            data-stage={stage}
+            data-phase={isCrashed ? 'crashed' : isCashedOut ? 'cashed_out' : isRunning ? 'running' : isCountdown ? 'countdown' : 'idle'}
+            style={stageStyle}
+        >
+            <div className={styles.starsFar} aria-hidden="true">
+                {FAR_STARS.map((s, i) => (
+                    <span key={i} className={styles.starFar} style={{ left: `${s.left}%`, top: `${s.top}%`, animationDelay: `${s.delay}s` }} />
+                ))}
+            </div>
+            <div className={styles.starsNear} aria-hidden="true">
+                {NEAR_STARS.map((s, i) => (
+                    <span key={i} className={styles.starNear} style={{ left: `${s.left}%`, top: `${s.top}%`, animationDelay: `${s.delay}s` }} />
                 ))}
             </div>
 
-            <div
-                className={`${styles.rocketTrack} ${isCrashed ? styles.rocketTrackCrashed : ''}`}
-                style={{ '--flight-progress': progress } as React.CSSProperties}
-            >
-                <div className={`${styles.exhaust} ${isRunning || isCountdown ? styles.exhaustActive : ''}`} aria-hidden="true" />
-                <div className={`${styles.rocket} ${isCrashed ? styles.rocketCrashed : ''} ${isCashedOut ? styles.rocketCashedOut : ''}`} aria-hidden="true">
-                    🚀
-                </div>
+            <div className={styles.clouds} aria-hidden="true">
+                <span className={styles.cloud} />
+                <span className={styles.cloud} />
             </div>
 
+            <div className={styles.speedLines} aria-hidden="true">
+                {SPEED_LINES.map((s, i) => (
+                    <span key={i} className={styles.speedLine} style={{ left: `${s.left}%`, animationDelay: `${s.delay}s` }} />
+                ))}
+            </div>
+
+            {history.length > 0 && (
+                <div className={styles.historyOverlay}>
+                    <RocketHistoryStrip items={history} loading={false} compact />
+                </div>
+            )}
+
+            <div className={`${styles.rocketWrap} ${isCrashed ? styles.rocketWrapCrashed : ''} ${isCashedOut ? styles.rocketWrapCashedOut : ''}`}>
+                <div className={styles.particlesDown} aria-hidden="true">
+                    {DOWNWARD_PARTICLES.map((p, i) => (
+                        <span key={i} className={styles.particleDown} style={{ left: `${p.left}%`, animationDelay: `${p.delay}s` }} />
+                    ))}
+                </div>
+
+                <div className={styles.rocketInner}>
+                    <RocketAsset intensity={intensity} />
+                </div>
+
+                {isCrashed && (
+                    <div className={styles.crashBurst} key={resultRound?.round_id} aria-hidden="true">
+                        {CRASH_PARTICLES.map((p, i) => (
+                            <span
+                                key={i}
+                                className={styles.crashParticle}
+                                style={{ '--angle': `${p.angle}deg`, animationDelay: `${p.delay}s` } as React.CSSProperties}
+                            />
+                        ))}
+                        <span className={styles.crashFlash} />
+                    </div>
+                )}
+            </div>
+
+            <button type="button" className={styles.muteBtn} onClick={onToggleMute} aria-label={soundMuted ? 'Unmute sound' : 'Mute sound'}>
+                {soundMuted ? '🔇' : '🔊'}
+            </button>
+
             <div className={styles.readout}>
-                {isCountdown && round?.seconds_remaining != null ? (
+                {isCountdown && sync.secondsRemaining != null ? (
                     <>
                         <span className={styles.countdownLabel}>Launching in</span>
-                        <span className={styles.countdownValue}>{Math.max(0, Math.ceil(Number(round.seconds_remaining)))}</span>
+                        <span className={styles.countdownValue}>{Math.max(1, Math.ceil(sync.secondsRemaining))}</span>
                     </>
                 ) : isCrashed ? (
                     <>
                         <span className={styles.crashedLabel}>ROCKET CRASHED</span>
-                        <span className={styles.multiplierValueCrashed}>{Number(round?.multiplier).toFixed(2)}x</span>
-                        <span className={styles.resultLine}>Result: -{Number(round?.wager_amount).toLocaleString()}</span>
+                        <span className={styles.multiplierValueCrashed}>{Number(resultRound?.multiplier).toFixed(2)}x</span>
+                        <span className={styles.resultLine}>Result: -{Number(resultRound?.wager_amount).toLocaleString()}</span>
                     </>
                 ) : isCashedOut ? (
                     <>
                         <span className={styles.successLabel}>SUCCESS</span>
-                        <span className={styles.multiplierValueSuccess}>{Number(round?.cashout_multiplier).toFixed(2)}x</span>
+                        <span className={styles.multiplierValueSuccess}>{Number(resultRound?.cashout_multiplier).toFixed(2)}x</span>
                         <span className={styles.resultLine}>
-                            Return: {Number(round?.payout_amount).toLocaleString(undefined, { maximumFractionDigits: 2 })} &middot; Profit: +
-                            {(Number(round?.payout_amount) - Number(round?.wager_amount)).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                            Return: {Number(resultRound?.payout_amount).toLocaleString(undefined, { maximumFractionDigits: 2 })} &middot; Profit: +
+                            {(Number(resultRound?.payout_amount) - Number(resultRound?.wager_amount)).toLocaleString(undefined, { maximumFractionDigits: 2 })}
                         </span>
                     </>
                 ) : (
-                    <span className={styles.multiplierValue}>{liveMultiplier.toFixed(2)}x</span>
+                    <span className={`${styles.multiplierValue} ${isRunning ? styles.multiplierValueLive : ''}`}>
+                        {liveMultiplier.toFixed(2)}x
+                    </span>
                 )}
+                {isIdle && <span className={styles.idleHint}>Ready to launch</span>}
             </div>
         </div>
     );
 }
-
-const STAR_POSITIONS = Array.from({ length: 18 }, (_, i) => ({
-    left: (i * 37) % 100,
-    top: (i * 53) % 100,
-    delay: (i % 6) * 0.4,
-}));

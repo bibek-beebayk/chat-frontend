@@ -1,0 +1,108 @@
+.bar {
+    display: none;
+}
+
+/* Mobile-only - RocketControls' full form panel covers tablet/desktop
+   instead (see its own .controls display:none rule above this same
+   breakpoint). Positioned by the parent .stageWrap in RocketGame.module.css
+   as an overlay pinned to the bottom of the full-screen stage. */
+@media (max-width: 768px) {
+    .bar {
+        align-items: center;
+        background: linear-gradient(0deg, rgba(6, 3, 14, 0.92) 0%, rgba(6, 3, 14, 0.78) 65%, transparent 100%);
+        bottom: 0;
+        display: flex;
+        gap: 0.6rem;
+        left: 0;
+        padding: 1.6rem 0.7rem calc(0.7rem + env(safe-area-inset-bottom));
+        position: absolute;
+        right: 0;
+        z-index: 5;
+    }
+}
+
+.toggleRow {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    gap: 0.4rem;
+}
+
+.toggleBtn {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1.5px solid rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+    color: var(--color-text-secondary);
+    display: flex;
+    gap: 0.35rem;
+    justify-content: center;
+    min-width: 74px;
+    padding: 0.4rem 0.8rem;
+}
+
+.toggleBtn:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.toggleBtnActive {
+    background: rgba(var(--brand-gold-rgb, 245 197 66), 0.22);
+    border-color: rgba(var(--brand-gold-rgb, 245 197 66), 0.55);
+    color: var(--brand-gold, #f5c542);
+}
+
+.toggleLabel {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.toggleValue {
+    font-size: 0.78rem;
+    font-weight: 900;
+}
+
+.actionBtn {
+    align-items: center;
+    background: linear-gradient(120deg, var(--color-primary), var(--brand-gold, #f5c542));
+    border: 0;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 22px rgba(var(--brand-gold-rgb, 245 197 66), 0.32);
+    color: #1a1025;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    font-size: 1rem;
+    font-weight: 900;
+    justify-content: center;
+    letter-spacing: 0.02em;
+    min-height: 58px;
+    text-transform: uppercase;
+}
+
+.actionBtn:disabled {
+    box-shadow: none;
+    cursor: not-allowed;
+    filter: grayscale(0.35);
+    opacity: 0.65;
+}
+
+.actionLabel {
+    font-size: 0.72rem;
+    line-height: 1;
+}
+
+.actionAmount {
+    font-size: 1.15rem;
+    line-height: 1.25;
+}
+
+/* Cash Out state reuses the same slot but in the success-green treatment
+   used everywhere else in this game. */
+.actionBtnCashOut:not(:disabled) {
+    background: linear-gradient(120deg, #22c55e, #4ade80);
+    box-shadow: 0 8px 26px rgba(34, 197, 94, 0.45);
+    color: #06210f;
+}

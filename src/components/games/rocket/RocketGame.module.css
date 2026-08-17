@@ -1,24 +1,26 @@
+/*
+ * Mobile: the gameplay stage fills the entire remaining viewport (see
+ * RocketDisplay.module.css's mobile height rule) - RocketMobileControls
+ * overlays its bottom edge as compact button toggles, and the old
+ * form-style RocketControls panel is hidden entirely (see its own
+ * display:none rule above this breakpoint). Tablet/desktop keep the
+ * original layout: a bounded-height stage with a real controls panel
+ * below it, no outer bordered "card" around either, per the "avoid
+ * excessive card borders and form-like UI" design brief.
+ */
 .page {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: 0.6rem;
     margin: 0 auto;
-    max-width: 520px;
-    padding: var(--spacing-lg) var(--spacing-md);
+    max-width: 460px;
+    padding: 0.6rem 0.6rem 1rem;
     width: 100%;
 }
 
-.boardCard {
-    background:
-        radial-gradient(ellipse 70% 60% at 50% 0%, rgba(var(--brand-gold-rgb, 245 197 66), 0.1), transparent 60%),
-        linear-gradient(180deg, rgba(20, 10, 35, 0.92), rgba(10, 6, 20, 0.96));
-    border: 1px solid rgba(var(--brand-gold-rgb, 245 197 66), 0.22);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
+.stageWrap {
     display: flex;
-    flex-direction: column;
-    gap: 0.9rem;
-    padding: var(--spacing-lg);
+    position: relative;
 }
 
 .errorText {
@@ -39,20 +41,38 @@
     text-align: center;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .page {
-        gap: 0.65rem;
-        padding: var(--spacing-md) var(--spacing-sm);
+        gap: 0;
+        height: calc(100dvh - 56px);
+        max-width: none;
+        padding: 0;
+        position: relative;
     }
 
-    .boardCard {
-        gap: 0.65rem;
-        padding: var(--spacing-md) var(--spacing-sm);
+    .stageWrap {
+        flex: 1;
+        min-height: 0;
+    }
+
+    .errorText {
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0.5rem;
+        z-index: 6;
     }
 }
 
-@media (min-width: 860px) {
+@media (min-width: 700px) {
     .page {
-        max-width: 620px;
+        max-width: 560px;
+        padding: 1rem 1rem 1.25rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .page {
+        max-width: 640px;
     }
 }

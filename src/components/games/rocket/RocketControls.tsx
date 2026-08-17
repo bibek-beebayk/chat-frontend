@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import { RocketConfig, RocketRoundState } from '@/types';
 import styles from './RocketControls.module.css';
 
@@ -12,7 +13,9 @@ interface RocketControlsProps {
     autoCashoutInput: string;
     onAutoCashoutChange: (value: string) => void;
     balance: number;
-    round: RocketRoundState | null;
+    currentRound: RocketRoundState | null;
+    visualPhase: 'countdown' | 'running' | null;
+    liveMultiplier: number;
     busy: boolean;
     onPlaceBet: () => void;
     onCashOut: () => void;
@@ -27,30 +30,48 @@ export function RocketControls({
     autoCashoutInput,
     onAutoCashoutChange,
     balance,
-    round,
+    currentRound,
+    visualPhase,
+    liveMultiplier,
     busy,
     onPlaceBet,
     onCashOut,
 }: RocketControlsProps) {
-    const roundActive = round !== null;
+    const roundActive = currentRound !== null;
     const wagerAmount = Number(wagerInput);
     const isValidWager = Number.isFinite(wagerAmount) && wagerAmount > 0 && wagerAmount <= balance;
     const controlsDisabled = busy || roundActive;
+    const isRunning = visualPhase === 'running';
 
-    const liveMultiplier = round?.phase === 'running' ? Number(round.multiplier) : 1;
+    // Immediate pressed feedback the instant the player taps Cash Out,
+    // independent of how long the actual server round-trip takes -
+    // "the visual response must be immediate even if the authoritative
+    // response takes a moment", without claiming a win before it's real.
+    const [justPressed, setJustPressed] = useState(false);
+    const pressedTimerRef = useRef<number | null>(null);
+    useEffect(() => () => {
+        if (pressedTimerRef.current !== null) window.clearTimeout(pressedTimerRef.current);
+    }, []);
+
     const potentialReturn = wagerAmount > 0
-        ? wagerAmount * (roundActive ? liveMultiplier : (autoCashoutEnabled ? Number(autoCashoutInput) || 1 : 1))
+        ? wagerAmount * (isRunning ? liveMultiplier : (autoCashoutEnabled ? Number(autoCashoutInput) || 1 : 1))
         : 0;
 
-    const statusText = !round
+    const statusText = !currentRound
         ? 'Ready to launch'
-        : round.phase === 'countdown'
+        : visualPhase === 'countdown'
             ? 'Betting closed - launching soon'
-            : round.phase === 'running'
-                ? 'In flight - cash out any time'
-                : round.phase === 'cashed_out'
-                    ? 'Cashed out'
-                    : 'Crashed';
+            : 'In flight - cash out any time';
+
+    const handleCashOutClick = () => {
+        if (busy) return;
+        setJustPressed(true);
+        if (pressedTimerRef.current !== null) window.clearTimeout(pressedTimerRef.current);
+        pressedTimerRef.current = window.setTimeout(() => setJustPressed(false), 900);
+        onCashOut();
+    };
+
+    const glowTier = liveMultiplier >= 10 ? 3 : liveMultiplier >= 5 ? 2 : liveMultiplier >= 2 ? 1 : 0;
 
     return (
         <div className={styles.controls}>
@@ -125,16 +146,31 @@ export function RocketControls({
                 )}
             </div>
 
-            <div className={styles.returnRow}>
-                <span>Potential Return</span>
-                <strong>{potentialReturn.toLocaleString(undefined, { maximumFractionDigits: 2 })} RP</strong>
-            </div>
+            {!isRunning && (
+                <div className={styles.returnRow}>
+                    <span>Potential Return</span>
+                    <strong>{potentialReturn.toLocaleString(undefined, { maximumFractionDigits: 2 })} RP</strong>
+                </div>
+            )}
 
-            {round && round.phase === 'running' ? (
-                <button type="button" className={styles.cashOutBtn} onClick={onCashOut} disabled={busy}>
-                    Cash Out &middot; {potentialReturn.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+            {isRunning ? (
+                <button
+                    type="button"
+                    className={`${styles.cashOutBtn} ${justPressed ? styles.cashOutBtnPressed : ''}`}
+                    data-glow-tier={glowTier}
+                    onClick={handleCashOutClick}
+                    disabled={busy}
+                >
+                    {busy ? (
+                        <span className={styles.cashOutSpinner} aria-hidden="true" />
+                    ) : (
+                        <>
+                            <span className={styles.cashOutLabel}>CASH OUT</span>
+                            <span className={styles.cashOutAmount}>{potentialReturn.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+                        </>
+                    )}
                 </button>
-            ) : round && round.phase === 'countdown' ? (
+            ) : visualPhase === 'countdown' ? (
                 <button type="button" className={styles.playBtn} disabled>
                     Launching...
                 </button>

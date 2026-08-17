@@ -4,98 +4,314 @@
         radial-gradient(ellipse 90% 60% at 50% 100%, rgba(var(--brand-gold-rgb, 245 197 66), 0.14), transparent 65%),
         radial-gradient(ellipse 70% 50% at 50% 0%, rgba(var(--color-primary-rgb), 0.22), transparent 60%),
         linear-gradient(180deg, #1a0f38 0%, #120a26 55%, #0a0616 100%);
-    border: 1px solid rgba(var(--brand-gold-rgb, 245 197 66), 0.28);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-lg), inset 0 0 40px rgba(0, 0, 0, 0.4);
     display: flex;
     flex-direction: column;
-    height: 300px;
+    height: clamp(340px, 58vh, 560px);
     justify-content: flex-end;
     overflow: hidden;
     position: relative;
     width: 100%;
 }
 
-.stars {
+.stage[data-stage='accelerating'],
+.stage[data-stage='extreme'] {
+    animation: cameraShake calc(420ms / var(--speed-mult, 1)) ease-in-out infinite;
+}
+
+@keyframes cameraShake {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(calc(var(--intensity, 0) * -1.4px), calc(var(--intensity, 0) * 1px)); }
+    50% { transform: translate(calc(var(--intensity, 0) * 1.2px), calc(var(--intensity, 0) * -1.4px)); }
+    75% { transform: translate(calc(var(--intensity, 0) * -0.8px), calc(var(--intensity, 0) * -0.6px)); }
+}
+
+/* ---------- Parallax stars ---------- */
+
+.starsFar,
+.starsNear {
     inset: 0;
     position: absolute;
 }
 
-.star {
+.starFar,
+.starNear {
     background: #fff;
     border-radius: 50%;
-    box-shadow: 0 0 4px 1px rgba(255, 255, 255, 0.6);
-    height: 2px;
-    opacity: 0.5;
     position: absolute;
-    width: 2px;
-    animation: twinkle 3.2s ease-in-out infinite;
+    will-change: top, opacity;
 }
 
-@keyframes twinkle {
-    0%, 100% { opacity: 0.15; }
-    50% { opacity: 0.85; }
+.starFar {
+    animation: starDriftFar calc(6s / max(var(--speed-mult, 1), 0.5)) linear infinite;
+    box-shadow: 0 0 3px 1px rgba(255, 255, 255, 0.5);
+    height: 1.5px;
+    opacity: 0.4;
+    width: 1.5px;
 }
 
-.rocketTrack {
-    bottom: 46px;
-    height: calc(100% - 90px);
-    left: 0;
+.starNear {
+    animation: starDriftNear calc(3.2s / max(var(--speed-mult, 1), 0.5)) linear infinite;
+    box-shadow: 0 0 4px 1px rgba(255, 255, 255, 0.65);
+    height: 2.2px;
+    opacity: 0.6;
+    width: 2.2px;
+}
+
+/*
+ * These animate `top` (not `transform: translateY`) on purpose: percentage
+ * translateY is relative to the ELEMENT's own box, not its container - on a
+ * 1.5-2.2px star that's a sub-2px wobble, which read as twinkling instead
+ * of scrolling. `top` percentages resolve against the containing block
+ * (.starsFar/.starsNear, inset:0 to the full stage), so this actually
+ * travels the full height.
+ */
+@keyframes starDriftFar {
+    from { top: -6%; }
+    to { top: 106%; }
+}
+
+@keyframes starDriftNear {
+    from { top: -8%; }
+    to { top: 112%; }
+}
+
+/* ---------- Launch-phase atmosphere ---------- */
+
+.clouds {
+    inset: 0;
+    opacity: 1;
     position: absolute;
-    right: 0;
-    transition: none;
+    transition: opacity 900ms ease;
 }
 
-.exhaust {
-    background: linear-gradient(180deg, rgba(var(--brand-gold-rgb, 245 197 66), 0.85), rgba(var(--color-primary-rgb), 0.5), transparent);
+.stage:not([data-stage='launch']) .clouds {
+    opacity: 0;
+}
+
+.cloud {
+    background: radial-gradient(ellipse 60% 100% at 50% 50%, rgba(255, 255, 255, 0.16), transparent 70%);
     border-radius: 50%;
-    bottom: calc(var(--flight-progress, 0) * 100% - 6px);
-    filter: blur(3px);
-    height: 26px;
-    left: calc(18% + var(--flight-progress, 0) * 46%);
+    bottom: -10%;
+    height: 60%;
+    position: absolute;
+    width: 70%;
+}
+
+.cloud:first-child {
+    animation: cloudDrift 5s ease-in-out infinite;
+    left: -20%;
+}
+
+.cloud:last-child {
+    animation: cloudDrift 6.5s ease-in-out infinite reverse;
+    right: -25%;
+}
+
+@keyframes cloudDrift {
+    0%, 100% { transform: translateX(0) scale(1); }
+    50% { transform: translateX(6%) scale(1.06); }
+}
+
+/* ---------- Speed lines (space+) ---------- */
+
+.speedLines {
+    inset: 0;
     opacity: 0;
     position: absolute;
-    transform: translate(-50%, 0);
-    transition: bottom 120ms linear, left 120ms linear;
-    width: 10px;
+    transition: opacity 400ms ease;
 }
 
-.exhaustActive {
-    animation: flicker 220ms ease-in-out infinite alternate;
+.stage[data-stage='space'] .speedLines,
+.stage[data-stage='accelerating'] .speedLines,
+.stage[data-stage='extreme'] .speedLines {
     opacity: 1;
 }
 
-@keyframes flicker {
-    from { height: 22px; opacity: 0.75; }
-    to { height: 34px; opacity: 1; }
-}
-
-.rocket {
-    bottom: calc(var(--flight-progress, 0) * 100%);
-    filter: drop-shadow(0 0 10px rgba(var(--brand-gold-rgb, 245 197 66), 0.85)) drop-shadow(0 0 22px rgba(var(--brand-gold-rgb, 245 197 66), 0.5));
-    font-size: 2.4rem;
-    left: calc(18% + var(--flight-progress, 0) * 46%);
-    line-height: 1;
+.speedLine {
+    background: linear-gradient(180deg, transparent, rgba(var(--brand-gold-rgb, 245 197 66), 0.55), transparent);
+    height: 30%;
     position: absolute;
-    transform: translate(-50%, 50%) rotate(-38deg);
-    transition: bottom 120ms linear, left 120ms linear;
+    top: -30%;
+    width: 2px;
+    animation: speedLineFall calc(0.5s / max(var(--speed-mult, 1), 0.6)) linear infinite;
 }
 
-.rocketCrashed {
-    animation: crashSpin 700ms ease-in forwards;
+@keyframes speedLineFall {
+    from { transform: translateY(0); }
+    to { transform: translateY(400%); }
 }
 
-@keyframes crashSpin {
-    to {
-        filter: drop-shadow(0 0 14px rgba(239, 68, 68, 0.9));
-        opacity: 0.35;
-        transform: translate(-50%, 50%) rotate(140deg) scale(0.85);
-    }
+/* ---------- Downward particles (thrust illusion) ---------- */
+
+.particlesDown {
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
 }
 
-.rocketCashedOut {
-    filter: drop-shadow(0 0 14px rgba(var(--brand-gold-rgb, 245 197 66), 1)) drop-shadow(0 0 28px rgba(var(--brand-gold-rgb, 245 197 66), 0.7));
+.particleDown {
+    background: rgba(var(--brand-gold-rgb, 245 197 66), 0.7);
+    border-radius: 50%;
+    height: 3px;
+    opacity: 0;
+    position: absolute;
+    top: 30%;
+    width: 3px;
 }
+
+.stage[data-phase='running'] .particleDown {
+    animation: particleFall calc(0.9s / max(var(--speed-mult, 1), 0.5)) linear infinite;
+}
+
+@keyframes particleFall {
+    0% { opacity: 0; transform: translateY(0); }
+    15% { opacity: 0.85; }
+    100% { opacity: 0; transform: translateY(220px); }
+}
+
+/* ---------- Rocket ---------- */
+
+.rocketWrap {
+    align-items: center;
+    bottom: 34%;
+    display: flex;
+    justify-content: center;
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%, 50%);
+    z-index: 2;
+}
+
+.rocketInner {
+    animation: rocketIdleBob 2.6s ease-in-out infinite;
+}
+
+.stage[data-phase='running'] .rocketInner {
+    animation:
+        rocketVibrate calc(260ms / max(var(--speed-mult, 1), 0.5)) ease-in-out infinite,
+        rocketTiltDrift 3.4s ease-in-out infinite;
+}
+
+.stage[data-phase='countdown'] .rocketInner {
+    animation: rocketIgnitionShudder 400ms ease-in-out infinite;
+}
+
+@keyframes rocketIdleBob {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-4px) rotate(-1deg); }
+}
+
+@keyframes rocketIgnitionShudder {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(0.6px, -0.4px); }
+}
+
+@keyframes rocketVibrate {
+    0%, 100% { transform: translate(0, 0) rotate(calc(var(--intensity, 0) * -2deg)); }
+    50% { transform: translate(calc(var(--intensity, 0) * 1.6px), calc(var(--intensity, 0) * -0.8px)) rotate(calc(var(--intensity, 0) * 2deg)); }
+}
+
+@keyframes rocketTiltDrift {
+    0%, 100% { margin-left: 0; }
+    50% { margin-left: calc(var(--intensity, 0) * 6px); }
+}
+
+.rocketWrapCrashed .rocketInner {
+    animation: crashShudder 700ms ease-out forwards;
+}
+
+@keyframes crashShudder {
+    0% { opacity: 1; transform: scale(1) rotate(0deg); }
+    20% { transform: scale(1.05) rotate(-6deg); }
+    40% { transform: scale(0.98) rotate(8deg); }
+    60% { opacity: 1; transform: scale(0.9) rotate(-4deg); }
+    100% { opacity: 0; transform: scale(0.5) rotate(30deg); }
+}
+
+.rocketWrapCashedOut .rocketInner {
+    animation: cashedPulse 600ms ease-out;
+}
+
+@keyframes cashedPulse {
+    0% { filter: brightness(1); transform: scale(1); }
+    40% { filter: brightness(1.6); transform: scale(1.18); }
+    100% { filter: brightness(1); transform: scale(1); }
+}
+
+/* ---------- Crash burst ---------- */
+
+.crashBurst {
+    inset: -40px;
+    pointer-events: none;
+    position: absolute;
+}
+
+.crashFlash {
+    animation: crashFlash 350ms ease-out forwards;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.9), rgba(239, 68, 68, 0.5) 45%, transparent 75%);
+    border-radius: 50%;
+    inset: 0;
+    opacity: 0;
+    position: absolute;
+}
+
+@keyframes crashFlash {
+    0% { opacity: 0; transform: scale(0.3); }
+    30% { opacity: 0.9; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.3); }
+}
+
+.crashParticle {
+    animation: crashParticleFly 650ms ease-out forwards;
+    background: radial-gradient(circle, #fff2c9, var(--brand-gold, #f5c542) 45%, #f87171 80%);
+    border-radius: 50%;
+    height: 5px;
+    left: 50%;
+    opacity: 0;
+    position: absolute;
+    top: 50%;
+    width: 5px;
+}
+
+@keyframes crashParticleFly {
+    0% { opacity: 1; transform: translate(-50%, -50%) rotate(var(--angle)) translateY(0) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-70px) scale(0.3); }
+}
+
+/* ---------- Recent multipliers (compact, top of stage) ---------- */
+
+.historyOverlay {
+    left: 0;
+    padding: 0.7rem 2.6rem 0 0.7rem;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 3;
+}
+
+/* ---------- Sound toggle ---------- */
+
+.muteBtn {
+    align-items: center;
+    background: rgba(10, 6, 20, 0.5);
+    border: 1px solid rgba(var(--brand-gold-rgb, 245 197 66), 0.3);
+    border-radius: 50%;
+    display: flex;
+    font-size: 0.95rem;
+    height: 30px;
+    justify-content: center;
+    position: absolute;
+    right: 0.7rem;
+    top: 0.7rem;
+    width: 30px;
+    z-index: 4;
+}
+
+/* ---------- Readout ---------- */
 
 .readout {
     align-items: center;
@@ -110,10 +326,33 @@
 
 .multiplierValue {
     color: var(--color-text-primary);
-    font-size: 3rem;
+    font-size: 3.1rem;
     font-weight: 900;
     letter-spacing: 0.01em;
     text-shadow: 0 0 24px rgba(var(--brand-gold-rgb, 245 197 66), 0.5);
+    transition: text-shadow 200ms ease;
+}
+
+.multiplierValueLive {
+    color: #fff;
+    text-shadow: 0 0 calc(18px + var(--intensity, 0) * 22px) rgba(var(--brand-gold-rgb, 245 197 66), calc(0.5 + var(--intensity, 0) * 0.4));
+}
+
+.milestonePulse .multiplierValueLive {
+    animation: milestoneFlash 700ms ease-out;
+}
+
+@keyframes milestoneFlash {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.22); text-shadow: 0 0 40px rgba(var(--brand-gold-rgb, 245 197 66), 1); }
+    100% { transform: scale(1); }
+}
+
+.idleHint {
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin-top: 0.2rem;
 }
 
 .countdownLabel {
@@ -125,13 +364,20 @@
 }
 
 .countdownValue {
+    animation: countdownPulse 1s ease-in-out infinite;
     color: var(--brand-gold, #f5c542);
     font-size: 3.2rem;
     font-weight: 900;
     text-shadow: 0 0 26px rgba(var(--brand-gold-rgb, 245 197 66), 0.6);
 }
 
+@keyframes countdownPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+
 .crashedLabel {
+    animation: fadeInResult 500ms ease-out 320ms backwards;
     color: #f87171;
     font-size: 0.9rem;
     font-weight: 900;
@@ -139,6 +385,7 @@
 }
 
 .multiplierValueCrashed {
+    animation: fadeInResult 500ms ease-out 380ms backwards;
     color: #f87171;
     font-size: 2.6rem;
     font-weight: 900;
@@ -146,6 +393,7 @@
 }
 
 .successLabel {
+    animation: fadeInResult 450ms ease-out 100ms backwards;
     color: #4ade80;
     font-size: 0.9rem;
     font-weight: 900;
@@ -153,6 +401,7 @@
 }
 
 .multiplierValueSuccess {
+    animation: fadeInResult 450ms ease-out 160ms backwards;
     color: var(--brand-gold, #f5c542);
     font-size: 2.6rem;
     font-weight: 900;
@@ -160,20 +409,35 @@
 }
 
 .resultLine {
+    animation: fadeInResult 450ms ease-out 460ms backwards;
     color: var(--color-text-secondary);
     font-size: 0.82rem;
     font-weight: 650;
 }
 
-@media (max-width: 600px) {
+@keyframes fadeInResult {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/*
+ * Full-screen mobile: the stage fills all of RocketGame.module.css's
+ * .stageWrap (itself sized to the remaining viewport below the
+ * ImmersiveGameShell header), edge-to-edge, in place of the bounded-height
+ * card used on tablet/desktop. Bottom padding reserves room so the
+ * multiplier/result readout never sits behind RocketMobileControls' overlay
+ * bar (a sibling of this stage, absolutely positioned over its bottom edge).
+ */
+@media (max-width: 768px) {
     .stage {
-        height: 250px;
+        border-radius: 0;
+        height: 100%;
+        padding-bottom: 8.5rem;
+        width: 100%;
     }
+}
 
-    .rocket {
-        font-size: 2rem;
-    }
-
+@media (max-width: 600px) {
     .multiplierValue,
     .countdownValue {
         font-size: 2.5rem;
@@ -182,5 +446,35 @@
     .multiplierValueCrashed,
     .multiplierValueSuccess {
         font-size: 2.1rem;
+    }
+}
+
+@media (min-width: 860px) {
+    .stage {
+        height: clamp(380px, 52vh, 620px);
+    }
+}
+
+/* ---------- Reduced motion / accessibility ---------- */
+
+.reducedMotion,
+.reducedMotion * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+}
+
+.reducedMotion .starFar,
+.reducedMotion .starNear,
+.reducedMotion .speedLine,
+.reducedMotion .particleDown,
+.reducedMotion .cloud {
+    animation: none !important;
+    opacity: 0.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .stage[data-stage='accelerating'],
+    .stage[data-stage='extreme'] {
+        animation: none;
     }
 }

@@ -7,13 +7,14 @@ import { emitPointsUpdated, usePointsBalance } from '@/hooks/usePointsBalance';
 import { ApiError } from '@/lib/api';
 import { rocketApi } from '@/lib/rocket';
 import { RocketConfig, RocketHistoryItem, RocketRoundState } from '@/types';
-import { RocketDisplay } from './RocketDisplay';
+import * as rocketAudio from './audio';
 import { RocketControls } from './RocketControls';
-import { RocketHistoryStrip } from './RocketHistoryStrip';
+import { RocketDisplay } from './RocketDisplay';
+import { RocketMobileControls } from './RocketMobileControls';
 import { RocketRulesModal } from './RocketRulesModal';
+import { useRocketSync } from './useRocketSync';
 import styles from './RocketGame.module.css';
 
-const POLL_INTERVAL_MS = 150;
 // How long the SUCCESS/CRASHED result stays on screen before the next
 // round's betting UI reappears - kept short per the design brief ("keep
 // result animation short so the next round begins quickly").
@@ -24,6 +25,12 @@ function makeClientRequestId(): string {
     return `rocket-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
+function vibrate(pattern: number | number[]) {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        try { navigator.vibrate(pattern); } catch {}
+    }
+}
+
 export function RocketGame() {
     const [config, setConfig] = useState<RocketConfig | null>(null);
     const [configError, setConfigError] = useState<string | null>(null);
@@ -31,10 +38,6 @@ export function RocketGame() {
     const [balanceOverride, setBalanceOverride] = useState<number | null>(null);
 
     const [currentRound, setCurrentRound] = useState<RocketRoundState | null>(null);
-    // A snapshot of the last terminal round, shown as the result banner for
-    // RESULT_DISPLAY_MS after currentRound resolves - kept separate from
-    // currentRound so the betting controls can re-enable immediately while
-    // the result is still visible.
     const [resultRound, setResultRound] = useState<RocketRoundState | null>(null);
 
     const [wagerInput, setWagerInput] = useState('10');
@@ -44,72 +47,114 @@ export function RocketGame() {
     const [busy, setBusy] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [rulesOpen, setRulesOpen] = useState(false);
+    const [muted, setMuted] = useState(false);
 
     const [history, setHistory] = useState<RocketHistoryItem[]>([]);
-    const [historyLoading, setHistoryLoading] = useState(true);
 
-    const pollTimerRef = useRef<number | null>(null);
     const resultTimerRef = useRef<number | null>(null);
-    // Guards against a slow in-flight poll response landing after a newer
-    // one (or after cash-out already moved the round to a terminal state)
-    // and clobbering it with stale data.
-    const roundIdRef = useRef<number | null>(null);
+    const soundStartedRef = useRef(false);
+    const finalTickPlayedRef = useRef(false);
+    const launchFxPlayedRef = useRef(false);
+
+    useEffect(() => {
+        setMuted(rocketAudio.isSoundMuted());
+    }, []);
 
     const loadHistory = useCallback(() => {
-        setHistoryLoading(true);
         rocketApi.getHistory()
             .then(setHistory)
-            .catch(() => {})
-            .finally(() => setHistoryLoading(false));
+            .catch(() => {});
     }, []);
 
-    const clearPollTimer = useCallback(() => {
-        if (pollTimerRef.current !== null) {
-            window.clearTimeout(pollTimerRef.current);
-            pollTimerRef.current = null;
-        }
-    }, []);
-
-    const finishRound = useCallback((round: RocketRoundState) => {
-        clearPollTimer();
+    const handleResolved = useCallback((round: RocketRoundState) => {
         setCurrentRound(null);
         setResultRound(round);
         setBalanceOverride(round.balance_after != null ? Number(round.balance_after) : null);
         emitPointsUpdated();
         loadHistory();
 
+        rocketAudio.stopEngineLoop();
+        soundStartedRef.current = false;
+        if (round.status === 'cashed_out') {
+            rocketAudio.playCashOutSuccess();
+            vibrate([25, 40, 25]);
+        } else if (round.status === 'crashed') {
+            rocketAudio.playCrash();
+            vibrate([60, 30, 90]);
+        }
+
         if (resultTimerRef.current !== null) window.clearTimeout(resultTimerRef.current);
         resultTimerRef.current = window.setTimeout(() => {
             setResultRound(null);
             resultTimerRef.current = null;
         }, RESULT_DISPLAY_MS);
-    }, [clearPollTimer, loadHistory]);
+    }, [loadHistory]);
 
-    const pollOnce = useCallback(async () => {
-        try {
-            const round = await rocketApi.getCurrent();
-            if (!round || round.round_id !== roundIdRef.current) return;
+    const sync = useRocketSync(currentRound, config, handleResolved);
 
-            if (round.status === 'active') {
-                setCurrentRound(round);
-                pollTimerRef.current = window.setTimeout(pollOnce, POLL_INTERVAL_MS);
-            } else {
-                roundIdRef.current = null;
-                finishRound(round);
-            }
-        } catch {
-            // Transient network hiccup - keep polling, the next tick will
-            // either recover or the round will still be there to resume.
-            pollTimerRef.current = window.setTimeout(pollOnce, POLL_INTERVAL_MS);
+    // Visual-only phase derived from the sync engine's throttled countdown
+    // state - currentRound.phase itself is only ever a snapshot from the
+    // moment the round was placed/last polled, so this is what actually
+    // drives the countdown -> launch -> flight transition on screen.
+    const visualPhase: 'countdown' | 'running' | null = !currentRound
+        ? null
+        : sync.secondsRemaining !== null && sync.secondsRemaining > 0.05
+            ? 'countdown'
+            : 'running';
+
+    // Countdown tick sounds + haptics, and the one-shot ignition/launch FX
+    // at the moment flight actually begins.
+    useEffect(() => {
+        if (!currentRound || visualPhase !== 'countdown' || sync.secondsRemaining === null) return;
+        const wholeSecond = Math.ceil(sync.secondsRemaining);
+        if (wholeSecond <= 1 && !finalTickPlayedRef.current) {
+            finalTickPlayedRef.current = true;
+            rocketAudio.playFinalCountdownTick();
         }
-    }, [finishRound]);
+    }, [currentRound, visualPhase, sync.secondsRemaining]);
 
-    const startPolling = useCallback((round: RocketRoundState) => {
-        roundIdRef.current = round.round_id;
-        setCurrentRound(round);
-        clearPollTimer();
-        pollTimerRef.current = window.setTimeout(pollOnce, POLL_INTERVAL_MS);
-    }, [clearPollTimer, pollOnce]);
+    useEffect(() => {
+        if (!currentRound) {
+            launchFxPlayedRef.current = false;
+            finalTickPlayedRef.current = false;
+            return;
+        }
+        if (visualPhase === 'running' && !launchFxPlayedRef.current) {
+            launchFxPlayedRef.current = true;
+            rocketAudio.playIgnition();
+            rocketAudio.startEngineLoop();
+            soundStartedRef.current = true;
+            vibrate([15, 20, 40]);
+        }
+    }, [currentRound, visualPhase]);
+
+    // Engine pitch/volume reacts to intensity as it changes, not per-frame.
+    useEffect(() => {
+        if (visualPhase === 'running' && soundStartedRef.current) {
+            rocketAudio.updateEngineIntensity(sync.intensity.value);
+        }
+    }, [visualPhase, sync.intensity.value]);
+
+    const clearResultTimer = useCallback(() => {
+        if (resultTimerRef.current !== null) {
+            window.clearTimeout(resultTimerRef.current);
+            resultTimerRef.current = null;
+        }
+    }, []);
+
+    // Discrete countdown tick sounds (once per whole-second boundary crossed).
+    const lastWholeSecondRef = useRef<number | null>(null);
+    useEffect(() => {
+        if (visualPhase !== 'countdown' || sync.secondsRemaining === null) {
+            lastWholeSecondRef.current = null;
+            return;
+        }
+        const wholeSecond = Math.ceil(sync.secondsRemaining);
+        if (lastWholeSecondRef.current !== wholeSecond && wholeSecond >= 1) {
+            lastWholeSecondRef.current = wholeSecond;
+            if (wholeSecond > 1) rocketAudio.playCountdownTick();
+        }
+    }, [visualPhase, sync.secondsRemaining]);
 
     // Initial load: config, recent history, and - critically - whether the
     // player already has an active round (a refresh/reconnect mid-flight),
@@ -121,7 +166,17 @@ export function RocketGame() {
         loadHistory();
         rocketApi.getCurrent()
             .then((round) => {
-                if (round && round.status === 'active') startPolling(round);
+                if (!round) return;
+                // The server resolves rounds lazily (see rocket/services.py's
+                // module docstring) - this very request can be what
+                // discovers a crash/auto-cashout that happened while the
+                // player was away (tab closed, connection dropped). Treat
+                // that exactly like a live resolution rather than silently
+                // dropping it, so they still see what happened to their
+                // wager instead of just landing back on a blank betting
+                // screen.
+                if (round.status === 'active') setCurrentRound(round);
+                else handleResolved(round);
             })
             .catch(() => {});
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -129,13 +184,20 @@ export function RocketGame() {
 
     useEffect(() => {
         return () => {
-            clearPollTimer();
-            if (resultTimerRef.current !== null) window.clearTimeout(resultTimerRef.current);
+            clearResultTimer();
+            rocketAudio.stopEngineLoop();
         };
-    }, [clearPollTimer]);
+    }, [clearResultTimer]);
 
     const effectiveBalance = balanceOverride ?? polledBalance;
     const busyOrActive = busy || currentRound !== null;
+
+    const handleToggleMute = () => {
+        const next = !muted;
+        setMuted(next);
+        rocketAudio.setSoundMuted(next);
+        if (!next) rocketAudio.unlockAudio();
+    };
 
     const handlePlaceBet = async () => {
         if (!config || busyOrActive) return;
@@ -158,13 +220,12 @@ export function RocketGame() {
             autoCashoutMultiplier = parsed;
         }
 
+        rocketAudio.unlockAudio();
+        rocketAudio.playButtonClick();
         setBusy(true);
         setErrorMessage(null);
         setResultRound(null);
-        if (resultTimerRef.current !== null) {
-            window.clearTimeout(resultTimerRef.current);
-            resultTimerRef.current = null;
-        }
+        clearResultTimer();
 
         try {
             const round = await rocketApi.play({
@@ -172,13 +233,13 @@ export function RocketGame() {
                 auto_cashout_multiplier: autoCashoutMultiplier,
                 client_request_id: makeClientRequestId(),
             });
-            startPolling(round);
+            setCurrentRound(round);
         } catch (err: any) {
             // A 409 means we already had an active round in flight (e.g. a
             // second tab, or a retried request) - resume it instead of
             // just showing an error, matching the reconnection behavior.
             if (err instanceof ApiError && err.status === 409 && err.errors?.active_round) {
-                startPolling(err.errors.active_round as RocketRoundState);
+                setCurrentRound(err.errors.active_round as RocketRoundState);
             } else {
                 setErrorMessage(err?.message || 'Unable to start the round. Please try again.');
             }
@@ -188,12 +249,13 @@ export function RocketGame() {
     };
 
     const handleCashOut = async () => {
-        if (!currentRound || currentRound.phase !== 'running' || busy) return;
+        if (!currentRound || visualPhase !== 'running' || busy) return;
+        rocketAudio.playCashOutPress();
+        vibrate(20);
         setBusy(true);
         try {
             const round = await rocketApi.cashOut();
-            roundIdRef.current = null;
-            finishRound(round);
+            handleResolved(round);
         } catch (err: any) {
             setErrorMessage(err?.message || 'Unable to cash out. Please try again.');
         } finally {
@@ -211,17 +273,23 @@ export function RocketGame() {
         );
     }
 
-    const displayRound = currentRound || resultRound;
-
     return (
         <DashboardLayout>
             <ImmersiveGameShell gameName="Rollin Rocket" onInfoClick={() => setRulesOpen(true)}>
                 <div className={styles.page}>
-                    <div className={styles.boardCard}>
-                        <RocketDisplay round={displayRound} config={config} />
+                    <div className={styles.stageWrap}>
+                        <RocketDisplay
+                            currentRound={currentRound}
+                            resultRound={resultRound}
+                            visualPhase={visualPhase}
+                            sync={sync}
+                            history={history}
+                            soundMuted={muted}
+                            onToggleMute={handleToggleMute}
+                        />
 
                         {config && (
-                            <RocketControls
+                            <RocketMobileControls
                                 config={config}
                                 wagerInput={wagerInput}
                                 onWagerChange={setWagerInput}
@@ -230,17 +298,36 @@ export function RocketGame() {
                                 autoCashoutInput={autoCashoutInput}
                                 onAutoCashoutChange={setAutoCashoutInput}
                                 balance={effectiveBalance}
-                                round={currentRound}
+                                currentRound={currentRound}
+                                visualPhase={visualPhase}
+                                liveMultiplier={sync.displayMultiplier}
                                 busy={busy}
                                 onPlaceBet={handlePlaceBet}
                                 onCashOut={handleCashOut}
                             />
                         )}
-
-                        {errorMessage && <p className={styles.errorText}>{errorMessage}</p>}
                     </div>
 
-                    <RocketHistoryStrip items={history} loading={historyLoading} />
+                    {config && (
+                        <RocketControls
+                            config={config}
+                            wagerInput={wagerInput}
+                            onWagerChange={setWagerInput}
+                            autoCashoutEnabled={autoCashoutEnabled}
+                            onAutoCashoutEnabledChange={setAutoCashoutEnabled}
+                            autoCashoutInput={autoCashoutInput}
+                            onAutoCashoutChange={setAutoCashoutInput}
+                            balance={effectiveBalance}
+                            currentRound={currentRound}
+                            visualPhase={visualPhase}
+                            liveMultiplier={sync.displayMultiplier}
+                            busy={busy}
+                            onPlaceBet={handlePlaceBet}
+                            onCashOut={handleCashOut}
+                        />
+                    )}
+
+                    {errorMessage && <p className={styles.errorText}>{errorMessage}</p>}
                 </div>
             </ImmersiveGameShell>
             <RocketRulesModal isOpen={rulesOpen} onClose={() => setRulesOpen(false)} />

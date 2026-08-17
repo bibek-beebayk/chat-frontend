@@ -60,3 +60,27 @@
     border: 1px solid rgba(var(--brand-gold-rgb, 245 197 66), 0.45);
     color: var(--brand-gold, #f5c542);
 }
+
+.compactWrap {
+    position: relative;
+    width: 100%;
+    z-index: 3;
+}
+
+.trackCompact {
+    /* flex-start (not center) so the newest chip - always first in the
+       array - stays flush against the left edge and fully visible;
+       centering a row wider than its container clips overflow equally on
+       both sides, which was cutting the newest one off. Only the trailing
+       (older) edge fades, since content can now only overflow to the right. */
+    justify-content: flex-start;
+    mask-image: linear-gradient(90deg, #000 92%, transparent);
+    padding: 0;
+}
+
+.chipCompact {
+    background: rgba(10, 6, 20, 0.55);
+    backdrop-filter: blur(4px);
+    font-size: 0.66rem;
+    padding: 0.22rem 0.5rem;
+}
