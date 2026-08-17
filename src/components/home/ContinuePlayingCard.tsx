@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { gamesApi } from '@/lib/games';
 import { PlinkoRound, SlotRound } from '@/types';
 import { SkeletonText } from '@/components/ui/Skeleton';
 import styles from './ContinuePlayingCard.module.css';
@@ -18,8 +20,17 @@ const MODE_LABEL: Record<string, string> = {
     free_drop: 'Plinko: Free Drop',
 };
 
+// Emoji fallback only for a game with no thumbnail uploaded - previously
+// this card just hardcoded the slots emoji for every entry regardless of
+// game, which was a leftover bug from when Plinko was the only game.
+const ICON_FALLBACK: Record<string, string> = {
+    plinko: '🔴',
+    slots: '🎰',
+};
+
 interface Entry {
     key: string;
+    slug: string;
     label: string;
     href: string;
     createdAt: string;
@@ -34,6 +45,17 @@ interface Entry {
 export function ContinuePlayingCard({ plinkoRounds, slotsRounds, loading, error, onRetry }: ContinuePlayingCardProps) {
     const hasAnyData = plinkoRounds !== null || slotsRounds !== null;
     const entries = buildEntries(plinkoRounds, slotsRounds);
+
+    const [thumbnails, setThumbnails] = useState<Record<string, string | null>>({});
+    useEffect(() => {
+        gamesApi.list()
+            .then((games) => {
+                const map: Record<string, string | null> = {};
+                for (const game of games) map[game.slug] = game.thumbnail;
+                setThumbnails(map);
+            })
+            .catch(() => {});
+    }, []);
 
     return (
         <div className={styles.card}>
@@ -55,14 +77,22 @@ export function ContinuePlayingCard({ plinkoRounds, slotsRounds, loading, error,
                 </div>
             ) : (
                 <div className={styles.track}>
-                    {entries.map((entry) => (
-                        <div key={entry.key} className={styles.tile}>
-                            <div className={styles.thumb} aria-hidden="true">🎰</div>
-                            <span className={styles.label}>{entry.label}</span>
-                            <span className={styles.status}>Last played {formatRelativeTime(entry.createdAt)}</span>
-                            <Link href={entry.href} className={styles.playBtn}>Play</Link>
-                        </div>
-                    ))}
+                    {entries.map((entry) => {
+                        const thumbnail = thumbnails[entry.slug];
+                        return (
+                            <div key={entry.key} className={styles.tile}>
+                                {thumbnail ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={thumbnail} alt="" className={styles.thumbImg} />
+                                ) : (
+                                    <div className={styles.thumb} aria-hidden="true">{ICON_FALLBACK[entry.slug] || '🎮'}</div>
+                                )}
+                                <span className={styles.label}>{entry.label}</span>
+                                <span className={styles.status}>Last played {formatRelativeTime(entry.createdAt)}</span>
+                                <Link href={entry.href} className={styles.playBtn}>Play</Link>
+                            </div>
+                        );
+                    })}
                 </div>
             )}
         </div>
@@ -83,6 +113,7 @@ function buildEntries(plinkoRounds: PlinkoRound[] | null, slotsRounds: SlotRound
         for (const round of byMode.values()) {
             entries.push({
                 key: `plinko-${round.mode}`,
+                slug: 'plinko',
                 label: MODE_LABEL[round.mode] || round.mode,
                 href: '/games/plinko',
                 createdAt: round.created_at,
@@ -92,7 +123,7 @@ function buildEntries(plinkoRounds: PlinkoRound[] | null, slotsRounds: SlotRound
 
     if (slotsRounds && slotsRounds.length > 0) {
         const latest = slotsRounds.reduce((a, b) => (new Date(b.created_at) > new Date(a.created_at) ? b : a));
-        entries.push({ key: 'slots', label: 'Rollin 3x3', href: '/games/slots', createdAt: latest.created_at });
+        entries.push({ key: 'slots', slug: 'slots', label: 'Rollin 3x3', href: '/games/slots', createdAt: latest.created_at });
     }
 
     return entries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());

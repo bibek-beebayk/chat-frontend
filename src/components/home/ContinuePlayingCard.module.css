@@ -56,6 +56,13 @@
     width: 100%;
 }
 
+.thumbImg {
+    display: block;
+    height: 72px;
+    object-fit: cover;
+    width: 100%;
+}
+
 .label {
     color: var(--color-text-primary);
     font-size: 0.85rem;
