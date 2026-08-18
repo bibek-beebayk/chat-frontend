@@ -6,14 +6,12 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/forms/Input';
 import { Button } from '@/components/forms/Button';
-import { UserType } from '@/types';
 import styles from './page.module.css';
 import DownloadAppModal from '@/components/auth/DownloadAppModal';
 
 function RegisterPageContent() {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
-    const [userType, setUserType] = useState<UserType>('player');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -44,7 +42,7 @@ function RegisterPageContent() {
         setLoading(true);
 
         try {
-            const response = await register({ username, email, user_type: userType, password, confirm_password: confirmPassword });
+            const response = await register({ username, email, user_type: 'player', password, confirm_password: confirmPassword });
 
             // Store email for OTP verification page
             localStorage.setItem('pendingVerificationEmail', response.email);
@@ -60,11 +58,6 @@ function RegisterPageContent() {
             setLoading(false);
         }
     };
-
-    const userTypeOptions = [
-        { value: 'player', label: 'Player' },
-        { value: 'agent', label: 'Agent' },
-    ];
 
         return (
         <div className={`${styles.container} ${styles.loginCentered}`}>
@@ -120,28 +113,6 @@ function RegisterPageContent() {
                             {error}
                         </div>
                     )}
-
-                    <div className={styles.userTypeSection}>
-                        <div className={styles.radioGroup}>
-                            {userTypeOptions.map((option) => (
-                                <label
-                                    key={option.value}
-                                    className={styles.radioLabel}
-                                    data-checked={userType === option.value}
-                                >
-                                    <input
-                                        type="radio"
-                                        name="userType"
-                                        value={option.value}
-                                        checked={userType === option.value}
-                                        onChange={(e) => setUserType(e.target.value as UserType)}
-                                        className={styles.radioInput}
-                                    />
-                                    {option.label}
-                                </label>
-                            ))}
-                        </div>
-                    </div>
 
                     <Input
                         label="Username"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,36 +9,22 @@ import { User } from '@/types';
 import { UserAvatar } from '@/components/social/UserAvatar';
 import styles from './page.module.css';
 
-type Step = 1 | 2;
-
 export default function OnboardingPage() {
     const router = useRouter();
     const { user, loading: authLoading } = useAuth();
 
-    const [step, setStep] = useState<Step>(1);
     const [loading, setLoading] = useState(true);
     const [actionBusyId, setActionBusyId] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [sentRequestIds, setSentRequestIds] = useState<number[]>([]);
-    const [agents, setAgents] = useState<User[]>([]);
     const [players, setPlayers] = useState<User[]>([]);
 
-    const currentList = step === 1 ? agents : players;
-    const currentTitle = step === 1 ? 'Connect with top agents' : 'Meet other players';
-    const currentSubtitle = step === 1
-        ? 'Find trusted agents to chat with and start building your gaming network.'
-        : 'Build your circle, discover shared interests, and open direct conversations.';
-    const stepLabel = step === 1 ? 'Step 1 of 2' : 'Step 2 of 2';
-    const progress = step === 1 ? 50 : 100;
+    const currentList = players;
+    const currentTitle = 'Meet other players';
+    const currentSubtitle = 'Build your circle, discover shared interests, and open direct conversations.';
     const connectedCount = sentRequestIds.length;
 
-    const loadStepData = async (targetStep: Step) => {
-        if (targetStep === 1) {
-            const suggestedAgents = await socialApi.fetchSuggestedAgents();
-            setAgents(suggestedAgents);
-            await socialApi.updateOnboardingState({ has_seen_agent_suggestions: true });
-            return;
-        }
+    const loadPlayerSuggestions = async () => {
         const suggestedPlayers = await socialApi.fetchSuggestedPlayers();
         setPlayers(suggestedPlayers);
         await socialApi.updateOnboardingState({ has_seen_player_suggestions: true });
@@ -64,7 +50,7 @@ export default function OnboardingPage() {
                     router.replace('/');
                     return;
                 }
-                await loadStepData(1);
+                await loadPlayerSuggestions();
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load onboarding');
             } finally {
@@ -74,21 +60,6 @@ export default function OnboardingPage() {
 
         init();
     }, [authLoading, router, user]);
-
-    const goToStepTwo = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            if (players.length === 0) {
-                await loadStepData(2);
-            }
-            setStep(2);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to continue onboarding');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const finishOnboarding = async () => {
         setLoading(true);
@@ -119,12 +90,7 @@ export default function OnboardingPage() {
         router.push(`/users/${target.id}`);
     };
 
-    const emptyMessage = useMemo(
-        () => (step === 1
-            ? 'No agent suggestions are available right now.'
-            : 'No player suggestions are available right now.'),
-        [step]
-    );
+    const emptyMessage = 'No player suggestions are available right now.';
 
     if (authLoading || !user) return null;
 
@@ -142,11 +108,11 @@ export default function OnboardingPage() {
                     </div>
                     <div className={styles.progressCard}>
                         <div className={styles.progressHeader}>
-                            <span>{stepLabel}</span>
-                            <strong>{progress}%</strong>
+                            <span>Step 1 of 1</span>
+                            <strong>100%</strong>
                         </div>
                         <div className={styles.progressTrack}>
-                            <span style={{ width: `${progress}%` }}></span>
+                            <span style={{ width: '100%' }}></span>
                         </div>
                     </div>
                     <div className={styles.sideStats}>
@@ -164,13 +130,9 @@ export default function OnboardingPage() {
                 <section className={styles.panel}>
                     <header className={styles.hero}>
                         <div>
-                            <p className={styles.stepLabel}>{stepLabel}</p>
+                            <p className={styles.stepLabel}>Step 1 of 1</p>
                             <h2 className={styles.title}>{currentTitle}</h2>
                             <p className={styles.subtitle}>{currentSubtitle}</p>
-                        </div>
-                        <div className={styles.stepPills} aria-label="Onboarding steps">
-                            <span className={step === 1 ? styles.activeStep : ''}>Agents</span>
-                            <span className={step === 2 ? styles.activeStep : ''}>Players</span>
                         </div>
                     </header>
 
@@ -225,25 +187,12 @@ export default function OnboardingPage() {
                             )}
 
                             <div className={styles.footerActions}>
-                                {step === 1 ? (
-                                    <>
-                                        <button type="button" className={styles.secondaryBtn} onClick={goToStepTwo}>
-                                            Skip for now
-                                        </button>
-                                        <button type="button" className={styles.primaryBtn} onClick={goToStepTwo}>
-                                            Continue
-                                        </button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <button type="button" className={styles.secondaryBtn} onClick={finishOnboarding}>
-                                            Skip for now
-                                        </button>
-                                        <button type="button" className={styles.primaryBtn} onClick={finishOnboarding}>
-                                            Finish
-                                        </button>
-                                    </>
-                                )}
+                                <button type="button" className={styles.secondaryBtn} onClick={finishOnboarding}>
+                                    Skip for now
+                                </button>
+                                <button type="button" className={styles.primaryBtn} onClick={finishOnboarding}>
+                                    Finish
+                                </button>
                             </div>
                         </>
                     )}
@@ -254,7 +203,6 @@ export default function OnboardingPage() {
 }
 
 function getSuggestionLabel(target: User): string {
-    if (target.user_type === 'agent') return 'Trusted agent suggestion';
     if (target.user_type === 'player') return 'Player in the Rollin community';
     return 'Community member';
 }

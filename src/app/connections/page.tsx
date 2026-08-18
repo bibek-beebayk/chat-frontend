@@ -40,7 +40,7 @@ export default function ConnectionsPage() {
     const router = useRouter();
     const pendingIncomingCount = usePendingConnectionsCount();
 
-    const [activeTab, setActiveTab] = useState<TargetType>('agents');
+    const [activeTab] = useState<TargetType>('players');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [busyKey, setBusyKey] = useState<string | null>(null);
@@ -55,8 +55,6 @@ export default function ConnectionsPage() {
     const [agentNotConnected, setAgentNotConnected] = useState<SectionState>(emptySectionState);
     const [playerConnected, setPlayerConnected] = useState<SectionState>(emptySectionState);
     const [playerNotConnected, setPlayerNotConnected] = useState<SectionState>(emptySectionState);
-
-    const isAgentUser = user?.user_type === 'agent';
 
     useEffect(() => {
         const timer = window.setTimeout(() => {
@@ -78,11 +76,6 @@ export default function ConnectionsPage() {
         }
     }, [authLoading, router, user]);
 
-    useEffect(() => {
-        if (isAgentUser) {
-            setActiveTab('players');
-        }
-    }, [isAgentUser]);
 
     const fetchSection = useCallback(
         async (target: TargetType, section: SectionKey, options: { reset: boolean; offset?: number }) => {
@@ -126,48 +119,31 @@ export default function ConnectionsPage() {
         [debouncedAgentQuery, debouncedPlayerQuery]
     );
 
+    // Agent flow removed - this used to also fetch the 'agents' sections for
+    // non-agent viewers (agent search/connections). fetchSection still
+    // supports an 'agents' target (see below), it's just never invoked here
+    // anymore since the Agents tab is hidden and its backend search endpoint
+    // is unexposed.
     const loadAll = useCallback(async () => {
         if (!user) return;
         setIsLoading(true);
         setError(null);
         try {
-            if (isAgentUser) {
-                await Promise.all([
-                    fetchSection('players', 'connected', { reset: true }),
-                    fetchSection('players', 'not_connected', { reset: true }),
-                ]);
-            } else {
-                await Promise.all([
-                    fetchSection('agents', 'connected', { reset: true }),
-                    fetchSection('agents', 'not_connected', { reset: true }),
-                    fetchSection('players', 'connected', { reset: true }),
-                    fetchSection('players', 'not_connected', { reset: true }),
-                ]);
-            }
+            await Promise.all([
+                fetchSection('players', 'connected', { reset: true }),
+                fetchSection('players', 'not_connected', { reset: true }),
+            ]);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to load connections');
         } finally {
             setIsLoading(false);
         }
-    }, [fetchSection, isAgentUser, user]);
+    }, [fetchSection, user]);
 
     useEffect(() => {
         if (!user) return;
         loadAll();
     }, [loadAll, user]);
-
-    useEffect(() => {
-        if (!user) return;
-        if (isAgentUser) {
-            return;
-        }
-        Promise.all([
-            fetchSection('agents', 'connected', { reset: true }),
-            fetchSection('agents', 'not_connected', { reset: true }),
-        ]).catch(() => {
-            // noop to keep previous results
-        });
-    }, [debouncedAgentQuery, fetchSection, isAgentUser, user]);
 
     useEffect(() => {
         if (!user) return;
@@ -286,7 +262,7 @@ export default function ConnectionsPage() {
             >
                 <section className={styles.heroPanel}>
                     <div className={styles.heroCopy}>
-                        <span className={styles.heroEyebrow}>{isAgentUser ? 'Player Network' : 'Agent and Player Network'}</span>
+                        <span className={styles.heroEyebrow}>Player Network</span>
                         <h2>Build your trusted Rollin circle.</h2>
                         <p>Keep useful contacts close, discover new community members, and open chats from one focused workspace.</p>
                     </div>
@@ -302,33 +278,10 @@ export default function ConnectionsPage() {
 
                 <section className={styles.controlPanel}>
                     <div className={styles.controlHeader}>
-                        {isAgentUser ? (
-                            <div>
-                                <h2>Players</h2>
-                                <p>Manage player connections and message requests.</p>
-                            </div>
-                        ) : (
-                            <div className={styles.tabs} role="tablist" aria-label="Connection type">
-                                <button
-                                    className={`${styles.tabBtn} ${activeTab === 'agents' ? styles.activeTab : ''}`}
-                                    onClick={() => setActiveTab('agents')}
-                                    type="button"
-                                    role="tab"
-                                    aria-selected={activeTab === 'agents'}
-                                >
-                                    Agents
-                                </button>
-                                <button
-                                    className={`${styles.tabBtn} ${activeTab === 'players' ? styles.activeTab : ''}`}
-                                    onClick={() => setActiveTab('players')}
-                                    type="button"
-                                    role="tab"
-                                    aria-selected={activeTab === 'players'}
-                                >
-                                    Players
-                                </button>
-                            </div>
-                        )}
+                        <div>
+                            <h2>Players</h2>
+                            <p>Manage player connections and message requests.</p>
+                        </div>
 
                         <button className={styles.pendingBtn} type="button" onClick={() => router.push('/connections/pending')}>
                             Pending Requests

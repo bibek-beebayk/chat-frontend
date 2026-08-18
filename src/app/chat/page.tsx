@@ -2771,17 +2771,7 @@ function ChatPageContent() {
                         </>
                     ) : (
                         <>
-                            <div className={styles.agentFilterRow}>
-                                <button
-                                    className={styles.agentFilterPill}
-                                    onClick={() => {
-                                        setChatSwitcherOpen(false);
-                                        setAgentSearchOpen(true);
-                                    }}
-                                >
-                                    Find Agents
-                                </button>
-                            </div>
+                            {/* Agent flow removed - "Find Agents" entry point hidden (agent-search endpoint is unexposed). */}
                             {clientSupportRoom && renderRoomListButton(clientSupportRoom, () => setChatSwitcherOpen(false))}
                             <div className={styles.agentChatsHeader}>Message Requests</div>
                             {messageRequestRooms.length > 0 ? (
