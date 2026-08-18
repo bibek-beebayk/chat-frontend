@@ -88,9 +88,9 @@ export default function PostsPage() {
     return (
         <DashboardLayout>
             <PageShell
-                title="Posts"
-                eyebrow="Community"
-                description="Read updates, share ideas, and keep up with the latest community posts."
+                title=""
+                eyebrow=""
+                description=""
                 width="wide"
                 actions={
                     <div className={styles.topActions}>

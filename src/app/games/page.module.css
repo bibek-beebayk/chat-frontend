@@ -355,3 +355,9 @@
     background: rgba(var(--color-primary-rgb), 0.06);
     border-color: rgba(var(--color-primary-rgb), 0.14);
 }
+
+:global(html[data-theme='light']) .filterPillActive {
+    background: var(--color-primary);
+    border-color: transparent;
+    color: #fff;
+}

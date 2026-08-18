@@ -8,9 +8,91 @@
     text-align: center;
 }
 
-.balanceCard,
-.redeemSection,
-.ledgerSection {
+/* ---------- Current Reward Points hero ---------- */
+
+.balanceHero {
+    align-items: center;
+    background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
+    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.6rem;
+    margin-bottom: var(--spacing-md);
+    padding: 0.75rem var(--spacing-md);
+}
+
+.balanceIcon {
+    color: var(--brand-gold, #f5c542);
+    flex-shrink: 0;
+}
+
+.balanceMain {
+    align-items: baseline;
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    gap: 0.15rem 0.5rem;
+    min-width: 0;
+}
+
+.balanceMain span {
+    color: var(--color-text-muted);
+    font-size: 0.68rem;
+    font-weight: 850;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.balanceMain strong {
+    background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+    background-clip: text;
+    color: transparent;
+    font-size: 1.5rem;
+    line-height: 1.1;
+}
+
+.redeemBtn {
+    background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+    border: 0;
+    border-radius: 999px;
+    color: #fff;
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    font-weight: 850;
+    padding: 0.5rem 1rem;
+    white-space: nowrap;
+}
+
+/* ---------- Daily / Weekly / Events tabs ---------- */
+
+.tabRow {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: var(--spacing-md);
+}
+
+.tabBtn {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    color: var(--color-text-secondary);
+    flex: 1;
+    font-size: 0.86rem;
+    font-weight: 800;
+    padding: 0.6rem 0.5rem;
+}
+
+.tabBtnActive {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    border-color: transparent;
+    color: #fff;
+}
+
+/* ---------- Daily Challenges ---------- */
+
+.challengesSection {
     background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
     border: 1px solid rgba(var(--color-primary-rgb), 0.16);
     border-radius: var(--radius-lg);
@@ -19,46 +101,209 @@
     padding: var(--spacing-lg);
 }
 
-.balanceCard {
+.sectionHeader {
     align-items: center;
     display: flex;
-    gap: var(--spacing-lg);
     justify-content: space-between;
+    margin-bottom: var(--spacing-md);
 }
 
-.balanceCard > div > span,
-.lifetimeStat span {
-    color: var(--color-text-muted);
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 850;
-    margin-bottom: 0.4rem;
-    text-transform: uppercase;
-}
-
-.balanceCard > div > strong {
-    background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
-    background-clip: text;
-    color: transparent;
-    font-size: clamp(2rem, 4vw, 2.8rem);
-    line-height: 1;
-}
-
-.lifetimeStat {
-    text-align: right;
-}
-
-.lifetimeStat strong {
-    color: var(--color-text-primary);
-    font-size: 1.4rem;
-}
-
-.redeemSection h2,
+.sectionHeader h2,
+.rewardsSection h2,
 .ledgerSection h2 {
     color: var(--color-text-primary);
     font-size: 1rem;
     font-weight: 900;
-    margin: 0 0 var(--spacing-md);
+    margin: 0;
+}
+
+.resetTimer {
+    color: var(--color-text-muted);
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+.challengesEmpty {
+    align-items: center;
+    color: var(--color-text-muted);
+    display: flex;
+    flex-direction: column;
+    font-size: 0.85rem;
+    gap: 0.6rem;
+    justify-content: center;
+    min-height: 100px;
+    text-align: center;
+}
+
+.retryBtn {
+    background: rgba(var(--color-primary-rgb), 0.16);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.4rem 0.9rem;
+}
+
+.challengeList {
+    display: grid;
+    gap: 0.65rem;
+}
+
+.challengeRow {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-md);
+    display: flex;
+    gap: 0.85rem;
+    padding: 0.75rem 0.9rem;
+}
+
+.challengeIcon {
+    align-items: center;
+    background: rgba(var(--color-primary-rgb), 0.18);
+    border-radius: 12px;
+    display: flex;
+    flex-shrink: 0;
+    font-size: 1.3rem;
+    height: 42px;
+    justify-content: center;
+    width: 42px;
+}
+
+.challengeBody {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 0;
+}
+
+.challengeLabel {
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+    font-weight: 800;
+}
+
+.challengeProgressLabel {
+    color: var(--color-text-muted);
+    font-size: 0.72rem;
+}
+
+.progressTrack {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    height: 6px;
+    overflow: hidden;
+}
+
+.progressFill {
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    border-radius: 999px;
+    height: 100%;
+}
+
+.xpBadge {
+    background: rgba(var(--color-primary-rgb), 0.18);
+    border-radius: 999px;
+    color: var(--color-primary-light);
+    flex-shrink: 0;
+    font-size: 0.76rem;
+    font-weight: 850;
+    padding: 0.35rem 0.7rem;
+    white-space: nowrap;
+}
+
+.doneBadge {
+    align-items: center;
+    background: rgba(34, 197, 94, 0.18);
+    border-radius: 50%;
+    color: #4ade80;
+    display: flex;
+    flex-shrink: 0;
+    font-size: 0.95rem;
+    font-weight: 900;
+    height: 30px;
+    justify-content: center;
+    width: 30px;
+}
+
+/* ---------- Rewards (streak + redeem RP) ---------- */
+
+.rewardsSection {
+    margin-bottom: var(--spacing-md);
+}
+
+.rewardsSection h2 {
+    margin-bottom: var(--spacing-md);
+}
+
+.rewardTiles {
+    display: grid;
+    gap: var(--spacing-md);
+    grid-template-columns: 1fr;
+    max-width: 420px;
+}
+
+/* ---------- Redeem Reward Points modal ---------- */
+
+.modalBackdrop {
+    align-items: center;
+    background: rgba(5, 2, 12, 0.7);
+    display: flex;
+    inset: 0;
+    justify-content: center;
+    padding: var(--spacing-md);
+    position: fixed;
+    z-index: 1300;
+}
+
+.modal {
+    background: linear-gradient(160deg, #241640, #150b2c);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    max-width: 400px;
+    padding: var(--spacing-lg);
+    width: 100%;
+}
+
+.modalHeader {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+}
+
+.modalHeader h4 {
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    margin: 0;
+}
+
+.modalHeader button {
+    background: rgba(255, 255, 255, 0.08);
+    border: 0;
+    border-radius: 999px;
+    color: #fff;
+    cursor: pointer;
+    flex-shrink: 0;
+    height: 26px;
+    width: 26px;
+}
+
+:global(html[data-theme='light']) .modal {
+    background: linear-gradient(180deg, #ffffff, #faf8ff);
+    border-color: rgba(var(--color-primary-rgb), 0.16);
+    box-shadow: 0 20px 45px rgba(86, 42, 145, 0.16);
+}
+
+:global(html[data-theme='light']) .modalHeader button {
+    background: rgba(var(--color-primary-rgb), 0.08);
+    color: var(--color-text-primary);
 }
 
 .redeemForm {
@@ -124,14 +369,14 @@
     border: 1px solid rgba(234, 179, 8, 0.28);
     border-radius: var(--radius-md);
     display: flex;
-    gap: 0.75rem;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 0.4rem;
     padding: 0.85rem;
 }
 
 .requestStatus span {
     color: var(--color-text-secondary);
-    font-size: 0.88rem;
+    font-size: 0.85rem;
 }
 
 .requestStatus strong {
@@ -149,6 +394,20 @@
 
 .status_rejected strong {
     color: #fca5a5;
+}
+
+/* ---------- Recent Activity ledger ---------- */
+
+.ledgerSection {
+    background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
+    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-lg);
+}
+
+.ledgerSection h2 {
+    margin-bottom: var(--spacing-md);
 }
 
 .emptyLedger {
@@ -195,8 +454,8 @@
     color: #fca5a5;
 }
 
-:global(html[data-theme='light']) .balanceCard,
-:global(html[data-theme='light']) .redeemSection,
+:global(html[data-theme='light']) .balanceHero,
+:global(html[data-theme='light']) .challengesSection,
 :global(html[data-theme='light']) .ledgerSection {
     background: linear-gradient(180deg, #ffffff, #fbf8ff);
     border-color: rgba(var(--color-primary-rgb), 0.14);
@@ -209,22 +468,17 @@
     border-color: rgba(var(--color-primary-rgb), 0.14);
 }
 
+:global(html[data-theme='light']) .challengeRow {
+    background: rgba(248, 244, 255, 0.6);
+    border-color: rgba(var(--color-primary-rgb), 0.12);
+}
+
 :global(html[data-theme='light']) .ledgerItem {
     background: rgba(248, 244, 255, 0.7);
     border-color: rgba(var(--color-primary-rgb), 0.12);
 }
 
 @media (max-width: 720px) {
-    .balanceCard {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.75rem;
-    }
-
-    .lifetimeStat {
-        text-align: left;
-    }
-
     .ledgerItem {
         grid-template-columns: 1fr auto;
     }
