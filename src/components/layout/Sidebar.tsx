@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import styles from './Sidebar.module.css';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useUnreadMessagesCount } from '@/hooks/useUnreadMessagesCount';
 
 type NavItem = {
     href: string;
@@ -20,6 +21,7 @@ type NavGroup = {
 export function Sidebar({ onClose }: { onClose?: () => void }) {
     const pathname = usePathname();
     const { user, loading } = useAuth();
+    const unreadCount = useUnreadMessagesCount();
     const { themeMode, setThemeMode } = useTheme();
     const isRoleLoading = loading && !user;
     const isStaff = user?.user_type === 'staff';
@@ -35,7 +37,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         href: '/chat',
         label: 'Chat',
         icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>,
-        badge: '12'
+        badge: unreadCount > 0 ? (unreadCount > 99 ? '99+' : String(unreadCount)) : undefined
     };
     const announcementsItem = {
         href: '/announcements',

@@ -4,8 +4,8 @@ import React, { useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNotification } from '@/contexts/NotificationContext';
 import { usePendingConnectionsCount } from '@/hooks/usePendingConnectionsCount';
+import { useUnreadMessagesCount } from '@/hooks/useUnreadMessagesCount';
 import styles from './MobileBottomNav.module.css';
 
 type NavItem = {
@@ -21,7 +21,7 @@ const hiddenPrefixes = ['/login', '/register', '/verify-otp', '/set-password', '
 export const MobileBottomNav: React.FC = () => {
     const pathname = usePathname();
     const { user, loading } = useAuth();
-    const { unreadCount } = useNotification();
+    const unreadCount = useUnreadMessagesCount();
     const pendingConnections = usePendingConnectionsCount();
 
     const shouldHide = !user
