@@ -21,6 +21,12 @@
     gap: 0.65rem;
 }
 
+.nameRow {
+    align-items: center;
+    display: flex;
+    gap: 0.3rem;
+}
+
 .authorName {
     font-weight: 700;
     color: var(--color-text-primary);
@@ -28,6 +34,24 @@
 
 .authorName:hover {
     color: var(--color-primary-light);
+}
+
+.verifiedBadge {
+    align-items: center;
+    color: #3ba7ff;
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.officialTag {
+    background: rgba(var(--brand-gold-rgb, 245 197 66), 0.16);
+    border-radius: 999px;
+    color: var(--brand-gold, #f5c542);
+    flex-shrink: 0;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 0.12rem 0.5rem;
+    text-transform: uppercase;
 }
 
 .metaText {
@@ -242,11 +266,34 @@
     border-radius: var(--radius-md);
     overflow: hidden;
     border: 1px solid var(--color-border);
+    position: relative;
 }
 
 .video {
-    width: 100%;
+    background: #000;
     display: block;
+    width: 100%;
+}
+
+.videoPlayBtn {
+    align-items: center;
+    background: rgba(10, 6, 20, 0.55);
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    border-radius: 50%;
+    color: #fff;
+    display: flex;
+    height: 60px;
+    justify-content: center;
+    left: 50%;
+    padding-left: 3px;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+}
+
+.videoPlayBtn:hover {
+    background: rgba(10, 6, 20, 0.75);
 }
 
 .ctaWrap {

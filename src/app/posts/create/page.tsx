@@ -54,9 +54,9 @@ export default function CreatePostPage() {
     return (
         <DashboardLayout>
             <PageShell
-                title="Create Post"
-                eyebrow="Community"
-                description="Publish an update for the Rollin Community feed."
+                title=""
+                eyebrow=""
+                description=""
                 width="standard"
                 actions={
                     <button type="button" className={styles.backBtn} onClick={() => router.back()}>

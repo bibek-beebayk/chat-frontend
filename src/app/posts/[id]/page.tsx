@@ -290,10 +290,10 @@ export default function PostDetailsPage() {
                         <span aria-hidden="true">‹</span>
                         Back
                     </button>
-                    <div>
+                    {/* <div>
                         <p className={styles.eyebrow}>Community Post</p>
                         <h1 className={styles.title}>Post Details</h1>
-                    </div>
+                    </div> */}
                 </section>
 
                 {error && <p className={styles.errorBox}>{error}</p>}

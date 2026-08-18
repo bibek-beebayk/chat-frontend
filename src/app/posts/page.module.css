@@ -1,38 +1,95 @@
-.topActions {
+.pageHeader {
+    align-items: center;
     display: flex;
+    flex-direction: row;
+    gap: var(--spacing-md);
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.pageTitle {
+    color: var(--color-text-primary);
+    font-size: clamp(1.45rem, 2vw, 2rem);
+    font-weight: 800;
+}
+
+.topActions {
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
     gap: 0.5rem;
 }
 
-.primaryBtn,
-.secondaryBtn {
-    border-radius: var(--radius-md);
-    padding: 0.6rem 1rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: all 0.2s ease;
-    cursor: pointer;
-}
-
-.primaryBtn {
-    color: white;
-    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-    border: 1px solid transparent;
-}
-
-.primaryBtn:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
-}
-
-.secondaryBtn {
-    color: var(--color-text-secondary);
+.iconBtn {
+    align-items: center;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    color: var(--color-text-secondary);
+    display: flex;
+    flex-shrink: 0;
+    height: 40px;
+    justify-content: center;
+    width: 40px;
 }
 
-.secondaryBtn:hover {
-    background: rgba(255, 255, 255, 0.1);
+.iconBtn:hover {
+    background: rgba(var(--color-primary-rgb), 0.14);
+    border-color: rgba(var(--color-primary-rgb), 0.35);
+    color: var(--color-primary-light);
+}
+
+.composeBtn {
+    align-items: center;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    border-radius: 50%;
+    color: #fff;
+    display: flex;
+    flex-shrink: 0;
+    height: 40px;
+    justify-content: center;
+    width: 40px;
+}
+
+.composeBtn:hover {
+    box-shadow: var(--shadow-md);
     transform: translateY(-1px);
+}
+
+.tabRow {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.tabBtn {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    color: var(--color-text-secondary);
+    font-size: 0.86rem;
+    font-weight: 800;
+    padding: 0.55rem 1.1rem;
+}
+
+.tabBtnActive {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    border-color: transparent;
+    color: #fff;
+}
+
+:global(html[data-theme='light']) .tabBtn {
+    background: rgba(var(--color-primary-rgb), 0.06);
+    border-color: rgba(var(--color-primary-rgb), 0.14);
+}
+
+/* Must come after the light-theme .tabBtn override above - both classes
+   apply together on the active tab, and this needs to win over it (see the
+   equivalent bug fixed in games/page.module.css's .filterPillActive). */
+:global(html[data-theme='light']) .tabBtnActive {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    border-color: transparent;
+    color: #fff;
 }
 
 .errorBox,
@@ -73,15 +130,3 @@
     }
 }
 
-@media (max-width: 767px) {
-    .topActions {
-        width: 100%;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .primaryBtn,
-    .secondaryBtn {
-        text-align: center;
-    }
-}

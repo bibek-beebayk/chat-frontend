@@ -80,6 +80,37 @@ function PostMediaImage({
     );
 }
 
+function PostVideo({ src }: { src: string }) {
+    const [playing, setPlaying] = useState(false);
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    const startPlayback = () => {
+        setPlaying(true);
+        videoRef.current?.play().catch(() => {});
+    };
+
+    return (
+        <div className={styles.videoWrap}>
+            <video
+                ref={videoRef}
+                controls={playing}
+                className={styles.video}
+                onClick={!playing ? startPlayback : undefined}
+                playsInline
+            >
+                <source src={src} />
+            </video>
+            {!playing && (
+                <button type="button" className={styles.videoPlayBtn} onClick={startPlayback} aria-label="Play video">
+                    <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true">
+                        <path d="M8 5v14l11-7z" />
+                    </svg>
+                </button>
+            )}
+        </div>
+    );
+}
+
 export function PostCard({
     post,
     compact = false,
@@ -126,9 +157,19 @@ export function PostCard({
                 <div className={styles.authorBlock}>
                     <UserAvatar user={post.author} size={38} />
                     <div>
-                        <Link href={`/users/${post.author.id}`} className={styles.authorName}>
-                            {post.author.username}
-                        </Link>
+                        <div className={styles.nameRow}>
+                            <Link href={`/users/${post.author.id}`} className={styles.authorName}>
+                                {post.author.username}
+                            </Link>
+                            {post.author.is_verified && (
+                                <span className={styles.verifiedBadge} aria-label="Verified" title="Verified">
+                                    <VerifiedIcon />
+                                </span>
+                            )}
+                            {post.author.user_type === 'staff' && (
+                                <span className={styles.officialTag}>Official</span>
+                            )}
+                        </div>
                         <p className={styles.metaText}>
                             {createdAt.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                         </p>
@@ -222,13 +263,7 @@ export function PostCard({
                 )
             )}
 
-            {!firstImage && post.video && (
-                <div className={styles.videoWrap}>
-                    <video controls className={styles.video}>
-                        <source src={post.video} />
-                    </video>
-                </div>
-            )}
+            {!firstImage && post.video && <PostVideo src={post.video} />}
 
             {post.cta_label && post.cta_link && (
                 <div className={styles.ctaWrap}>
@@ -259,6 +294,15 @@ export function PostCard({
                 </footer>
             )}
         </article>
+    );
+}
+
+function VerifiedIcon() {
+    return (
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+            <path d="M12 2.5 14.4 4.9 17.7 4.4 18.3 7.7 21.1 9.6 19.6 12.6 21.1 15.6 18.3 17.5 17.7 20.8 14.4 20.3 12 22.7 9.6 20.3 6.3 20.8 5.7 17.5 2.9 15.6 4.4 12.6 2.9 9.6 5.7 7.7 6.3 4.4 9.6 4.9 12 2.5Z" />
+            <path d="m8.8 12.2 2.2 2.2 4.2-4.6" stroke="#fff" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
     );
 }
 
