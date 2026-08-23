@@ -235,6 +235,16 @@ function ChatPageContent() {
         return () => mediaQuery.removeEventListener('change', applyViewport);
     }, []);
 
+    // Hides the bottom nav (mobile only) so the chat screen owns the full
+    // viewport - same body-class convention ImmersiveGameShell uses for
+    // game pages, but scoped to just the bottom nav (top bar stays).
+    useEffect(() => {
+        document.body.classList.add('chat-immersive-mobile');
+        return () => {
+            document.body.classList.remove('chat-immersive-mobile');
+        };
+    }, []);
+
     useEffect(() => {
         if (!isMobileViewport) {
             setMobileOptionsOpen(false);
@@ -1905,6 +1915,19 @@ function ChatPageContent() {
                                             onClick={() => setShowRoomList(true)}
                                         >
                                             ←
+                                        </button>
+                                    )}
+                                    {/* Mobile: back to the chat list page (distinct from the in-page "Chats" switcher) */}
+                                    {isMobileViewport && (
+                                        <button
+                                            type="button"
+                                            className={styles.mobileBackButton}
+                                            onClick={() => router.push('/chats')}
+                                            aria-label="Back to chat list"
+                                        >
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M15 18l-6-6 6-6" />
+                                            </svg>
                                         </button>
                                     )}
                                     <h2>

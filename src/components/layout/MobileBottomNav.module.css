@@ -40,6 +40,12 @@
     display: none;
 }
 
+/* The /chat room screen owns the full mobile viewport - unlike the game
+   immersive class above, the top bar stays, only the bottom nav hides. */
+:global(body.chat-immersive-mobile) .nav {
+    display: none;
+}
+
 .item {
     display: flex;
     flex-direction: column;

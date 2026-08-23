@@ -329,6 +329,12 @@ html[data-theme='light'] select option:checked {
     padding-bottom: env(safe-area-inset-bottom);
   }
 
+  /* The /chat room screen hides only the bottom nav (top bar stays) - same
+     reserved-padding cancellation as the game-immersive rule above. */
+  body.chat-immersive-mobile.has-mobile-bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
   /* The text footer is redundant with the persistent bottom nav on mobile
      (an app-like chrome, not a page that scrolls to a website footer) - hide
      it everywhere the bottom nav is showing, not just in immersive game
