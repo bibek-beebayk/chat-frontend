@@ -10,7 +10,7 @@ import { emitPointsUpdated } from '@/hooks/usePointsBalance';
 import { formatPoints, pointsApi } from '@/lib/points';
 import { rewardsApi } from '@/lib/rewards';
 import { displayLabelForDailyProgressItem, xpApi } from '@/lib/xp';
-import { DailyProgressItem, LoginStreakStatus, PointsBalance, PointsLedgerEntry, PointsRedemptionRequest } from '@/types';
+import { DailyProgressItem, LoginStreakStatus, PointsBalance, PointsInfo, PointsLedgerEntry, PointsRedemptionRequest } from '@/types';
 import styles from './page.module.css';
 
 const LEDGER_PAGE_SIZE = 10;
@@ -69,6 +69,7 @@ function msUntilNextLocalMidnight(): number {
 export default function RewardsPage() {
     const { user } = useAuth();
     const [balance, setBalance] = useState<PointsBalance | null>(null);
+    const [pointsInfo, setPointsInfo] = useState<PointsInfo | null>(null);
     const [ledger, setLedger] = useState<PointsLedgerEntry[]>([]);
     const [ledgerHasMore, setLedgerHasMore] = useState(false);
     const [ledgerLoadingMore, setLedgerLoadingMore] = useState(false);
@@ -104,14 +105,16 @@ export default function RewardsPage() {
             // returns every player's requests) - a player would always get a
             // 403 there. balance.active_redemption_request is the player's
             // own pending/approved request, scoped server-side.
-            const [balanceData, ledgerPage] = await Promise.all([
+            const [balanceData, ledgerPage, info] = await Promise.all([
                 pointsApi.getBalance(),
                 pointsApi.getLedger({ limit: LEDGER_PAGE_SIZE }),
+                pointsApi.getInfo(),
             ]);
             setBalance(balanceData);
             setLedger(ledgerPage.results);
             setLedgerHasMore(ledgerPage.meta.has_more);
             setActiveRequest(balanceData.active_redemption_request || null);
+            setPointsInfo(info);
         } catch {
             // leave existing state on transient errors
         } finally {
@@ -173,6 +176,19 @@ export default function RewardsPage() {
 
     const resetLabel = useMemo(() => formatResetCountdown(resetIn), [resetIn]);
 
+    const openRedeemModal = () => {
+        const currentBalance = Number(balance?.balance ?? 0);
+        const minRequired = pointsInfo?.min_redemption_points;
+        if (minRequired != null && currentBalance < minRequired) {
+            setToast({
+                message: `You need at least ${minRequired.toLocaleString()} RP to redeem. You currently have ${formatPoints(currentBalance)} RP.`,
+                type: 'error',
+            });
+            return;
+        }
+        setRedeemModalOpen(true);
+    };
+
     const submitRedemption = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const amount = Number(pointsAmount);
@@ -230,7 +246,7 @@ export default function RewardsPage() {
                                 <span>Current Reward Points</span>
                                 <strong>{formatPoints(balance?.balance ?? 0)}</strong>
                             </div>
-                            <button type="button" className={styles.redeemBtn} onClick={() => setRedeemModalOpen(true)}>Redeem</button>
+                            <button type="button" className={styles.redeemBtn} onClick={openRedeemModal}>Redeem</button>
                         </section>
 
                         <div className={styles.tabRow} role="tablist">

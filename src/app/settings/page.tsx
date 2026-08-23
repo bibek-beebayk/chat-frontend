@@ -15,7 +15,7 @@ import { apiClient } from '@/lib/api';
 import styles from './page.module.css';
 
 type ToastState = { message: string; type: 'success' | 'error' } | null;
-type SectionKey = 'account' | 'security' | 'notifications';
+type SectionKey = 'account' | 'appearance' | 'security' | 'notifications';
 
 export default function SettingsPage() {
     const router = useRouter();
@@ -196,7 +196,7 @@ export default function SettingsPage() {
                     </div>
                     <div className={styles.profileInfo}>
                         <h2>{displayName}</h2>
-                        <p>Player ID: #{user.id}</p>
+                        <p>@{user.username}</p>
                     </div>
                     <Link href="/profile" className={styles.viewProfileBtn}>View Profile</Link>
                 </section>
@@ -213,12 +213,6 @@ export default function SettingsPage() {
                     </button>
                     {expandedSection === 'account' && (
                         <div className={styles.expandedPanel}>
-                            <div className={styles.actionRow}>
-                                <span>
-                                    <strong>Email</strong>
-                                    <small>{user.email || 'Not set'}</small>
-                                </span>
-                            </div>
                             <button type="button" className={styles.actionRow} onClick={() => setIsVerifyPasswordModalOpen(true)}>
                                 <span>
                                     <strong>Change Email</strong>
@@ -226,14 +220,53 @@ export default function SettingsPage() {
                                 </span>
                                 <span aria-hidden="true">›</span>
                             </button>
-                            <Link href="/payments" className={styles.actionRow}>
-                                <span>
-                                    <strong>Payments</strong>
-                                    <small>Manage saved payment methods.</small>
-                                </span>
-                                <span aria-hidden="true">›</span>
-                            </Link>
+                            {/* Payments link temporarily hidden - not deleted, just unlinked from Settings for now. */}
 
+                            {user.user_type === 'agent' && (
+                                <div className={styles.subSection}>
+                                    <h3 className={styles.optionTitle}>Agent Availability</h3>
+                                    <div className={styles.fieldGroup}>
+                                        <label className={styles.label}>Availability</label>
+                                        <select
+                                            className={styles.input}
+                                            value={agentAvailability}
+                                            onChange={(e) => setAgentAvailability(e.target.value)}
+                                        >
+                                            <option value="online">Online</option>
+                                            <option value="busy">Busy</option>
+                                            <option value="away">Away</option>
+                                            <option value="offline">Offline</option>
+                                        </select>
+                                    </div>
+                                    <div className={styles.fieldGroup}>
+                                        <label className={styles.label}>Status note</label>
+                                        <input
+                                            className={styles.input}
+                                            value={agentStatusNote}
+                                            onChange={(e) => setAgentStatusNote(e.target.value)}
+                                            placeholder="Add quick status note"
+                                            maxLength={120}
+                                        />
+                                    </div>
+                                    <button type="button" className={styles.primaryBtn} onClick={updateAvailability} disabled={isUpdatingAvailability}>
+                                        {isUpdatingAvailability ? 'Saving...' : 'Save Availability'}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    <button
+                        type="button"
+                        className={styles.menuRow}
+                        onClick={() => toggleSection('appearance')}
+                        aria-expanded={expandedSection === 'appearance'}
+                    >
+                        <span className={styles.menuLeft}><AppearanceIcon /> Appearance</span>
+                        <ChevronIcon expanded={expandedSection === 'appearance'} />
+                    </button>
+                    {expandedSection === 'appearance' && (
+                        <div className={styles.expandedPanel}>
                             <div className={styles.subSection}>
                                 <h3 className={styles.optionTitle}>Theme</h3>
                                 <div className={styles.segment}>
@@ -268,38 +301,6 @@ export default function SettingsPage() {
                                     ))}
                                 </div>
                             </div>
-
-                            {user.user_type === 'agent' && (
-                                <div className={styles.subSection}>
-                                    <h3 className={styles.optionTitle}>Agent Availability</h3>
-                                    <div className={styles.fieldGroup}>
-                                        <label className={styles.label}>Availability</label>
-                                        <select
-                                            className={styles.input}
-                                            value={agentAvailability}
-                                            onChange={(e) => setAgentAvailability(e.target.value)}
-                                        >
-                                            <option value="online">Online</option>
-                                            <option value="busy">Busy</option>
-                                            <option value="away">Away</option>
-                                            <option value="offline">Offline</option>
-                                        </select>
-                                    </div>
-                                    <div className={styles.fieldGroup}>
-                                        <label className={styles.label}>Status note</label>
-                                        <input
-                                            className={styles.input}
-                                            value={agentStatusNote}
-                                            onChange={(e) => setAgentStatusNote(e.target.value)}
-                                            placeholder="Add quick status note"
-                                            maxLength={120}
-                                        />
-                                    </div>
-                                    <button type="button" className={styles.primaryBtn} onClick={updateAvailability} disabled={isUpdatingAvailability}>
-                                        {isUpdatingAvailability ? 'Saving...' : 'Save Availability'}
-                                    </button>
-                                </div>
-                            )}
                         </div>
                     )}
 
@@ -617,6 +618,18 @@ function AccountIcon() {
         <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M20 21a8 8 0 0 0-16 0" />
             <circle cx="12" cy="7" r="4" />
+        </svg>
+    );
+}
+
+function AppearanceIcon() {
+    return (
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 2a10 10 0 1 0 3.2 19.47c.7-.24.9-1.13.36-1.65a2.2 2.2 0 0 1 1.5-3.8H18a3 3 0 0 0 3-3 10 10 0 0 0-9-11Z" />
+            <circle cx="8" cy="9" r="1.3" fill="currentColor" stroke="none" />
+            <circle cx="14.5" cy="7.5" r="1.3" fill="currentColor" stroke="none" />
+            <circle cx="17" cy="12.5" r="1.3" fill="currentColor" stroke="none" />
+            <circle cx="10" cy="15.5" r="1.3" fill="currentColor" stroke="none" />
         </svg>
     );
 }

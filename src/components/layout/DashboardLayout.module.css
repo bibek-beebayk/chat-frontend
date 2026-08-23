@@ -84,6 +84,38 @@
         padding-bottom: var(--spacing-sm);
     }
 
+    /* The /chat room screen also hides the bottom nav on mobile - same
+       reasoning as the game-immersive rule above. */
+    :global(body.chat-immersive-mobile) .contentArea {
+        padding-bottom: var(--spacing-sm);
+    }
+
+    /* Every layout ancestor here only sets a min-height, so by default the
+       whole page grows to fit its content and the BODY scrolls - correct
+       for ordinary pages, but /chat wants a fixed-height app screen with
+       no page-level scroll (only its own internal message list scrolls).
+       Capping .layoutContainer at 100dvh and forcing min-height: 0 down
+       the flex chain (the classic fix for a flex child's default
+       min-height: auto refusing to shrink below its content) lets the
+       chat page's own height: 100%/flex: 1 rules finally resolve against
+       a real, bounded height instead of an ever-growing auto one. */
+    :global(body.chat-immersive-mobile) .layoutContainer {
+        height: 100dvh;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    :global(body.chat-immersive-mobile) .mainWrapper {
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    :global(body.chat-immersive-mobile) .contentArea,
+    :global(body.chat-immersive-mobile) .mainContent {
+        min-height: 0;
+        overflow: hidden;
+    }
+
     .rightSidebar {
         width: 100%;
     }

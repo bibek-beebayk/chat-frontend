@@ -222,7 +222,7 @@ export default function ProfilePage() {
                                     </button>
                                 </div>
                             )}
-                            <p className={styles.playerId}>Player ID: #{user.id}</p>
+                            <p className={styles.playerId}>@{user.username}</p>
 
                             {isPlayer && xpStatus && (
                                 <>

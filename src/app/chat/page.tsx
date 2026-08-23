@@ -1476,6 +1476,16 @@ function ChatPageContent() {
             >
                 <div className={styles.roomAvatar}>
                     {initial}
+                    {room.room_type === 'group' && (
+                        <span className={styles.roomTypeBadge} title="Group chat" aria-label="Group chat">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                            </svg>
+                        </span>
+                    )}
                 </div>
 
                 <div className={styles.roomInfo}>
@@ -1571,6 +1581,14 @@ function ChatPageContent() {
     const clientGroupRooms = user?.user_type !== 'staff'
         ? orderedClientRooms.filter((room) => room.room_type === 'group')
         : [];
+    // Direct chats and groups interleaved by recency (not grouped by type) -
+    // used by the mobile "Chats" switcher, which shows one clean list
+    // instead of separate headered sections.
+    const clientCombinedChats = [...clientDirectRooms, ...clientGroupRooms].sort((a, b) => {
+        const aTs = a.last_activity ? new Date(a.last_activity).getTime() : 0;
+        const bTs = b.last_activity ? new Date(b.last_activity).getTime() : 0;
+        return bTs - aTs;
+    });
 
     if (authLoading || !user) {
         return (
@@ -2041,6 +2059,11 @@ function ChatPageContent() {
                                         </button>
                                     )}
                                     {user.user_type !== 'staff' && isMobileViewport && selectedRoomData && (
+                                        selectedRoomData.can_switch_station
+                                        || (user.user_type === 'agent' && selectedRoomData.room_type === 'direct_agent')
+                                        || (user.user_type === 'agent' && selectedRoomData.room_type === 'group' && selectedRoomData.user_is_group_admin)
+                                        || (user.user_type === 'player' && selectedRoomData.room_type === 'group')
+                                    ) && (
                                         <div className={styles.mobileOptionsWrapper}>
                                             <button
                                                 className={styles.mobileOptionsTrigger}
@@ -2795,35 +2818,13 @@ function ChatPageContent() {
                     ) : (
                         <>
                             {/* Agent flow removed - "Find Agents" entry point hidden (agent-search endpoint is unexposed). */}
-                            {clientSupportRoom && renderRoomListButton(clientSupportRoom, () => setChatSwitcherOpen(false))}
-                            <div className={styles.agentChatsHeader}>Message Requests</div>
-                            {messageRequestRooms.length > 0 ? (
-                                messageRequestRooms.map((room) => renderMessageRequestItem(room, () => setChatSwitcherOpen(false)))
+                            {/* Support chat, message requests, and the group-discovery entry point are
+                                intentionally excluded here - this is just a clean, headerless list of
+                                1:1 chats and groups by recent activity. */}
+                            {clientCombinedChats.length > 0 ? (
+                                clientCombinedChats.map((room) => renderRoomListButton(room, () => setChatSwitcherOpen(false)))
                             ) : (
-                                <div className={styles.noRooms}>No message requests</div>
-                            )}
-                            {clientDirectRooms.length > 0 && (
-                                <>
-                                    <div className={styles.agentChatsHeader}>Chats</div>
-                                    {clientDirectRooms.map((room) => renderRoomListButton(room, () => setChatSwitcherOpen(false)))}
-                                </>
-                            )}
-                            <div className={styles.agentChatsHeader}>Groups</div>
-                            <div className={styles.agentFilterRow}>
-                                <button
-                                    className={styles.agentFilterPill}
-                                    onClick={() => {
-                                        setChatSwitcherOpen(false);
-                                        setGroupDiscoverOpen(true);
-                                    }}
-                                >
-                                    Browse
-                                </button>
-                            </div>
-                            {clientGroupRooms.length > 0 ? (
-                                clientGroupRooms.map((room) => renderRoomListButton(room, () => setChatSwitcherOpen(false)))
-                            ) : (
-                                <div className={styles.noRooms}>No groups</div>
+                                <div className={styles.noRooms}>No active chats</div>
                             )}
                         </>
                     )}
