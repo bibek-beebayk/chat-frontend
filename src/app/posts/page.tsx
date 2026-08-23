@@ -132,7 +132,7 @@ export default function PostsPage() {
         <DashboardLayout>
             <PageShell title="" eyebrow="" description="" width="wide">
                 <div className={styles.pageHeader}>
-                    <h1 className={styles.pageTitle}>Community</h1>
+                    <h1 className={styles.pageTitle}>Feed</h1>
                     <div className={styles.topActions}>
                         <button type="button" className={styles.iconBtn} onClick={() => router.push('/posts/my')} aria-label="My posts">
                             <ProfileIcon />

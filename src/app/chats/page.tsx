@@ -3,11 +3,16 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { StoriesRow } from '@/components/chat/StoriesRow';
+import { StoryViewerModal } from '@/components/chat/StoryViewerModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiClient } from '@/lib/api';
 import { resolveProfileImageUrl } from '@/lib/social';
-import { Room } from '@/types';
+import { storiesApi } from '@/lib/stories';
+import { Room, StoryGroup } from '@/types';
 import styles from './page.module.css';
+
+type ChatTab = 'chats' | 'online' | 'groups';
 
 export default function ChatsListPage() {
     const router = useRouter();
@@ -17,12 +22,12 @@ export default function ChatsListPage() {
     const [messageRequestRooms, setMessageRequestRooms] = useState<Room[]>([]);
     const [loading, setLoading] = useState(true);
     const [requestActionRoomId, setRequestActionRoomId] = useState<number | null>(null);
+    const [searchOpen, setSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [collapsed, setCollapsed] = useState({
-        requests: true,
-        chats: false,
-        groups: false,
-    });
+    const [activeTab, setActiveTab] = useState<ChatTab>('chats');
+
+    const [storyGroups, setStoryGroups] = useState<StoryGroup[]>([]);
+    const [viewerGroupIndex, setViewerGroupIndex] = useState<number | null>(null);
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -54,16 +59,26 @@ export default function ChatsListPage() {
         }
     }, [user]);
 
+    const fetchStories = useCallback(async () => {
+        try {
+            const data = await storiesApi.list();
+            setStoryGroups(data);
+        } catch (error) {
+            console.error('Failed to load stories', error);
+        }
+    }, []);
+
     useEffect(() => {
         if (!user) return;
         fetchRooms();
         fetchMessageRequests();
+        fetchStories();
         const interval = setInterval(() => {
             fetchRooms();
             fetchMessageRequests();
         }, 8000);
         return () => clearInterval(interval);
-    }, [fetchMessageRequests, fetchRooms, user]);
+    }, [fetchMessageRequests, fetchRooms, fetchStories, user]);
 
     const respondToMessageRequest = async (roomId: number, action: 'accept' | 'reject') => {
         setRequestActionRoomId(roomId);
@@ -85,6 +100,7 @@ export default function ChatsListPage() {
     };
 
     const roomSubtitle = (room: Room) => {
+        if (room.last_message_preview) return room.last_message_preview;
         if (room.room_type === 'support') return room.queue_name || 'Support queue';
         if (room.room_type === 'direct_agent') return room.counterpart?.user_type === 'agent' ? 'Agent chat' : 'Player chat';
         if (room.room_type === 'group') {
@@ -122,6 +138,7 @@ export default function ChatsListPage() {
     const rawGroupRooms = user?.user_type !== 'staff'
         ? orderedClientRooms.filter((room) => room.room_type === 'group')
         : [];
+    const rawOnlineRooms = rawDirectRooms.filter((room) => room.counterpart?.presence_status === 'ONLINE');
 
     const normalizedQuery = searchQuery.trim().toLowerCase();
     const matchesRoom = (room: Room) => {
@@ -134,40 +151,51 @@ export default function ChatsListPage() {
     const filteredRequestRooms = messageRequestRooms.filter(matchesRoom);
     const filteredDirectRooms = rawDirectRooms.filter(matchesRoom);
     const filteredGroupRooms = rawGroupRooms.filter(matchesRoom);
+    const filteredOnlineRooms = rawOnlineRooms.filter(matchesRoom);
+    const filteredSupportRoom = supportRoom && matchesRoom(supportRoom) ? supportRoom : null;
+
     const unreadRequestCount = messageRequestRooms.reduce((total, room) => total + (room.unread_count || 0), 0);
-    const unreadChatCount = orderedClientRooms.reduce((total, room) => total + (room.unread_count || 0), 0);
-    const totalConversationCount = rawDirectRooms.length + rawGroupRooms.length + (supportRoom ? 1 : 0);
-    const hasAnyResults = filteredRequestRooms.length > 0 || filteredDirectRooms.length > 0 || filteredGroupRooms.length > 0;
 
     const openRoom = (roomId: number) => {
         router.push(`/chat?room_id=${roomId}`);
     };
 
-    const toggleSection = (key: keyof typeof collapsed) => {
-        setCollapsed((prev) => ({ ...prev, [key]: !prev[key] }));
-    };
-
     const renderRoomItem = (room: Room) => {
         const displayName = roomDisplayName(room);
-        const imageUrl = resolveProfileImageUrl(room.counterpart || room.client || null);
+        const counterpart = room.counterpart || room.client || null;
+        const imageUrl = resolveProfileImageUrl(counterpart);
         const fallback = displayName.trim().charAt(0).toUpperCase() || 'C';
+        const isOnline = room.counterpart?.presence_status === 'ONLINE';
 
         return (
             <button key={room.id} className={styles.roomItem} onClick={() => openRoom(room.id)}>
-                <div className={styles.roomAvatar}>
-                    {imageUrl ? (
-                        <img src={imageUrl} alt={displayName} className={styles.roomAvatarImage} />
-                    ) : (
-                        <span>{fallback}</span>
-                    )}
+                <div className={styles.roomAvatarWrap}>
+                    <div className={styles.roomAvatar}>
+                        {imageUrl ? (
+                            <img src={imageUrl} alt={displayName} className={styles.roomAvatarImage} />
+                        ) : (
+                            <span>{fallback}</span>
+                        )}
+                    </div>
+                    {room.room_type === 'direct_agent' && isOnline && <span className={styles.onlineDot} aria-hidden="true" />}
                 </div>
                 <div className={styles.roomTextWrap}>
-                    <div className={styles.roomName}>{displayName}</div>
+                    <div className={styles.roomNameRow}>
+                        <span className={styles.roomName}>{displayName}</span>
+                        {room.counterpart?.is_verified && (
+                            <span className={styles.verifiedBadge} aria-label="Verified" title="Verified">
+                                <VerifiedIcon />
+                            </span>
+                        )}
+                    </div>
                     <div className={styles.roomSubtitle}>{roomSubtitle(room)}</div>
                 </div>
-                {(room.unread_count || 0) > 0 && (
-                    <span className={styles.badge}>{(room.unread_count || 0) > 99 ? '99+' : room.unread_count}</span>
-                )}
+                <div className={styles.roomMeta}>
+                    {room.last_activity && <span className={styles.roomTimestamp}>{formatRelativeTime(room.last_activity)}</span>}
+                    {(room.unread_count || 0) > 0 && (
+                        <span className={styles.badge}>{(room.unread_count || 0) > 99 ? '99+' : room.unread_count}</span>
+                    )}
+                </div>
             </button>
         );
     };
@@ -231,153 +259,175 @@ export default function ChatsListPage() {
         );
     }
 
+    let tabContent: React.ReactNode;
+    if (activeTab === 'chats') {
+        const hasAnyResults = filteredRequestRooms.length > 0 || filteredDirectRooms.length > 0 || !!filteredSupportRoom;
+        tabContent = (
+            <div className={styles.sections}>
+                {filteredRequestRooms.length > 0 && (
+                    <div className={styles.section}>
+                        <div className={styles.sectionTitleWrap}>
+                            <h2 className={styles.sectionTitle}>Message Requests</h2>
+                            {unreadRequestCount > 0 && (
+                                <span className={styles.sectionBadge}>{unreadRequestCount > 99 ? '99+' : unreadRequestCount}</span>
+                            )}
+                        </div>
+                        <div className={styles.sectionBody}>{filteredRequestRooms.map(renderRequestItem)}</div>
+                    </div>
+                )}
+                <div className={styles.sectionBody}>
+                    {filteredSupportRoom && renderRoomItem(filteredSupportRoom)}
+                    {filteredDirectRooms.map(renderRoomItem)}
+                </div>
+                {normalizedQuery && !hasAnyResults && <div className={styles.empty}>No chats matched &quot;{searchQuery.trim()}&quot;</div>}
+                {!normalizedQuery && !filteredSupportRoom && filteredDirectRooms.length === 0 && filteredRequestRooms.length === 0 && (
+                    <div className={styles.empty}>No chats yet</div>
+                )}
+            </div>
+        );
+    } else if (activeTab === 'online') {
+        tabContent = (
+            <div className={styles.sections}>
+                <div className={styles.sectionBody}>
+                    {filteredOnlineRooms.length > 0 ? (
+                        filteredOnlineRooms.map(renderRoomItem)
+                    ) : (
+                        <div className={styles.empty}>No one you chat with is online right now</div>
+                    )}
+                </div>
+            </div>
+        );
+    } else {
+        tabContent = (
+            <div className={styles.sections}>
+                <div className={styles.sectionBody}>
+                    {filteredGroupRooms.length > 0 ? (
+                        filteredGroupRooms.map(renderRoomItem)
+                    ) : (
+                        <div className={styles.empty}>No groups yet</div>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
     return (
         <DashboardLayout>
             <main className={styles.main}>
                 <section className={styles.panel}>
                     <div className={styles.headerRow}>
                         <div className={styles.topRow}>
-                            <div>
-                                <p className={styles.eyebrow}>Messages</p>
-                                <h1 className={styles.title}>Chats</h1>
-                            </div>
-                            {supportRoom && (
+                            <h1 className={styles.title}>Chat</h1>
+                            <div className={styles.headerActions}>
                                 <button
                                     type="button"
-                                    className={styles.supportQuickBtn}
-                                    onClick={() => openRoom(supportRoom.id)}
+                                    className={`${styles.iconBtn} ${searchOpen ? styles.iconBtnActive : ''}`}
+                                    onClick={() => setSearchOpen((prev) => !prev)}
+                                    aria-label="Search chats"
+                                    aria-pressed={searchOpen}
                                 >
-                                    Support Chat
+                                    <SearchIcon />
                                 </button>
-                            )}
-                        </div>
-                        <div className={styles.summaryGrid} aria-label="Chat summary">
-                            <div>
-                                <strong>{totalConversationCount}</strong>
-                                <span>Conversations</span>
-                            </div>
-                            <div>
-                                <strong>{messageRequestRooms.length}</strong>
-                                <span>Requests</span>
-                            </div>
-                            <div>
-                                <strong>{unreadChatCount}</strong>
-                                <span>Unread</span>
+                                <button
+                                    type="button"
+                                    className={styles.iconBtn}
+                                    onClick={() => router.push('/connections')}
+                                    aria-label="Start a new chat"
+                                >
+                                    <PlusIcon />
+                                </button>
                             </div>
                         </div>
-                        <label className={styles.searchBox}>
-                            <span aria-hidden="true">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
-                            </span>
-                            <input
-                                type="text"
-                                className={styles.searchInput}
-                                placeholder="Search chats"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </label>
+
+                        {searchOpen && (
+                            <label className={styles.searchBox}>
+                                <span aria-hidden="true"><SearchIcon /></span>
+                                <input
+                                    type="text"
+                                    className={styles.searchInput}
+                                    placeholder="Search chats"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    autoFocus
+                                />
+                            </label>
+                        )}
+
+                        <div className={styles.tabRow} role="tablist">
+                            {(['chats', 'online', 'groups'] as ChatTab[]).map((tab) => (
+                                <button
+                                    key={tab}
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={activeTab === tab}
+                                    className={`${styles.tabBtn} ${activeTab === tab ? styles.tabBtnActive : ''}`}
+                                    onClick={() => setActiveTab(tab)}
+                                >
+                                    {tab === 'chats' ? 'Chats' : tab === 'online' ? 'Online' : 'Groups'}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
-                    {loading ? (
-                        <div className={styles.empty}>Loading chats...</div>
-                    ) : (
-                        <div className={styles.sections}>
-                            {(filteredRequestRooms.length > 0 || !normalizedQuery) && (
-                                <div className={styles.section}>
-                                    <button
-                                        className={styles.sectionToggle}
-                                        onClick={() => toggleSection('requests')}
-                                        type="button"
-                                        aria-expanded={!collapsed.requests}
-                                    >
-                                        <div className={styles.sectionTitleWrap}>
-                                            <h2 className={styles.sectionTitle}>Message Requests</h2>
-                                            {unreadRequestCount > 0 && (
-                                                <span className={styles.sectionBadge}>
-                                                    {unreadRequestCount > 99 ? '99+' : unreadRequestCount}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <svg
-                                            viewBox="0 0 24 24"
-                                            className={`${styles.chevron} ${collapsed.requests ? styles.chevronCollapsed : ''}`}
-                                            aria-hidden="true"
-                                        >
-                                            <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                        </svg>
-                                    </button>
-                                    <div className={`${styles.sectionBody} ${collapsed.requests ? styles.sectionBodyCollapsed : styles.sectionBodyExpanded}`}>
-                                        {filteredRequestRooms.length > 0 ? (
-                                            filteredRequestRooms.map((room) => renderRequestItem(room))
-                                        ) : (
-                                            <div className={styles.empty}>No message requests</div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
+                    <div className={styles.storiesWrap}>
+                        <StoriesRow
+                            groups={storyGroups}
+                            onOpenViewer={setViewerGroupIndex}
+                            onStoryCreated={fetchStories}
+                        />
+                    </div>
 
-                            {(filteredDirectRooms.length > 0 || !normalizedQuery) && (
-                                <div className={styles.section}>
-                                    <button
-                                        className={styles.sectionToggle}
-                                        onClick={() => toggleSection('chats')}
-                                        type="button"
-                                        aria-expanded={!collapsed.chats}
-                                    >
-                                        <h2 className={styles.sectionTitle}>Chats</h2>
-                                        <svg
-                                            viewBox="0 0 24 24"
-                                            className={`${styles.chevron} ${collapsed.chats ? styles.chevronCollapsed : ''}`}
-                                            aria-hidden="true"
-                                        >
-                                            <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                        </svg>
-                                    </button>
-                                    <div className={`${styles.sectionBody} ${collapsed.chats ? styles.sectionBodyCollapsed : styles.sectionBodyExpanded}`}>
-                                        {filteredDirectRooms.length > 0 ? (
-                                            filteredDirectRooms.map((room) => renderRoomItem(room))
-                                        ) : (
-                                            <div className={styles.empty}>No direct chats</div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-                            {(filteredGroupRooms.length > 0 || !normalizedQuery) && (
-                                <div className={styles.section}>
-                                    <button
-                                        className={styles.sectionToggle}
-                                        onClick={() => toggleSection('groups')}
-                                        type="button"
-                                        aria-expanded={!collapsed.groups}
-                                    >
-                                        <h2 className={styles.sectionTitle}>Groups</h2>
-                                        <svg
-                                            viewBox="0 0 24 24"
-                                            className={`${styles.chevron} ${collapsed.groups ? styles.chevronCollapsed : ''}`}
-                                            aria-hidden="true"
-                                        >
-                                            <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                        </svg>
-                                    </button>
-                                    <div className={`${styles.sectionBody} ${collapsed.groups ? styles.sectionBodyCollapsed : styles.sectionBodyExpanded}`}>
-                                        {filteredGroupRooms.length > 0 ? (
-                                            filteredGroupRooms.map((room) => renderRoomItem(room))
-                                        ) : (
-                                            <div className={styles.empty}>No groups</div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-                            {normalizedQuery && !hasAnyResults && (
-                                <div className={styles.empty}>No chats matched &quot;{searchQuery.trim()}&quot;</div>
-                            )}
-                        </div>
-                    )}
+                    {tabContent}
                 </section>
             </main>
+
+            {viewerGroupIndex !== null && (
+                <StoryViewerModal
+                    groups={storyGroups}
+                    startGroupIndex={viewerGroupIndex}
+                    onClose={() => setViewerGroupIndex(null)}
+                    onStoryDeleted={fetchStories}
+                />
+            )}
         </DashboardLayout>
+    );
+}
+
+function formatRelativeTime(value: string): string {
+    const seconds = Math.max(1, Math.floor((Date.now() - new Date(value).getTime()) / 1000));
+    if (seconds < 60) return 'now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}d`;
+    return new Date(value).toLocaleDateString('en', { month: 'short', day: 'numeric' });
+}
+
+function SearchIcon() {
+    return (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+    );
+}
+
+function PlusIcon() {
+    return (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+    );
+}
+
+function VerifiedIcon() {
+    return (
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+            <path d="M12 2.5 14.4 4.9 17.7 4.4 18.3 7.7 21.1 9.6 19.6 12.6 21.1 15.6 18.3 17.5 17.7 20.8 14.4 20.3 12 22.7 9.6 20.3 6.3 20.8 5.7 17.5 2.9 15.6 4.4 12.6 2.9 9.6 5.7 7.7 6.3 4.4 9.6 4.9 12 2.5Z" />
+            <path d="m8.8 12.2 2.2 2.2 4.2-4.6" stroke="#fff" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
     );
 }

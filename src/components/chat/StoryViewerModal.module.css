@@ -1,0 +1,110 @@
+.backdrop {
+    align-items: center;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    inset: 0;
+    justify-content: center;
+    position: fixed;
+    z-index: 1400;
+}
+
+.viewer {
+    background: #000;
+    border-radius: var(--radius-lg);
+    height: min(90vh, 780px);
+    max-width: 420px;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+
+.progressRow {
+    display: flex;
+    gap: 0.3rem;
+    padding: 0.6rem 0.6rem 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 3;
+}
+
+.progressTrack {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 999px;
+    flex: 1;
+    height: 3px;
+    overflow: hidden;
+}
+
+.progressFill {
+    background: #fff;
+    height: 100%;
+}
+
+.header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 0.75rem 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 3;
+}
+
+.headerLeft {
+    align-items: center;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.authorName {
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.headerActions {
+    align-items: center;
+    display: flex;
+    gap: 0.4rem;
+}
+
+.iconBtn {
+    align-items: center;
+    background: rgba(0, 0, 0, 0.4);
+    border: 0;
+    border-radius: 50%;
+    color: #fff;
+    display: flex;
+    font-size: 1.3rem;
+    height: 32px;
+    justify-content: center;
+    line-height: 1;
+    width: 32px;
+}
+
+.media {
+    height: 100%;
+    object-fit: contain;
+    width: 100%;
+}
+
+.tapZoneLeft,
+.tapZoneRight {
+    background: transparent;
+    border: 0;
+    bottom: 0;
+    position: absolute;
+    top: 0;
+    width: 35%;
+}
+
+.tapZoneLeft {
+    left: 0;
+}
+
+.tapZoneRight {
+    right: 0;
+}

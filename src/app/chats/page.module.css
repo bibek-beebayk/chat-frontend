@@ -21,9 +21,63 @@
 
 .topRow {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
+}
+
+.headerActions {
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
+    gap: 0.5rem;
+}
+
+.iconBtn {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    color: var(--color-text-secondary);
+    display: flex;
+    flex-shrink: 0;
+    height: 38px;
+    justify-content: center;
+    width: 38px;
+}
+
+.iconBtn:hover,
+.iconBtnActive {
+    background: rgba(var(--color-primary-rgb), 0.14);
+    border-color: rgba(var(--color-primary-rgb), 0.35);
+    color: var(--color-primary-light);
+}
+
+.tabRow {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.tabBtn {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    color: var(--color-text-secondary);
+    flex: 1;
+    font-size: 0.82rem;
+    font-weight: 800;
+    padding: 0.5rem 0.6rem;
+}
+
+.tabBtnActive {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    border-color: transparent;
+    color: #fff;
+}
+
+.storiesWrap {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 0 0.9rem;
 }
 
 .eyebrow {
@@ -236,6 +290,48 @@
     text-align: left;
     min-height: 68px;
     transition: border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
+}
+
+.roomAvatarWrap {
+    position: relative;
+}
+
+.onlineDot {
+    background: #22c55e;
+    border: 2px solid var(--color-bg-primary, #0f0821);
+    border-radius: 50%;
+    bottom: -1px;
+    height: 12px;
+    position: absolute;
+    right: -1px;
+    width: 12px;
+}
+
+.roomNameRow {
+    align-items: center;
+    display: flex;
+    gap: 0.3rem;
+    min-width: 0;
+}
+
+.verifiedBadge {
+    align-items: center;
+    color: #3ba7ff;
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.roomMeta {
+    align-items: flex-end;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.roomTimestamp {
+    color: var(--color-text-muted);
+    font-size: 0.7rem;
+    white-space: nowrap;
 }
 
 .roomItem:hover {

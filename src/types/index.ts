@@ -115,12 +115,31 @@ export interface ConnectionWithPresence extends Omit<SocialConnection, 'requeste
     receiver: UserWithPresence;
 }
 
+// Stories - real 24h-expiring stories (own + accepted connections' only, not a public wall)
+export interface Story {
+    id: number;
+    media: string;
+    caption: string;
+    created_at: string;
+    expires_at: string;
+    is_viewed: boolean;
+}
+
+export interface StoryGroup {
+    author: User;
+    stories: Story[];
+    has_unviewed: boolean;
+    is_own: boolean;
+}
+
 // Room types
 export interface Room {
     id: number;
     name: string;
     room_type?: 'support' | 'direct_agent' | 'group' | string;
-    counterpart?: User | null;
+    // counterpart is presence-enriched server-side (ConnectionUserSerializer)
+    // for direct_agent rooms - present_status falls back to 'OFFLINE' when absent.
+    counterpart?: (User & { presence_status?: PresenceStatus }) | null;
     current_handler?: User;
     client?: User;
     group_admin?: User;
@@ -130,6 +149,7 @@ export interface Room {
     created_at: string;
     last_activity?: string;
     last_message_sender_id?: number;
+    last_message_preview?: string | null;
     status: 'OPEN' | 'CLOSED';
     participant_count?: number;
     unread_count?: number;
@@ -420,7 +440,22 @@ export interface XpStatus {
     next_rank_xp: number | null;
     xp_to_next_rank: number;
     rank_progress_percent: number;
+    global_rank: number;
     updated_at: string;
+}
+
+export interface Achievement {
+    slug: string;
+    label: string;
+    unlocked: boolean;
+    earned_at: string | null;
+}
+
+export interface PlayerGameStats {
+    range: 'all' | 'week' | 'month';
+    rounds_played: number;
+    total_wins: number;
+    highest_multiplier: string | null;
 }
 
 export interface DailyProgressItem {
@@ -448,6 +483,18 @@ export interface PointsLedgerEntry {
     note?: string;
     metadata?: Record<string, unknown>;
     created_at: string;
+}
+
+export interface PointsLedgerMeta {
+    limit: number;
+    offset: number;
+    count: number;
+    has_more: boolean;
+}
+
+export interface PointsLedgerPage {
+    results: PointsLedgerEntry[];
+    meta: PointsLedgerMeta;
 }
 
 export interface PointsRedemptionRequest {

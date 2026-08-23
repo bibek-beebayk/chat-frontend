@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/api';
-import { DailyProgressItem, XpStatus } from '@/types';
+import { Achievement, DailyProgressItem, XpStatus } from '@/types';
 
 export const xpApi = {
     getStatus(): Promise<XpStatus> {
@@ -8,6 +8,10 @@ export const xpApi = {
 
     getDailyProgress(): Promise<DailyProgressItem[]> {
         return apiClient.get<DailyProgressItem[]>('/api/xp/daily-progress/');
+    },
+
+    getAchievements(): Promise<Achievement[]> {
+        return apiClient.get<Achievement[]>('/api/xp/achievements/');
     },
 };
 

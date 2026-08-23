@@ -1,43 +1,76 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { ChangePasswordModal } from '@/components/settings/ChangePasswordModal';
 import { Toast } from '@/components/ui/Toast';
-import { Modal } from '@/components/ui/Modal';
 import { UserAvatar } from '@/components/social/UserAvatar';
+import { RankBadge } from '@/components/home/RankBadge';
 import { useAuth } from '@/contexts/AuthContext';
+import { useXpStatus } from '@/hooks/useXpStatus';
+import { usePointsBalance } from '@/hooks/usePointsBalance';
 import { apiClient } from '@/lib/api';
+import { xpApi } from '@/lib/xp';
+import { gamesApi } from '@/lib/games';
+import { rewardsApi } from '@/lib/rewards';
+import { Achievement, LoginStreakStatus, PlayerGameStats } from '@/types';
 import styles from './page.module.css';
 
 type ToastState = { message: string; type: 'success' | 'error' } | null;
+type StatsRange = 'all' | 'week' | 'month';
+
+const ACHIEVEMENT_ICONS: Record<string, string> = {
+    streak_7day: '🔥',
+    first_win: '🏆',
+    rocket_cashout_above_10x: '🚀',
+    rocket_five_alive: '🍀',
+};
+
+const RANK_TEXT_COLORS: Record<string, string> = {
+    bronze: '#cd7f32',
+    silver: '#c7ccd1',
+    gold: 'var(--color-accent)',
+    platinum: '#8fc9e0',
+    diamond: '#3fa8e0',
+    rollin_elite: 'var(--color-accent)',
+};
+
+const STATS_RANGE_OPTIONS: { value: StatsRange; label: string }[] = [
+    { value: 'all', label: 'All Time' },
+    { value: 'week', label: 'This Week' },
+    { value: 'month', label: 'This Month' },
+];
+
+function capitalize(slug: string): string {
+    return slug.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 export default function ProfilePage() {
     const router = useRouter();
-    const { user, loading, checkAuth, deleteAccount } = useAuth();
+    const { user, loading, checkAuth, updateUsername } = useAuth();
+    const { data: xpStatus } = useXpStatus();
+    const pointsBalance = usePointsBalance();
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [toast, setToast] = useState<ToastState>(null);
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
-    const [isVerifyPasswordModalOpen, setIsVerifyPasswordModalOpen] = useState(false);
-    const [isEmailEntryModalOpen, setIsEmailEntryModalOpen] = useState(false);
-    const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
-    const [verifiedPassword, setVerifiedPassword] = useState('');
-    const [newEmail, setNewEmail] = useState('');
-    const [emailOtp, setEmailOtp] = useState('');
-    const [emailStepLoading, setEmailStepLoading] = useState(false);
+    const [isEditingUsername, setIsEditingUsername] = useState(false);
+    const [usernameDraft, setUsernameDraft] = useState('');
+    const [isSavingUsername, setIsSavingUsername] = useState(false);
 
-    const [agentAvailability, setAgentAvailability] = useState('online');
-    const [agentStatusNote, setAgentStatusNote] = useState('');
-    const [isUpdatingAvailability, setIsUpdatingAvailability] = useState(false);
+    const [streak, setStreak] = useState<LoginStreakStatus | null>(null);
+    const [achievements, setAchievements] = useState<Achievement[] | null>(null);
+    const [statsRange, setStatsRange] = useState<StatsRange>('all');
+    const [gameStats, setGameStats] = useState<PlayerGameStats | null>(null);
 
-    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-    const [isDeleteFinalOpen, setIsDeleteFinalOpen] = useState(false);
-    const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+    const [isRangeMenuOpen, setIsRangeMenuOpen] = useState(false);
+    const [rangeMenuPos, setRangeMenuPos] = useState<'down' | 'up'>('down');
+    const rangeMenuRef = useRef<HTMLDivElement>(null);
+
+    const isPlayer = user?.user_type === 'player';
 
     useEffect(() => {
         if (!loading && !user) {
@@ -46,20 +79,36 @@ export default function ProfilePage() {
     }, [loading, router, user]);
 
     useEffect(() => {
-        if (!user) return;
-        setAgentAvailability(user.agent_availability || 'online');
-        setAgentStatusNote(user.agent_status_note || '');
-    }, [user]);
+        if (!isPlayer) return;
+        rewardsApi.getStreak().then(setStreak).catch(() => {});
+        xpApi.getAchievements().then(setAchievements).catch(() => {});
+    }, [isPlayer]);
 
-    const resetEmailFlow = () => {
-        setVerifiedPassword('');
-        setNewEmail('');
-        setEmailOtp('');
-        setIsVerifyPasswordModalOpen(false);
-        setIsEmailEntryModalOpen(false);
-        setIsOtpModalOpen(false);
-        setEmailStepLoading(false);
-    };
+    useEffect(() => {
+        if (!isPlayer) return;
+        gamesApi.getStats(statsRange).then(setGameStats).catch(() => {});
+    }, [isPlayer, statsRange]);
+
+    useLayoutEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (rangeMenuRef.current && !rangeMenuRef.current.contains(event.target as Node)) {
+                setIsRangeMenuOpen(false);
+            }
+        };
+
+        if (isRangeMenuOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+            if (rangeMenuRef.current) {
+                const rect = rangeMenuRef.current.getBoundingClientRect();
+                const spaceBelow = window.innerHeight - rect.bottom;
+                setRangeMenuPos(spaceBelow < 180 ? 'up' : 'down');
+            }
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isRangeMenuOpen]);
 
     const onPickAvatar = () => {
         fileInputRef.current?.click();
@@ -89,88 +138,32 @@ export default function ProfilePage() {
         }
     };
 
-    const verifyCurrentPassword = async (password: string) => {
-        try {
-            setEmailStepLoading(true);
-            await apiClient.post('/api/auth/verify-current-password/', { current_password: password });
-            setVerifiedPassword(password);
-            setIsVerifyPasswordModalOpen(false);
-            setIsEmailEntryModalOpen(true);
-        } catch (error: any) {
-            setToast({ message: error?.message || 'Current password is incorrect.', type: 'error' });
-        } finally {
-            setEmailStepLoading(false);
-        }
+    const startEditingUsername = () => {
+        if (!user) return;
+        setUsernameDraft(user.username);
+        setIsEditingUsername(true);
     };
 
-    const requestEmailOtp = async () => {
-        if (!newEmail.trim()) {
-            setToast({ message: 'Please enter a new email address.', type: 'error' });
+    const cancelEditingUsername = () => {
+        setIsEditingUsername(false);
+        setUsernameDraft('');
+    };
+
+    const saveUsername = async () => {
+        const trimmed = usernameDraft.trim();
+        if (!user || !trimmed || trimmed === user.username) {
+            setIsEditingUsername(false);
             return;
         }
         try {
-            setEmailStepLoading(true);
-            await apiClient.post('/api/auth/email-change/request/', {
-                new_email: newEmail.trim(),
-                current_password: verifiedPassword,
-            });
-            setIsEmailEntryModalOpen(false);
-            setIsOtpModalOpen(true);
-            setToast({ message: 'OTP sent to your new email.', type: 'success' });
+            setIsSavingUsername(true);
+            await updateUsername(trimmed);
+            setToast({ message: 'Username updated.', type: 'success' });
+            setIsEditingUsername(false);
         } catch (error: any) {
-            setToast({ message: error?.message || 'Failed to request OTP.', type: 'error' });
+            setToast({ message: error?.message || 'Failed to update username.', type: 'error' });
         } finally {
-            setEmailStepLoading(false);
-        }
-    };
-
-    const verifyEmailOtp = async () => {
-        if (!emailOtp.trim()) {
-            setToast({ message: 'Please enter the OTP code.', type: 'error' });
-            return;
-        }
-        try {
-            setEmailStepLoading(true);
-            await apiClient.post('/api/auth/email-change/verify/', {
-                new_email: newEmail.trim(),
-                otp_code: emailOtp.trim(),
-            });
-            await checkAuth();
-            setToast({ message: 'Email changed successfully.', type: 'success' });
-            resetEmailFlow();
-        } catch (error: any) {
-            setToast({ message: error?.message || 'Failed to verify OTP.', type: 'error' });
-        } finally {
-            setEmailStepLoading(false);
-        }
-    };
-
-    const updateAvailability = async () => {
-        try {
-            setIsUpdatingAvailability(true);
-            await apiClient.patch('/api/auth/agent-availability/', {
-                agent_availability: agentAvailability,
-                agent_status_note: agentStatusNote,
-            });
-            await checkAuth();
-            setToast({ message: 'Availability updated.', type: 'success' });
-        } catch (error: any) {
-            setToast({ message: error?.message || 'Failed to update availability.', type: 'error' });
-        } finally {
-            setIsUpdatingAvailability(false);
-        }
-    };
-
-    const handleDeleteAccount = async () => {
-        try {
-            setIsDeletingAccount(true);
-            await deleteAccount();
-            setToast({ message: 'Account deleted successfully.', type: 'success' });
-            window.location.href = '/login';
-        } catch (error: any) {
-            setToast({ message: error?.message || 'Failed to delete account.', type: 'error' });
-        } finally {
-            setIsDeletingAccount(false);
+            setIsSavingUsername(false);
         }
     };
 
@@ -178,285 +171,281 @@ export default function ProfilePage() {
         return null;
     }
 
+    const streakRewardLabel = streak ? `$${Number(streak.reward_amount).toFixed(2)} credit` : null;
+
     return (
         <DashboardLayout>
             <main className={styles.main}>
-                <section className={styles.panel}>
-                    <header className={styles.pageHeader}>
-                        <p className={styles.eyebrow}>Account Center</p>
-                        <h1 className={styles.title}>Edit Profile</h1>
-                        <p className={styles.subtitle}>Manage your identity, login details, availability, and account safety.</p>
-                    </header>
+                <header className={styles.topBar}>
+                    <button type="button" className={styles.iconBtn} onClick={() => router.back()} aria-label="Go back">
+                        <BackIcon />
+                    </button>
+                    <h1 className={styles.topBarTitle}>My Profile</h1>
+                    <Link href="/settings" className={styles.iconBtn} aria-label="Settings">
+                        <GearIcon />
+                    </Link>
+                </header>
 
-                    <div className={styles.profileHero}>
-                        <div className={styles.avatarFrame}>
-                            <UserAvatar user={user} size={92} />
-                        </div>
-                        <div className={styles.identity}>
-                            <span className={styles.rolePill}>{user.user_type}</span>
-                            <h2 className={styles.username}>{user.username}</h2>
-                            <p className={styles.email}>{user.email || 'No email set'}</p>
-                        </div>
-                        <button type="button" className={styles.avatarBtn} onClick={onPickAvatar} disabled={isUploadingAvatar}>
-                            {isUploadingAvatar ? 'Uploading...' : 'Change Photo'}
-                        </button>
-                    </div>
-
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={onAvatarSelected}
-                        className={styles.hiddenFileInput}
-                    />
-
-                    <div className={styles.contentGrid}>
-                        <section className={styles.card}>
-                            <div className={styles.cardHeader}>
-                                <div>
-                                    <h3 className={styles.sectionTitle}>Account</h3>
-                                    <p>Update contact details and how your profile appears.</p>
-                                </div>
-                            </div>
-                            <div className={styles.metaGrid}>
-                                <div>
-                                    <span>Username</span>
-                                    <strong>{user.username}</strong>
-                                </div>
-                                <div>
-                                    <span>Email</span>
-                                    <strong>{user.email || 'Not set'}</strong>
-                                </div>
-                                <div>
-                                    <span>Role</span>
-                                    <strong>{user.user_type}</strong>
-                                </div>
-                            </div>
-                            <div className={styles.actionsList}>
-                                <button type="button" className={styles.actionBtn} onClick={() => setIsVerifyPasswordModalOpen(true)}>
-                                    Change Email
-                                </button>
-                            </div>
-                        </section>
-
-                        <section className={styles.card}>
-                            <div className={styles.cardHeader}>
-                                <div>
-                                    <h3 className={styles.sectionTitle}>Security</h3>
-                                    <p>Keep your password current and protect access to your account.</p>
-                                </div>
-                            </div>
-                            <div className={styles.actionsList}>
-                                <button type="button" className={styles.actionBtn} onClick={() => setIsPasswordModalOpen(true)}>
-                                    Change Password
-                                </button>
-                            </div>
-                        </section>
-
-                        {user.user_type === 'agent' && (
-                            <section className={`${styles.card} ${styles.wideCard}`}>
-                                <div className={styles.cardHeader}>
-                                    <div>
-                                        <h3 className={styles.sectionTitle}>Agent Availability</h3>
-                                        <p>Set your visible support presence for community members.</p>
-                                    </div>
-                                </div>
-                                <div className={styles.fieldGrid}>
-                                    <div className={styles.fieldGroup}>
-                                        <label className={styles.label}>Availability</label>
-                                        <select
-                                            className={styles.input}
-                                            value={agentAvailability}
-                                            onChange={(e) => setAgentAvailability(e.target.value)}
-                                        >
-                                            <option value="online">Online</option>
-                                            <option value="busy">Busy</option>
-                                            <option value="away">Away</option>
-                                            <option value="offline">Offline</option>
-                                        </select>
-                                    </div>
-                                    <div className={styles.fieldGroup}>
-                                        <label className={styles.label}>Status note</label>
-                                        <input
-                                            className={styles.input}
-                                            value={agentStatusNote}
-                                            onChange={(e) => setAgentStatusNote(e.target.value)}
-                                            placeholder="Add quick status note"
-                                            maxLength={120}
-                                        />
-                                    </div>
-                                </div>
-                                <button type="button" className={styles.primaryBtn} onClick={updateAvailability} disabled={isUpdatingAvailability}>
-                                    {isUpdatingAvailability ? 'Saving...' : 'Save Availability'}
-                                </button>
-                            </section>
-                        )}
-
-                        <section className={`${styles.card} ${styles.dangerCard}`}>
-                            <div className={styles.cardHeader}>
-                                <div>
-                                    <h3 className={styles.sectionTitle}>Danger Zone</h3>
-                                    <p>Permanently remove your account and related access.</p>
-                                </div>
-                            </div>
-                            <button
-                                type="button"
-                                className={styles.dangerBtn}
-                                onClick={() => setIsDeleteConfirmOpen(true)}
-                                disabled={isDeletingAccount}
-                            >
-                                {isDeletingAccount ? 'Deleting Account...' : 'Delete Account'}
+                <section className={styles.profileCard}>
+                    <div className={styles.profileCardTop}>
+                        <div className={styles.avatarRing}>
+                            <UserAvatar user={user} size={72} />
+                            <span className={styles.crownBadge} aria-hidden="true">👑</span>
+                            <button type="button" className={styles.avatarEditBtn} onClick={onPickAvatar} disabled={isUploadingAvatar} aria-label="Change profile picture">
+                                <CameraIcon />
                             </button>
-                        </section>
+                        </div>
+
+                        <div className={styles.profileCardInfo}>
+                            {isEditingUsername ? (
+                                <div className={styles.usernameEditRow}>
+                                    <input
+                                        className={styles.usernameInput}
+                                        value={usernameDraft}
+                                        onChange={(e) => setUsernameDraft(e.target.value)}
+                                        autoFocus
+                                        maxLength={150}
+                                        disabled={isSavingUsername}
+                                    />
+                                    <button type="button" className={styles.usernameSaveBtn} onClick={saveUsername} disabled={isSavingUsername}>
+                                        {isSavingUsername ? '...' : 'Save'}
+                                    </button>
+                                    <button type="button" className={styles.usernameCancelBtn} onClick={cancelEditingUsername} disabled={isSavingUsername}>
+                                        Cancel
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className={styles.usernameRow}>
+                                    <h2 className={styles.username}>{user.username}</h2>
+                                    <button type="button" className={styles.editPencilBtn} onClick={startEditingUsername} aria-label="Edit username">
+                                        <PencilIcon />
+                                    </button>
+                                </div>
+                            )}
+                            <p className={styles.playerId}>Player ID: #{user.id}</p>
+
+                            {isPlayer && xpStatus && (
+                                <>
+                                    <div className={styles.rankRow}>
+                                        <RankBadge rank={xpStatus.rank} size="sm" />
+                                        <span className={styles.rankLabel} style={{ color: RANK_TEXT_COLORS[xpStatus.rank] }}>{xpStatus.rank_label}</span>
+                                    </div>
+                                    <div className={styles.xpRow}>
+                                        <XpIcon />
+                                        <span>
+                                            {xpStatus.total_xp.toLocaleString()}
+                                            {xpStatus.next_rank_xp != null ? ` / ${xpStatus.next_rank_xp.toLocaleString()} XP` : ' XP'}
+                                        </span>
+                                    </div>
+                                </>
+                            )}
+                        </div>
                     </div>
+
+                    {isPlayer && xpStatus && (
+                        <div className={styles.progressBlock}>
+                            <div className={styles.progressTrack} role="progressbar" aria-valuenow={xpStatus.rank_progress_percent} aria-valuemin={0} aria-valuemax={100}>
+                                <div className={styles.progressFill} style={{ width: `${xpStatus.rank_progress_percent}%` }} />
+                            </div>
+                            <p className={styles.progressCaption}>
+                                {xpStatus.next_rank
+                                    ? `${xpStatus.xp_to_next_rank.toLocaleString()} XP to reach ${capitalize(xpStatus.next_rank)}`
+                                    : 'Top rank reached'}
+                            </p>
+                        </div>
+                    )}
                 </section>
+
+                {isPlayer && (
+                    <section className={styles.statRow}>
+                        <div className={styles.statTile}>
+                            <span className={styles.statValue}>{pointsBalance.toLocaleString()}</span>
+                            <span className={styles.statLabel}>RP</span>
+                        </div>
+                        <div className={styles.statTile}>
+                            <span className={styles.statValue}>{xpStatus ? `#${xpStatus.global_rank.toLocaleString()}` : '—'}</span>
+                            <span className={styles.statLabel}>Global Rank</span>
+                        </div>
+                    </section>
+                )}
+
+                {isPlayer && (xpStatus || streak) && (
+                    <section className={styles.sectionCard}>
+                        <h3 className={styles.sectionTitle}>Next Rewards</h3>
+                        <div className={styles.rewardsList}>
+                            {xpStatus?.next_rank && (
+                                <div className={styles.rewardRow}>
+                                    <span className={styles.rewardLockIcon}><LockIcon /></span>
+                                    <div className={styles.rewardText}>
+                                        <strong>{capitalize(xpStatus.next_rank)} Rank</strong>
+                                        <small>{xpStatus.next_rank_xp?.toLocaleString()} XP</small>
+                                    </div>
+                                </div>
+                            )}
+                            {streak && (
+                                <div className={styles.rewardRow}>
+                                    <span className={`${styles.rewardLockIcon} ${streak.reward_available ? styles.rewardUnlocked : ''}`}>
+                                        {streak.reward_available ? <CheckIcon /> : <LockIcon />}
+                                    </span>
+                                    <div className={styles.rewardText}>
+                                        <strong>Daily Streak - {streakRewardLabel}</strong>
+                                        <small>Day {Math.min(streak.current_streak, streak.target_days)} of {streak.target_days}</small>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </section>
+                )}
+
+                {isPlayer && achievements && (
+                    <section className={styles.sectionCard}>
+                        <h3 className={styles.sectionTitle}>Achievements</h3>
+                        <div className={styles.achievementsRow}>
+                            {achievements.map((achievement) => (
+                                <div key={achievement.slug} className={styles.achievementItem}>
+                                    <div className={`${styles.achievementBadge} ${achievement.unlocked ? styles.achievementUnlocked : styles.achievementLocked}`}>
+                                        <span aria-hidden="true">{ACHIEVEMENT_ICONS[achievement.slug] || '⭐'}</span>
+                                        {!achievement.unlocked && <span className={styles.achievementLockOverlay}><LockIcon /></span>}
+                                    </div>
+                                    <span className={styles.achievementLabel}>{achievement.label}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                {isPlayer && (
+                    <section className={styles.sectionCard}>
+                        <div className={styles.statsHeader}>
+                            <h3 className={styles.sectionTitle}>Stats</h3>
+                            <div className={styles.rangeMenuWrap} ref={rangeMenuRef}>
+                                <button
+                                    type="button"
+                                    className={styles.rangeSelect}
+                                    aria-haspopup="listbox"
+                                    aria-expanded={isRangeMenuOpen}
+                                    onClick={() => setIsRangeMenuOpen((open) => !open)}
+                                >
+                                    {STATS_RANGE_OPTIONS.find((o) => o.value === statsRange)?.label}
+                                    <ChevronDownIcon />
+                                </button>
+                                {isRangeMenuOpen && (
+                                    <div className={`${styles.rangeMenu} ${rangeMenuPos === 'up' ? styles.rangeMenuUp : ''}`} role="listbox">
+                                        {STATS_RANGE_OPTIONS.map((option) => (
+                                            <button
+                                                key={option.value}
+                                                type="button"
+                                                role="option"
+                                                aria-selected={statsRange === option.value}
+                                                className={`${styles.rangeMenuItem} ${statsRange === option.value ? styles.rangeMenuItemActive : ''}`}
+                                                onClick={() => {
+                                                    setStatsRange(option.value);
+                                                    setIsRangeMenuOpen(false);
+                                                }}
+                                            >
+                                                {option.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div className={styles.gameStatsGrid}>
+                            <div className={styles.gameStatTile}>
+                                <span className={styles.statValue}>{gameStats ? gameStats.rounds_played.toLocaleString() : '—'}</span>
+                                <span className={styles.statLabel}>Rounds Played</span>
+                            </div>
+                            <div className={styles.gameStatTile}>
+                                <span className={styles.statValue}>{gameStats ? gameStats.total_wins.toLocaleString() : '—'}</span>
+                                <span className={styles.statLabel}>Total Wins</span>
+                            </div>
+                            <div className={styles.gameStatTile}>
+                                <span className={styles.statValue}>{gameStats?.highest_multiplier ? `${Number(gameStats.highest_multiplier).toFixed(2)}x` : '—'}</span>
+                                <span className={styles.statLabel}>Highest Multiplier</span>
+                            </div>
+                        </div>
+                    </section>
+                )}
+
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={onAvatarSelected}
+                    className={styles.hiddenFileInput}
+                />
             </main>
-
-            <ChangePasswordModal
-                isOpen={isPasswordModalOpen}
-                onClose={() => setIsPasswordModalOpen(false)}
-                onSuccess={(message) => setToast({ message, type: 'success' })}
-                onError={(message) => setToast({ message, type: 'error' })}
-            />
-
-            <Modal
-                isOpen={isVerifyPasswordModalOpen}
-                onClose={resetEmailFlow}
-                title="Verify Current Password"
-                footer={
-                    <>
-                        <button className={styles.modalSecondaryBtn} onClick={resetEmailFlow} disabled={emailStepLoading}>
-                            Cancel
-                        </button>
-                        <button
-                            className={styles.modalPrimaryBtn}
-                            onClick={() => verifyCurrentPassword(verifiedPassword)}
-                            disabled={emailStepLoading || !verifiedPassword.trim()}
-                        >
-                            {emailStepLoading ? 'Verifying...' : 'Continue'}
-                        </button>
-                    </>
-                }
-            >
-                <div className={styles.fieldGroup}>
-                    <label className={styles.label}>Current password</label>
-                    <input
-                        className={styles.input}
-                        type="password"
-                        value={verifiedPassword}
-                        onChange={(e) => setVerifiedPassword(e.target.value)}
-                        autoFocus
-                    />
-                </div>
-            </Modal>
-
-            <Modal
-                isOpen={isEmailEntryModalOpen}
-                onClose={resetEmailFlow}
-                title="Enter New Email"
-                footer={
-                    <>
-                        <button className={styles.modalSecondaryBtn} onClick={resetEmailFlow} disabled={emailStepLoading}>
-                            Cancel
-                        </button>
-                        <button
-                            className={styles.modalPrimaryBtn}
-                            onClick={requestEmailOtp}
-                            disabled={emailStepLoading || !newEmail.trim()}
-                        >
-                            {emailStepLoading ? 'Sending OTP...' : 'Send OTP'}
-                        </button>
-                    </>
-                }
-            >
-                <div className={styles.fieldGroup}>
-                    <label className={styles.label}>New email address</label>
-                    <input
-                        className={styles.input}
-                        type="email"
-                        value={newEmail}
-                        onChange={(e) => setNewEmail(e.target.value)}
-                        autoFocus
-                    />
-                </div>
-            </Modal>
-
-            <Modal
-                isOpen={isOtpModalOpen}
-                onClose={resetEmailFlow}
-                title="Verify OTP"
-                footer={
-                    <>
-                        <button className={styles.modalSecondaryBtn} onClick={resetEmailFlow} disabled={emailStepLoading}>
-                            Cancel
-                        </button>
-                        <button
-                            className={styles.modalPrimaryBtn}
-                            onClick={verifyEmailOtp}
-                            disabled={emailStepLoading || !emailOtp.trim()}
-                        >
-                            {emailStepLoading ? 'Verifying...' : 'Verify & Update Email'}
-                        </button>
-                    </>
-                }
-            >
-                <div className={styles.fieldGroup}>
-                    <label className={styles.label}>OTP sent to {newEmail || 'new email'}</label>
-                    <input
-                        className={styles.input}
-                        type="text"
-                        value={emailOtp}
-                        onChange={(e) => setEmailOtp(e.target.value)}
-                        maxLength={6}
-                        autoFocus
-                    />
-                </div>
-            </Modal>
-
-            <Modal
-                isOpen={isDeleteConfirmOpen}
-                onClose={() => setIsDeleteConfirmOpen(false)}
-                title="Delete Account"
-                footer={
-                    <>
-                        <button className={styles.modalSecondaryBtn} onClick={() => setIsDeleteConfirmOpen(false)} disabled={isDeletingAccount}>
-                            Cancel
-                        </button>
-                        <button
-                            className={styles.modalDangerBtn}
-                            onClick={() => {
-                                setIsDeleteConfirmOpen(false);
-                                setIsDeleteFinalOpen(true);
-                            }}
-                            disabled={isDeletingAccount}
-                        >
-                            Continue
-                        </button>
-                    </>
-                }
-            >
-                <p className={styles.modalText}>Are you sure you want to permanently delete your account?</p>
-            </Modal>
-
-            <Modal
-                isOpen={isDeleteFinalOpen}
-                onClose={() => setIsDeleteFinalOpen(false)}
-                title="Final Confirmation"
-                footer={
-                    <>
-                        <button className={styles.modalSecondaryBtn} onClick={() => setIsDeleteFinalOpen(false)} disabled={isDeletingAccount}>
-                            Cancel
-                        </button>
-                        <button className={styles.modalDangerBtn} onClick={handleDeleteAccount} disabled={isDeletingAccount}>
-                            {isDeletingAccount ? 'Deleting...' : 'Delete Permanently'}
-                        </button>
-                    </>
-                }
-            >
-                <p className={styles.modalText}>This action cannot be undone.</p>
-            </Modal>
 
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
         </DashboardLayout>
+    );
+}
+
+function BackIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+        </svg>
+    );
+}
+
+function GearIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg>
+    );
+}
+
+function CameraIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+            <circle cx="12" cy="13" r="4" />
+        </svg>
+    );
+}
+
+function PencilIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z" />
+        </svg>
+    );
+}
+
+function XpIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+        </svg>
+    );
+}
+
+function LockIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+    );
+}
+
+function ChevronDownIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="6 9 12 15 18 9" />
+        </svg>
+    );
+}
+
+function CheckIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+        </svg>
     );
 }

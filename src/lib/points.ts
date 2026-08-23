@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/api';
-import { PointsBalance, PointsInfo, PointsLedgerEntry, PointsRedemptionRequest, PointsRedemptionStatus } from '@/types';
+import { PointsBalance, PointsInfo, PointsLedgerPage, PointsRedemptionRequest, PointsRedemptionStatus } from '@/types';
 
 function unwrapList(data: PointsRedemptionRequest[] | { results: PointsRedemptionRequest[] }): PointsRedemptionRequest[] {
     return Array.isArray(data) ? data : data.results || [];
@@ -19,8 +19,12 @@ export const pointsApi = {
         return apiClient.get<PointsInfo>('/api/points/info/');
     },
 
-    getLedger(): Promise<PointsLedgerEntry[]> {
-        return apiClient.get<PointsLedgerEntry[]>('/api/points/ledger/');
+    getLedger(params?: { limit?: number; offset?: number }): Promise<PointsLedgerPage> {
+        const query = new URLSearchParams();
+        if (params?.limit) query.set('limit', String(params.limit));
+        if (params?.offset) query.set('offset', String(params.offset));
+        const suffix = query.toString() ? `?${query.toString()}` : '';
+        return apiClient.get<PointsLedgerPage>(`/api/points/ledger/${suffix}`);
     },
 
     requestRedemption(payload: { points_amount: number; reward_description?: string; note?: string }): Promise<PointsRedemptionRequest> {

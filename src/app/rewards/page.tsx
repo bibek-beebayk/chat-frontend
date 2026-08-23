@@ -13,6 +13,8 @@ import { displayLabelForDailyProgressItem, xpApi } from '@/lib/xp';
 import { DailyProgressItem, LoginStreakStatus, PointsBalance, PointsLedgerEntry, PointsRedemptionRequest } from '@/types';
 import styles from './page.module.css';
 
+const LEDGER_PAGE_SIZE = 10;
+
 type ToastState = { message: string; type: 'success' | 'error' } | null;
 type ChallengeTab = 'daily' | 'weekly' | 'events';
 
@@ -23,6 +25,25 @@ const entryTypeCopy: Record<string, string> = {
     redemption_finalize: 'Redemption completed',
     adjustment: 'Staff adjustment',
 };
+
+// game_round ledger entries carry which game via metadata.game (set by
+// each game's points.services call) - same slug->name mapping used
+// elsewhere for real game data (e.g. ContinuePlayingCard).
+const GAME_LABELS: Record<string, string> = {
+    plinko: 'Plinko',
+    slots: 'Rollin 3x3',
+    rocket: 'Rollin Rocket',
+};
+
+function ledgerEntryLabel(entry: PointsLedgerEntry): string {
+    if (entry.action?.label) return entry.action.label;
+    if (entry.entry_type === 'game_round') {
+        const gameSlug = entry.metadata?.game;
+        if (typeof gameSlug === 'string' && GAME_LABELS[gameSlug]) return GAME_LABELS[gameSlug];
+        return 'Game Round';
+    }
+    return entryTypeCopy[entry.entry_type] || entry.entry_type;
+}
 
 // Purely decorative per-item icon - there's no icon concept on XPAction
 // itself, so this is a small local slug map (same approach as
@@ -49,6 +70,8 @@ export default function RewardsPage() {
     const { user } = useAuth();
     const [balance, setBalance] = useState<PointsBalance | null>(null);
     const [ledger, setLedger] = useState<PointsLedgerEntry[]>([]);
+    const [ledgerHasMore, setLedgerHasMore] = useState(false);
+    const [ledgerLoadingMore, setLedgerLoadingMore] = useState(false);
     const [activeRequest, setActiveRequest] = useState<PointsRedemptionRequest | null>(null);
     const [loading, setLoading] = useState(true);
     const [pointsAmount, setPointsAmount] = useState('');
@@ -81,12 +104,13 @@ export default function RewardsPage() {
             // returns every player's requests) - a player would always get a
             // 403 there. balance.active_redemption_request is the player's
             // own pending/approved request, scoped server-side.
-            const [balanceData, ledgerData] = await Promise.all([
+            const [balanceData, ledgerPage] = await Promise.all([
                 pointsApi.getBalance(),
-                pointsApi.getLedger(),
+                pointsApi.getLedger({ limit: LEDGER_PAGE_SIZE }),
             ]);
             setBalance(balanceData);
-            setLedger(ledgerData);
+            setLedger(ledgerPage.results);
+            setLedgerHasMore(ledgerPage.meta.has_more);
             setActiveRequest(balanceData.active_redemption_request || null);
         } catch {
             // leave existing state on transient errors
@@ -94,6 +118,19 @@ export default function RewardsPage() {
             setLoading(false);
         }
     }, [user]);
+
+    const loadMoreLedger = useCallback(async () => {
+        setLedgerLoadingMore(true);
+        try {
+            const nextPage = await pointsApi.getLedger({ limit: LEDGER_PAGE_SIZE, offset: ledger.length });
+            setLedger((prev) => [...prev, ...nextPage.results]);
+            setLedgerHasMore(nextPage.meta.has_more);
+        } catch {
+            // leave existing list on transient errors - user can retry via the button
+        } finally {
+            setLedgerLoadingMore(false);
+        }
+    }, [ledger.length]);
 
     const loadDailyProgress = useCallback(async () => {
         if (!user || user.user_type !== 'player') return;
@@ -282,17 +319,29 @@ export default function RewardsPage() {
                             {ledger.length === 0 ? (
                                 <p className={styles.emptyLedger}>No points activity yet.</p>
                             ) : (
-                                <div className={styles.ledgerList}>
-                                    {ledger.map((entry) => (
-                                        <div key={entry.id} className={styles.ledgerItem}>
-                                            <span>{entry.action?.label || entryTypeCopy[entry.entry_type] || entry.entry_type}</span>
-                                            <strong className={Number(entry.delta) >= 0 ? styles.positive : styles.negative}>
-                                                {Number(entry.delta) >= 0 ? '+' : ''}{formatPoints(entry.delta)}
-                                            </strong>
-                                            <time>{formatDate(entry.created_at)}</time>
-                                        </div>
-                                    ))}
-                                </div>
+                                <>
+                                    <div className={styles.ledgerList}>
+                                        {ledger.map((entry) => (
+                                            <div key={entry.id} className={styles.ledgerItem}>
+                                                <span>{ledgerEntryLabel(entry)}</span>
+                                                <strong className={Number(entry.delta) >= 0 ? styles.positive : styles.negative}>
+                                                    {Number(entry.delta) >= 0 ? '+' : ''}{formatPoints(entry.delta)}
+                                                </strong>
+                                                <time>{formatDate(entry.created_at)}</time>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {ledgerHasMore && (
+                                        <button
+                                            type="button"
+                                            className={styles.loadMoreBtn}
+                                            onClick={loadMoreLedger}
+                                            disabled={ledgerLoadingMore}
+                                        >
+                                            {ledgerLoadingMore ? 'Loading...' : 'Load More'}
+                                        </button>
+                                    )}
+                                </>
                             )}
                         </section>
                     </>
