@@ -58,3 +58,9 @@
     color: #fffbe8;
     box-shadow: var(--shadow-sm), 0 0 18px rgba(var(--color-primary-rgb), 0.55);
 }
+
+.rollin_legend {
+    background: linear-gradient(145deg, #f7d774, var(--color-secondary) 55%, #2a0a45);
+    color: #fffbe8;
+    box-shadow: var(--shadow-sm), 0 0 22px rgba(247, 215, 116, 0.6);
+}

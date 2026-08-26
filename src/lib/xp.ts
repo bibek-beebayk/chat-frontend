@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/api';
-import { Achievement, DailyProgressItem, XpStatus } from '@/types';
+import { Achievement, DailyProgressItem, RankTiersResponse, XpStatus } from '@/types';
 
 export const xpApi = {
     getStatus(): Promise<XpStatus> {
@@ -12,6 +12,14 @@ export const xpApi = {
 
     getAchievements(): Promise<Achievement[]> {
         return apiClient.get<Achievement[]>('/api/xp/achievements/');
+    },
+
+    getRankTiers(): Promise<RankTiersResponse> {
+        return apiClient.get<RankTiersResponse>('/api/xp/rank-tiers/');
+    },
+
+    acknowledgeLevelUp(): Promise<XpStatus> {
+        return apiClient.post<XpStatus>('/api/xp/acknowledge-level-up/', {});
     },
 };
 

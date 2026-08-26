@@ -34,6 +34,7 @@ const RANK_TEXT_COLORS: Record<string, string> = {
     platinum: '#8fc9e0',
     diamond: '#3fa8e0',
     rollin_elite: 'var(--color-accent)',
+    rollin_legend: '#f7d774',
 };
 
 const STATS_RANGE_OPTIONS: { value: StatsRange; label: string }[] = [
@@ -243,7 +244,7 @@ export default function ProfilePage() {
                     </div>
 
                     {isPlayer && xpStatus && (
-                        <div className={styles.progressBlock}>
+                        <Link href="/levels" className={styles.progressBlock}>
                             <div className={styles.progressTrack} role="progressbar" aria-valuenow={xpStatus.rank_progress_percent} aria-valuemin={0} aria-valuemax={100}>
                                 <div className={styles.progressFill} style={{ width: `${xpStatus.rank_progress_percent}%` }} />
                             </div>
@@ -251,8 +252,9 @@ export default function ProfilePage() {
                                 {xpStatus.next_rank
                                     ? `${xpStatus.xp_to_next_rank.toLocaleString()} XP to reach ${capitalize(xpStatus.next_rank)}`
                                     : 'Top rank reached'}
+                                <span className={styles.progressCaptionLink}>View Rollin Levels ›</span>
                             </p>
-                        </div>
+                        </Link>
                     )}
                 </section>
 

@@ -12,6 +12,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { OnboardingGuard } from '@/components/auth/OnboardingGuard';
 import { AnalyticsTracker } from '@/components/analytics/AnalyticsTracker';
+import { CelebrationManager } from '@/components/celebrations/CelebrationManager';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -81,6 +82,7 @@ export default function RootLayout({
                                     <MobileBottomNav />
                                     <Footer />
                                     <FloatingChat />
+                                    <CelebrationManager />
                                 </OnboardingGuard>
                             </NotificationProvider>
                         </AuthProvider>

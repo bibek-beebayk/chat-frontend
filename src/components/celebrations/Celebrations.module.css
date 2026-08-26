@@ -1,0 +1,148 @@
+.backdrop {
+    align-items: center;
+    background: rgba(5, 3, 12, 0.72);
+    backdrop-filter: blur(4px);
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    left: 0;
+    padding: 1.25rem;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 2000;
+}
+
+.card {
+    background:
+        radial-gradient(circle at 50% 0%, rgba(var(--color-primary-rgb), 0.22), transparent 55%),
+        linear-gradient(180deg, rgba(24, 12, 40, 0.98), rgba(10, 7, 20, 0.99));
+    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg), 0 0 40px rgba(var(--color-primary-rgb), 0.2);
+    display: grid;
+    gap: 0.9rem;
+    justify-items: center;
+    max-width: 340px;
+    padding: var(--spacing-lg);
+    text-align: center;
+    width: 100%;
+}
+
+.eyebrow {
+    color: var(--color-primary-light);
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.iconCircle {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 50%;
+    display: inline-flex;
+    font-size: 2.2rem;
+    height: 84px;
+    justify-content: center;
+    width: 84px;
+}
+
+.title {
+    background: linear-gradient(135deg, var(--color-accent), var(--color-primary-light));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-size: 1.8rem;
+    font-weight: 950;
+    margin: 0;
+}
+
+.subtitle {
+    color: var(--color-text-primary);
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.body {
+    color: var(--color-text-secondary);
+    font-size: 0.88rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.rewardPill {
+    align-items: center;
+    background: rgba(var(--color-accent-rgb), 0.14);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.35);
+    border-radius: var(--radius-md);
+    display: inline-flex;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+}
+
+.rewardPillIcon {
+    font-size: 1.2rem;
+}
+
+.rewardPillValue {
+    color: var(--color-accent);
+    font-size: 1.1rem;
+    font-weight: 900;
+}
+
+.primaryBtn {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    border: none;
+    border-radius: var(--radius-md);
+    box-shadow: 0 12px 28px rgba(102, 32, 214, 0.3);
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 900;
+    padding: 0.85rem 1.5rem;
+    width: 100%;
+}
+
+.secondaryLink {
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+/* ---------- Streak pips ---------- */
+
+.pipRow {
+    display: flex;
+    gap: 0.4rem;
+    justify-content: center;
+}
+
+.pip {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    color: var(--color-text-muted);
+    display: inline-flex;
+    flex-shrink: 0;
+    font-size: 0.68rem;
+    font-weight: 800;
+    height: 34px;
+    justify-content: center;
+    width: 34px;
+}
+
+.pipDone {
+    background: linear-gradient(135deg, var(--color-accent), #a5730a);
+    border-color: transparent;
+    color: #241800;
+}
+
+.pipTarget {
+    background: rgba(var(--color-accent-rgb), 0.14);
+    border-color: rgba(var(--color-accent-rgb), 0.4);
+    color: var(--color-accent);
+}

@@ -227,8 +227,10 @@
 }
 
 .progressBlock {
+    color: inherit;
     display: grid;
     gap: 0.4rem;
+    text-decoration: none;
     width: 100%;
 }
 
@@ -248,9 +250,20 @@
 }
 
 .progressCaption {
+    align-items: center;
     color: var(--color-text-muted);
+    display: flex;
+    flex-wrap: wrap;
     font-size: 0.78rem;
+    gap: 0.4rem;
+    justify-content: space-between;
     margin: 0;
+}
+
+.progressCaptionLink {
+    color: var(--color-primary-light);
+    flex-shrink: 0;
+    font-weight: 800;
 }
 
 /* ---------- Stat row ---------- */

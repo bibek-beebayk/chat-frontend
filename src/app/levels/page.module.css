@@ -1,0 +1,229 @@
+.main {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1rem;
+    width: 100%;
+    display: grid;
+    gap: var(--spacing-md);
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+    display: grid;
+    justify-items: center;
+    padding: 0.5rem 0 0.25rem;
+    text-align: center;
+}
+
+.heroIcon {
+    font-size: 2rem;
+    margin-bottom: 0.3rem;
+}
+
+.heroTitle {
+    color: var(--color-text-primary);
+    font-size: 1.9rem;
+    font-weight: 950;
+    margin: 0;
+}
+
+.heroTitle span {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.heroTagline {
+    color: var(--color-text-muted);
+    font-size: 0.86rem;
+    margin: 0.4rem 0 0;
+}
+
+.loadingArea {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    padding: 3rem 0;
+}
+
+.emptyState {
+    color: var(--color-text-muted);
+    padding: 2rem 0;
+    text-align: center;
+}
+
+/* ---------- Current level card ---------- */
+
+.currentCard {
+    align-items: center;
+    background:
+        radial-gradient(circle at 86% 0%, rgba(255, 215, 0, 0.08), transparent 30%),
+        linear-gradient(180deg, rgba(20, 10, 35, 0.92), rgba(10, 7, 20, 0.96));
+    border: 1px solid rgba(var(--color-primary-rgb), 0.18);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    color: inherit;
+    display: flex;
+    gap: 1rem;
+    padding: var(--spacing-md);
+    text-decoration: none;
+}
+
+.currentCardCol {
+    align-items: center;
+    display: flex;
+    flex: 1;
+    gap: 0.7rem;
+    min-width: 0;
+}
+
+.currentCardDivider {
+    background: rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+    width: 1px;
+}
+
+.currentCardLabel {
+    color: var(--color-text-muted);
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.currentCardValue {
+    color: var(--color-text-primary);
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 900;
+    margin-top: 0.15rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ---------- Tier list ---------- */
+
+.tierList {
+    display: grid;
+    gap: 0.6rem;
+}
+
+.tierRow {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    color: inherit;
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.7rem 0.85rem;
+    text-decoration: none;
+}
+
+.tierRowCurrent {
+    background: rgba(var(--color-accent-rgb), 0.08);
+    border-color: rgba(var(--color-accent-rgb), 0.4);
+}
+
+.tierRowLocked {
+    opacity: 0.55;
+}
+
+.tierRowInfo {
+    display: grid;
+    flex: 1;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.tierRowLabel {
+    color: var(--color-text-primary);
+    font-size: 0.94rem;
+    font-weight: 900;
+}
+
+.tierRowRange {
+    color: var(--color-text-muted);
+    font-size: 0.76rem;
+}
+
+.tierRowBadge {
+    background: rgba(var(--color-accent-rgb), 0.18);
+    border-radius: 999px;
+    color: var(--color-accent);
+    flex-shrink: 0;
+    font-size: 0.68rem;
+    font-weight: 900;
+    padding: 0.24rem 0.55rem;
+    text-transform: uppercase;
+}
+
+.chevron {
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+}
+
+/* ---------- How XP Works ---------- */
+
+.howItWorks {
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+}
+
+.howItWorksTitle {
+    color: var(--color-primary-light);
+    font-size: 0.8rem;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    margin: 0 0 0.9rem;
+    text-transform: uppercase;
+}
+
+.howItWorksGrid {
+    display: grid;
+    gap: 0.9rem;
+}
+
+.howItWorksItem {
+    display: grid;
+    gap: 0.2rem;
+}
+
+.howItWorksIcon {
+    font-size: 1.3rem;
+}
+
+.howItWorksItem strong {
+    color: var(--color-text-primary);
+    font-size: 0.88rem;
+}
+
+.howItWorksItem p {
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* ---------- Desktop ---------- */
+
+@media (min-width: 880px) {
+    .main {
+        max-width: 760px;
+        padding: 1.5rem;
+    }
+
+    .heroTitle {
+        font-size: 2.4rem;
+    }
+
+    .howItWorksGrid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}

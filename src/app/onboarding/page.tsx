@@ -7,12 +7,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { hasCompletedSocialOnboarding, socialApi } from '@/lib/social';
 import { User } from '@/types';
 import { UserAvatar } from '@/components/social/UserAvatar';
+import { WelcomeModal } from '@/components/celebrations/WelcomeModal';
 import styles from './page.module.css';
 
 export default function OnboardingPage() {
     const router = useRouter();
     const { user, loading: authLoading } = useAuth();
 
+    const [showWelcome, setShowWelcome] = useState(true);
     const [loading, setLoading] = useState(true);
     const [actionBusyId, setActionBusyId] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -93,6 +95,10 @@ export default function OnboardingPage() {
     const emptyMessage = 'No player suggestions are available right now.';
 
     if (authLoading || !user) return null;
+
+    if (showWelcome) {
+        return <WelcomeModal onDismissed={() => setShowWelcome(false)} />;
+    }
 
     return (
         <main className={styles.page}>

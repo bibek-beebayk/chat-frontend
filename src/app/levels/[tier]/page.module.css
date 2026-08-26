@@ -1,0 +1,351 @@
+.main {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1rem;
+    width: 100%;
+    display: grid;
+    gap: var(--spacing-md);
+}
+
+/* ---------- Top bar ---------- */
+
+.topBar {
+    align-items: center;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.6rem;
+}
+
+.iconBtn {
+    align-items: center;
+    background: rgba(var(--color-primary-rgb), 0.1);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+    border-radius: 999px;
+    color: var(--color-text-primary);
+    display: inline-flex;
+    height: 40px;
+    justify-content: center;
+    width: 40px;
+}
+
+.iconBtn svg {
+    height: 19px;
+    width: 19px;
+}
+
+.iconBtn:hover {
+    background: rgba(var(--color-primary-rgb), 0.16);
+}
+
+.iconBtnSpacer {
+    height: 40px;
+    width: 40px;
+}
+
+.topBarTitle {
+    color: var(--color-text-primary);
+    font-size: 1.05rem;
+    font-weight: 900;
+    margin: 0;
+    overflow: hidden;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.loadingArea {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    padding: 3rem 0;
+}
+
+.emptyState {
+    color: var(--color-text-muted);
+    padding: 2rem 0;
+    text-align: center;
+}
+
+/* ---------- Hero ---------- */
+
+.heroBlock {
+    display: grid;
+    justify-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+}
+
+.xpRange {
+    color: var(--color-text-muted);
+    font-size: 0.86rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+/* ---------- Section card (shared) ---------- */
+
+.sectionCard {
+    background:
+        radial-gradient(circle at 86% 0%, rgba(255, 215, 0, 0.08), transparent 30%),
+        linear-gradient(180deg, rgba(20, 10, 35, 0.92), rgba(10, 7, 20, 0.96));
+    border: 1px solid rgba(var(--color-primary-rgb), 0.18);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-md);
+}
+
+.sectionTitle {
+    color: var(--color-primary-light);
+    font-size: 0.76rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    margin: 0 0 0.8rem;
+    text-transform: uppercase;
+}
+
+/* ---------- Progress / status ---------- */
+
+.progressHeader {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.6rem;
+    justify-content: space-between;
+    margin-bottom: 0.6rem;
+}
+
+.progressLabel {
+    color: var(--color-text-muted);
+    flex-basis: 100%;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.progressValue {
+    color: var(--color-text-primary);
+    font-size: 1.15rem;
+    font-weight: 900;
+}
+
+.progressXp {
+    color: var(--color-primary-light);
+    font-size: 0.86rem;
+    font-weight: 800;
+}
+
+.progressTrack {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    height: 10px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.progressFill {
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    border-radius: 999px;
+    height: 100%;
+    transition: width 400ms ease;
+}
+
+.statusRow {
+    align-items: center;
+    color: var(--color-text-secondary);
+    display: flex;
+    font-size: 0.88rem;
+    font-weight: 700;
+    gap: 0.6rem;
+}
+
+.statusRow svg {
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    height: 18px;
+    width: 18px;
+}
+
+/* ---------- Sub-levels ---------- */
+
+.subLevelRow {
+    display: grid;
+    gap: 0.6rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.subLevelTile {
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    display: grid;
+    gap: 0.3rem;
+    padding: 0.65rem 0.5rem;
+    text-align: center;
+}
+
+.subLevelLabel {
+    color: var(--color-text-primary);
+    font-size: 0.78rem;
+    font-weight: 900;
+}
+
+.subLevelRange {
+    color: var(--color-text-muted);
+    font-size: 0.68rem;
+}
+
+/* ---------- Perks ---------- */
+
+.perksGrid {
+    display: grid;
+    gap: 0.7rem;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.perkTile {
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.75rem;
+}
+
+.perkIcon {
+    font-size: 1.3rem;
+}
+
+.perkTile strong {
+    color: var(--color-text-primary);
+    font-size: 0.88rem;
+}
+
+.perkTile p {
+    color: var(--color-text-muted);
+    font-size: 0.76rem;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* ---------- Next unlock ---------- */
+
+.nextUnlockCard {
+    border: 1px solid rgba(var(--color-accent-rgb), 0.35);
+    border-radius: var(--radius-lg);
+    display: grid;
+    gap: 0.2rem;
+    padding: var(--spacing-md);
+}
+
+.nextUnlockLabel {
+    color: var(--color-accent);
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.nextUnlockTitle {
+    color: var(--color-text-primary);
+    font-size: 1.05rem;
+    font-weight: 900;
+}
+
+.nextUnlockDesc {
+    color: var(--color-text-muted);
+    font-size: 0.82rem;
+    margin: 0.15rem 0 0;
+}
+
+/* ---------- Tagline ---------- */
+
+.tagline {
+    color: var(--color-text-muted);
+    font-size: 0.84rem;
+    font-style: italic;
+    margin: 0;
+    text-align: center;
+}
+
+/* ---------- Rollin Legend ---------- */
+
+.legendCard {
+    background: linear-gradient(180deg, rgba(50, 20, 60, 0.9), rgba(10, 7, 20, 0.96));
+    border: 1px solid rgba(247, 215, 116, 0.4);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 0 30px rgba(247, 215, 116, 0.12);
+    display: grid;
+    gap: 0.4rem;
+    justify-items: center;
+    padding: var(--spacing-lg);
+    text-align: center;
+}
+
+.legendLabel {
+    color: var(--color-text-muted);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.legendTitle {
+    background: linear-gradient(135deg, #f7d774, var(--color-secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-size: 1.5rem;
+    font-weight: 950;
+}
+
+.legendXp {
+    color: var(--color-text-primary);
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.legendPill {
+    background: rgba(247, 215, 116, 0.14);
+    border: 1px solid rgba(247, 215, 116, 0.35);
+    border-radius: 999px;
+    color: #f7d774;
+    font-size: 0.72rem;
+    font-weight: 900;
+    margin-top: 0.3rem;
+    padding: 0.3rem 0.75rem;
+    text-transform: uppercase;
+}
+
+.legendPrestigeRow {
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.7rem;
+    padding-top: 0.7rem;
+    width: 100%;
+}
+
+.legendPrestigeRow span {
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+}
+
+.legendPrestigeRow strong {
+    color: var(--color-text-primary);
+    font-size: 0.86rem;
+}
+
+/* ---------- Desktop ---------- */
+
+@media (min-width: 880px) {
+    .main {
+        max-width: 720px;
+        padding: 1.5rem;
+    }
+
+    .perksGrid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}

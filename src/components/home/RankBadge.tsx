@@ -13,6 +13,7 @@ const RANK_LABELS: Record<RankSlug, string> = {
     platinum: 'Platinum',
     diamond: 'Diamond',
     rollin_elite: 'Rollin Elite',
+    rollin_legend: 'Rollin Legend',
 };
 
 /**

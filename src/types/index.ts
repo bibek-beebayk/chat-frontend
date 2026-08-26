@@ -429,7 +429,7 @@ export interface PointsInfo {
     earn_actions: PointsEarnAction[];
 }
 
-export type RankSlug = 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'rollin_elite';
+export type RankSlug = 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'rollin_elite' | 'rollin_legend';
 
 export interface XpStatus {
     total_xp: number;
@@ -441,7 +441,44 @@ export interface XpStatus {
     xp_to_next_rank: number;
     rank_progress_percent: number;
     global_rank: number;
+    sub_level: number | null;
+    sub_level_label: string | null;
+    sub_level_progress_percent: number | null;
+    pending_level_up: PendingLevelUp | null;
     updated_at: string;
+}
+
+export interface PendingLevelUp {
+    rank: RankSlug;
+    rank_label: string;
+    bonus_rp: number | null;
+}
+
+export interface RankSubRange {
+    sub_level: number;
+    sub_level_label: string;
+    min_xp: number;
+    max_xp: number;
+}
+
+export interface RankTierEntry {
+    slug: RankSlug;
+    label: string;
+    min_xp: number;
+    max_xp: number | null;
+    sub_ranges: RankSubRange[] | null;
+    rank_up_bonus_rp: number | null;
+    tagline: string;
+    is_current: boolean;
+    is_unlocked: boolean;
+}
+
+export interface RankTiersResponse {
+    caller: {
+        total_xp: number;
+        rank: RankSlug;
+    };
+    tiers: RankTierEntry[];
 }
 
 export interface Achievement {
