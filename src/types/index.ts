@@ -522,6 +522,12 @@ export interface Game {
     is_active: boolean;
 }
 
+export interface RecentWin {
+    username: string;
+    multiplier: string;
+    created_at: string;
+}
+
 export type PlinkoRows = 8 | 12 | 16;
 export type PlinkoRiskLevel = 'low' | 'medium' | 'high';
 

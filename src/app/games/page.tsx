@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PageShell } from '@/components/layout/PageShell';
 import { gamesApi } from '@/lib/games';
+import { getFavoriteGameSlugs, onFavoriteGamesChanged } from '@/lib/favoriteGames';
 import { plinkoApi } from '@/lib/plinko';
 import { rocketApi } from '@/lib/rocket';
 import { slotsApi } from '@/lib/slots';
@@ -109,6 +110,12 @@ export default function GamesPage() {
     const [continueEntries, setContinueEntries] = useState<ContinueEntry[]>([]);
     const [continueLoading, setContinueLoading] = useState(true);
     const [filter, setFilter] = useState<FilterKey>('all');
+    const [favoriteSlugs, setFavoriteSlugs] = useState<string[]>([]);
+
+    useEffect(() => {
+        setFavoriteSlugs(getFavoriteGameSlugs());
+        return onFavoriteGamesChanged(() => setFavoriteSlugs(getFavoriteGameSlugs()));
+    }, []);
 
     useEffect(() => {
         gamesApi.list()
@@ -130,7 +137,7 @@ export default function GamesPage() {
 
     const filteredGames = games.filter((game) => {
         if (filter === 'all') return true;
-        if (filter === 'favorites') return false;
+        if (filter === 'favorites') return favoriteSlugs.includes(game.slug);
         return GAME_TAGS[game.slug] === (filter === 'popular' ? 'Popular' : 'New');
     });
 
@@ -162,7 +169,7 @@ export default function GamesPage() {
                                         <h3>{game.name}</h3>
                                         {game.description && <p>{game.description}</p>}
                                         {route ? (
-                                            <Link href={route} className={styles.playButton}>Play Now</Link>
+                                            <Link href={`/games/${game.slug}/details`} className={styles.playButton}>View Game</Link>
                                         ) : (
                                             <span className={styles.comingSoon}>Coming Soon</span>
                                         )}
@@ -245,7 +252,7 @@ export default function GamesPage() {
                                                     {tag && <span className={styles.gameRowTag}>{tag}</span>}
                                                 </div>
                                                 {route ? (
-                                                    <Link href={route} className={styles.gameRowPlay}>PLAY</Link>
+                                                    <Link href={`/games/${game.slug}/details`} className={styles.gameRowPlay}>VIEW</Link>
                                                 ) : (
                                                     <span className={styles.comingSoon}>Soon</span>
                                                 )}

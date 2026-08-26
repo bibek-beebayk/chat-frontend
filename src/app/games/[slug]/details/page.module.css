@@ -1,0 +1,338 @@
+.main {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1rem;
+    width: 100%;
+    display: grid;
+    gap: var(--spacing-md);
+}
+
+/* ---------- Top bar ---------- */
+
+.topBar {
+    align-items: center;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.6rem;
+}
+
+.iconBtn {
+    align-items: center;
+    background: rgba(var(--color-primary-rgb), 0.1);
+    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+    border-radius: 999px;
+    color: var(--color-text-primary);
+    display: inline-flex;
+    height: 40px;
+    justify-content: center;
+    width: 40px;
+}
+
+.iconBtn svg {
+    height: 19px;
+    width: 19px;
+}
+
+.iconBtn:hover {
+    background: rgba(var(--color-primary-rgb), 0.16);
+}
+
+.iconBtnActive {
+    background: rgba(239, 68, 68, 0.14);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #f87171;
+}
+
+.topBarTitle {
+    color: var(--color-text-primary);
+    font-size: 1.1rem;
+    font-weight: 900;
+    margin: 0;
+    overflow: hidden;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.loadingArea {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    padding: 3rem 0;
+}
+
+.emptyState {
+    color: var(--color-text-muted);
+    padding: 2rem 0;
+    text-align: center;
+}
+
+/* ---------- Layout ---------- */
+
+.layout {
+    display: grid;
+    gap: var(--spacing-md);
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+    aspect-ratio: 16 / 11;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    position: relative;
+}
+
+.heroImg {
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+}
+
+.heroFallback {
+    align-items: center;
+    display: flex;
+    font-size: 4rem;
+    height: 100%;
+    justify-content: center;
+    width: 100%;
+}
+
+.heroScrim {
+    background: linear-gradient(180deg, transparent 60%, rgba(0, 0, 0, 0.35));
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+}
+
+.playBtnDesktop {
+    display: none;
+}
+
+/* ---------- Info column ---------- */
+
+.titleRow {
+    align-items: center;
+    display: flex;
+    gap: 0.6rem;
+}
+
+.gameName {
+    color: var(--color-text-primary);
+    font-size: 1.4rem;
+    font-weight: 950;
+    margin: 0;
+}
+
+.tag {
+    background: rgba(var(--color-primary-rgb), 0.18);
+    border-radius: 999px;
+    color: var(--color-primary-light);
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    font-weight: 900;
+    padding: 0.28rem 0.65rem;
+    text-transform: uppercase;
+}
+
+.description {
+    color: var(--color-text-secondary);
+    font-size: 0.92rem;
+    line-height: 1.55;
+    margin: 0.6rem 0 0;
+}
+
+/* ---------- Stats ---------- */
+
+.statsGrid {
+    display: grid;
+    gap: 0.6rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 1.1rem;
+}
+
+.statTile {
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    display: grid;
+    gap: 0.3rem;
+    padding: 0.75rem 0.6rem;
+    text-align: center;
+}
+
+.statLabel {
+    color: var(--color-text-muted);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.statValue {
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    font-weight: 900;
+}
+
+/* ---------- Recent Wins ---------- */
+
+.recentWins {
+    margin-top: 1.3rem;
+}
+
+.sectionTitle {
+    color: var(--color-primary-light);
+    font-size: 0.76rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    margin: 0 0 0.7rem;
+    text-transform: uppercase;
+}
+
+.winsLoading {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+}
+
+.emptyWins {
+    color: var(--color-text-muted);
+    font-size: 0.86rem;
+    margin: 0;
+}
+
+.winsList {
+    display: grid;
+    gap: 0.55rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.winRow {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: var(--radius-md);
+    display: flex;
+    gap: 0.65rem;
+    padding: 0.6rem 0.75rem;
+}
+
+.winAvatar {
+    align-items: center;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    border-radius: 50%;
+    color: #fff;
+    display: inline-flex;
+    flex-shrink: 0;
+    font-size: 0.86rem;
+    font-weight: 800;
+    height: 34px;
+    justify-content: center;
+    width: 34px;
+}
+
+.winName {
+    color: var(--color-text-primary);
+    flex: 1;
+    font-size: 0.86rem;
+    font-weight: 700;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.winMultiplier {
+    color: var(--color-accent);
+    font-size: 0.88rem;
+    font-weight: 900;
+}
+
+.winTime {
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    font-size: 0.76rem;
+}
+
+/* ---------- Play Now ---------- */
+
+.playBarMobile {
+    margin-top: 1rem;
+}
+
+.playBtnMobile {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    border-radius: var(--radius-md);
+    box-shadow: 0 12px 28px rgba(102, 32, 214, 0.28);
+    color: #fff;
+    display: block;
+    font-size: 0.96rem;
+    font-weight: 900;
+    padding: 0.95rem;
+    text-align: center;
+    width: 100%;
+}
+
+/* ---------- Light theme ---------- */
+
+:global(html[data-theme='light']) .iconBtn {
+    background: rgba(99, 102, 241, 0.08);
+    border-color: rgba(99, 102, 241, 0.16);
+}
+
+:global(html[data-theme='light']) .statTile,
+:global(html[data-theme='light']) .winRow {
+    background: rgba(99, 102, 241, 0.045);
+    border-color: rgba(99, 102, 241, 0.14);
+}
+
+/* ---------- Desktop ---------- */
+
+@media (min-width: 880px) {
+    .main {
+        max-width: 1040px;
+        padding: 1.5rem;
+    }
+
+    .layout {
+        align-items: start;
+        grid-template-columns: 360px minmax(0, 1fr);
+        gap: var(--spacing-lg);
+    }
+
+    .heroCol {
+        display: grid;
+        gap: 0.85rem;
+        position: sticky;
+        top: 1.5rem;
+    }
+
+    .hero {
+        aspect-ratio: 4 / 3;
+    }
+
+    .playBtnDesktop {
+        background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+        border-radius: var(--radius-md);
+        box-shadow: 0 12px 28px rgba(102, 32, 214, 0.28);
+        color: #fff;
+        display: block;
+        font-size: 0.96rem;
+        font-weight: 900;
+        padding: 0.95rem;
+        text-align: center;
+        width: 100%;
+    }
+
+    .playBarMobile {
+        display: none;
+    }
+
+    .gameName {
+        font-size: 1.7rem;
+    }
+}
