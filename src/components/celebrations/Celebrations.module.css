@@ -14,19 +14,44 @@
 }
 
 .card {
-    background:
-        radial-gradient(circle at 50% 0%, rgba(var(--color-primary-rgb), 0.22), transparent 55%),
+    background-color: #150a24;
+    background-image:
+        radial-gradient(circle at 50% 0%, rgb(var(--color-primary-rgb) / 0.22), transparent 55%),
         linear-gradient(180deg, rgba(24, 12, 40, 0.98), rgba(10, 7, 20, 0.99));
-    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.3);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg), 0 0 40px rgba(var(--color-primary-rgb), 0.2);
+    box-shadow: var(--shadow-lg), 0 0 40px rgb(var(--color-primary-rgb) / 0.2);
     display: grid;
     gap: 0.9rem;
     justify-items: center;
     max-width: 340px;
     padding: var(--spacing-lg);
+    position: relative;
     text-align: center;
     width: 100%;
+}
+
+.closeBtn {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 50%;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 1rem;
+    height: 30px;
+    justify-content: center;
+    line-height: 1;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.75rem;
+    width: 30px;
+}
+
+.closeBtn:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: var(--color-text-primary);
 }
 
 .eyebrow {
@@ -75,8 +100,8 @@
 
 .rewardPill {
     align-items: center;
-    background: rgba(var(--color-accent-rgb), 0.14);
-    border: 1px solid rgba(var(--color-accent-rgb), 0.35);
+    background: rgb(var(--color-accent-rgb) / 0.14);
+    border: 1px solid rgb(var(--color-accent-rgb) / 0.35);
     border-radius: var(--radius-md);
     display: inline-flex;
     gap: 0.5rem;
@@ -142,7 +167,7 @@
 }
 
 .pipTarget {
-    background: rgba(var(--color-accent-rgb), 0.14);
-    border-color: rgba(var(--color-accent-rgb), 0.4);
+    background: rgb(var(--color-accent-rgb) / 0.14);
+    border-color: rgb(var(--color-accent-rgb) / 0.4);
     color: var(--color-accent);
 }

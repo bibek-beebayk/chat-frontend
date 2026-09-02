@@ -28,6 +28,9 @@ export function StreakProgressModal({ streak, onDismissed }: StreakProgressModal
     return (
         <div className={styles.backdrop} role="dialog" aria-modal="true" aria-label="Login streak progress">
             <div className={styles.card}>
+                <button type="button" className={styles.closeBtn} onClick={handleDismiss} aria-label="Close">
+                    ✕
+                </button>
                 <p className={styles.eyebrow}>{streak.target_days}-Day Streak</p>
                 <div className={styles.pipRow}>
                     {Array.from({ length: streak.target_days }).map((_, i) => {

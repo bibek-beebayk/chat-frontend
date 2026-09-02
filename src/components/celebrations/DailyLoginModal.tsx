@@ -24,6 +24,9 @@ export function DailyLoginModal({ xpValue, onDismissed }: DailyLoginModalProps) 
     return (
         <div className={styles.backdrop} role="dialog" aria-modal="true" aria-label="Daily login reward">
             <div className={styles.card}>
+                <button type="button" className={styles.closeBtn} onClick={handleDismiss} aria-label="Close">
+                    ✕
+                </button>
                 <p className={styles.eyebrow}>Daily Login Reward</p>
                 <div className={styles.iconCircle} aria-hidden="true">🎁</div>
                 <p className={styles.body}>You got</p>
