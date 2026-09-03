@@ -109,14 +109,24 @@
         font-size: 0.85rem;
     }
 
+    /* The reels are a rigid 300x300 component scaled down to fit small
+       screens. Keep .gridWrap a snug square that exactly contains the
+       scaled grid (300 * 0.76 = 228) and centre it both ways, so it can't
+       leave a gap at the top or spill past the bottom of the frame. */
     .gridWrap {
-        height: 228px;
-        padding: 0.5rem 0.4rem;
+        align-items: center;
+        aspect-ratio: 1;
+        height: auto;
+        margin: 0 auto;
+        max-width: 264px;
+        overflow: hidden;
+        padding: 0.5rem;
+        width: 100%;
     }
 
     .gridWrap > div {
         transform: scale(0.76);
-        transform-origin: top center;
+        transform-origin: center;
     }
 
     .resultArea {
