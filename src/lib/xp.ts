@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/api';
-import { Achievement, DailyProgressItem, RankTiersResponse, XpStatus } from '@/types';
+import { Achievement, ChallengePeriod, DailyProgressItem, RankTiersResponse, XpStatus } from '@/types';
 
 export const xpApi = {
     getStatus(): Promise<XpStatus> {
@@ -23,15 +23,35 @@ export const xpApi = {
     },
 };
 
-// XPAction.label (backend, xp/models.py) is free text an admin can set
-// independently of challenge_target_count - editing the target count in
-// Django admin does not update the label, so a naive item.label render can
-// silently show a stale round count. daily_challenge_rounds is the only
-// checklist item whose copy embeds a count, so its display label is built
-// from the live target_count here instead of trusted verbatim from the API.
-export function displayLabelForDailyProgressItem(item: DailyProgressItem): string {
-    if (item.slug === 'daily_challenge_rounds') {
-        return `Daily Challenge: Play ${item.target_count} Round${item.target_count === 1 ? '' : 's'}`;
-    }
-    return item.label;
+const PERIOD_BADGE: Record<ChallengePeriod, string> = {
+    daily: 'Daily',
+    weekly: 'Weekly',
+    event: 'Limited Time',
+};
+
+/** Short label for a period badge/pill next to a challenge tile. */
+export function challengePeriodLabel(period: ChallengePeriod): string {
+    return PERIOD_BADGE[period];
+}
+
+/**
+ * A short "resets in 4h" / "ends in 3d" countdown, driven entirely by
+ * `period` + `resets_at` off the API - never by the challenge's slug. This
+ * is what lets a brand-new weekly or event challenge (created purely in
+ * Django admin) render a correct countdown with no matching frontend
+ * change: the period type, not the specific challenge, decides the wording.
+ */
+export function describeChallengeTiming(period: ChallengePeriod, resetsAt: string, now: Date = new Date()): string {
+    const msRemaining = new Date(resetsAt).getTime() - now.getTime();
+    if (msRemaining <= 0) return period === 'event' ? 'Ending soon' : 'Resetting soon';
+
+    const totalMinutes = Math.floor(msRemaining / 60000);
+    const days = Math.floor(totalMinutes / 1440);
+    const hours = Math.floor((totalMinutes % 1440) / 60);
+    const minutes = totalMinutes % 60;
+
+    const verb = period === 'event' ? 'Ends' : 'Resets';
+    if (days >= 1) return `${verb} in ${days}d ${hours}h`;
+    if (hours >= 1) return `${verb} in ${hours}h ${minutes}m`;
+    return `${verb} in ${minutes}m`;
 }

@@ -2,16 +2,11 @@
 
 import Link from 'next/link';
 import { DailyProgressItem } from '@/types';
-import { displayLabelForDailyProgressItem } from '@/lib/xp';
 import styles from './TodaysMissionBanner.module.css';
 
 interface TodaysMissionBannerProps {
     items: DailyProgressItem[] | null;
 }
-
-const ACTION_HREF: Record<string, string> = {
-    daily_challenge_rounds: '/games/plinko',
-};
 
 /**
  * Highlights the single most relevant checklist item (first incomplete one,
@@ -29,8 +24,8 @@ export function TodaysMissionBanner({ items }: TodaysMissionBannerProps) {
     const percent = featured.target_count > 0
         ? Math.min(100, Math.round((featured.current_count / featured.target_count) * 100))
         : (featured.completed ? 100 : 0);
-    const href = ACTION_HREF[featured.slug];
-    const label = displayLabelForDailyProgressItem(featured);
+    const href = featured.action_url;
+    const label = featured.label;
 
     const content = (
         <>

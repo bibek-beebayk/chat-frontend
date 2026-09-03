@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useMemo } from 'react';
 import { usePlayerDashboardData } from '@/hooks/usePlayerDashboardData';
-import { displayLabelForDailyProgressItem } from '@/lib/xp';
 import { PromoCard } from '@/types';
 import { PromoCarousel } from './PromoCarousel';
 import { WelcomeBanner } from './WelcomeBanner';
@@ -41,16 +40,21 @@ export function PlayerHomePage() {
     // - see PlayerHomePage.module.css .promo).
     const promoCards = useMemo<PromoCard[]>(() => {
         const cards: PromoCard[] = [];
-        const roundsChallenge = dailyProgress.data?.find((item) => item.slug === 'daily_challenge_rounds');
-        if (roundsChallenge && !roundsChallenge.completed) {
+        // The first incomplete, actionable challenge - not a specific slug,
+        // so a new challenge created in admin (with a target and an
+        // action_url) is eligible to be featured here with no frontend
+        // change. "Actionable" excludes things like Daily Login, which has
+        // no natural destination to send the player to.
+        const featured = dailyProgress.data?.find((item) => !item.completed && item.action_url);
+        if (featured) {
             cards.push({
                 kind: 'challenge',
-                slug: roundsChallenge.slug,
-                label: displayLabelForDailyProgressItem(roundsChallenge),
-                current: roundsChallenge.current_count,
-                target: roundsChallenge.target_count,
-                xpValue: roundsChallenge.xp_value,
-                href: '/games/plinko',
+                slug: featured.slug,
+                label: featured.label,
+                current: featured.current_count,
+                target: featured.target_count,
+                xpValue: featured.xp_value,
+                href: featured.action_url,
             });
         }
         return cards;

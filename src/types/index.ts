@@ -486,6 +486,9 @@ export interface RankTiersResponse {
 export interface Achievement {
     slug: string;
     label: string;
+    description: string;
+    /** Optional emoji from admin; fall back to a local default when blank. */
+    icon: string;
     unlocked: boolean;
     earned_at: string | null;
 }
@@ -497,13 +500,31 @@ export interface PlayerGameStats {
     highest_multiplier: string | null;
 }
 
+export type ChallengePeriod = 'daily' | 'weekly' | 'event';
+
 export interface DailyProgressItem {
     slug: string;
+    // Already player-ready: any {target} placeholder is resolved server-side
+    // (XPAction.display_label), so render this as-is - never re-derive it
+    // from the slug.
     label: string;
+    description: string;
+    /** Optional emoji from admin; fall back to a local default when blank. */
+    icon: string;
+    /** Blank means not directly actionable - render the tile without a link. */
+    action_url: string;
     xp_value: number;
     target_count: number;
     current_count: number;
     completed: boolean;
+    // How often this challenge's progress resets - drives display only
+    // (a countdown/badge), never slug-specific logic, so a new weekly or
+    // event challenge created in admin renders correctly with no frontend
+    // change. See lib/xp.ts::describeChallengeTiming.
+    challenge_period: ChallengePeriod;
+    // ISO datetime this window next resets (daily/weekly) or closes for
+    // good (event).
+    resets_at: string;
 }
 
 // Discriminated union (not a fixed tuple) so PromoCarousel stays reusable

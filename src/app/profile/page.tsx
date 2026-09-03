@@ -20,13 +20,6 @@ import styles from './page.module.css';
 type ToastState = { message: string; type: 'success' | 'error' } | null;
 type StatsRange = 'all' | 'week' | 'month';
 
-const ACHIEVEMENT_ICONS: Record<string, string> = {
-    streak_7day: '🔥',
-    first_win: '🏆',
-    rocket_cashout_above_10x: '🚀',
-    rocket_five_alive: '🍀',
-};
-
 const RANK_TEXT_COLORS: Record<string, string> = {
     bronze: '#cd7f32',
     silver: '#c7ccd1',
@@ -306,7 +299,7 @@ export default function ProfilePage() {
                             {achievements.map((achievement) => (
                                 <div key={achievement.slug} className={styles.achievementItem}>
                                     <div className={`${styles.achievementBadge} ${achievement.unlocked ? styles.achievementUnlocked : styles.achievementLocked}`}>
-                                        <span aria-hidden="true">{ACHIEVEMENT_ICONS[achievement.slug] || '⭐'}</span>
+                                        <span aria-hidden="true">{achievement.icon || '⭐'}</span>
                                         {!achievement.unlocked && <span className={styles.achievementLockOverlay}><LockIcon /></span>}
                                     </div>
                                     <span className={styles.achievementLabel}>{achievement.label}</span>

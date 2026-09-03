@@ -119,6 +119,13 @@
     gap: 0.35rem;
 }
 
+.tileTop {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.15rem;
+}
+
 .tileIcon {
     align-items: center;
     border-radius: 50%;
@@ -127,8 +134,26 @@
     font-weight: 800;
     height: 34px;
     justify-content: center;
-    margin-bottom: 0.15rem;
     width: 34px;
+}
+
+/* Only shown for weekly/event challenges - daily (the common case) gets no
+   badge at all, see DailyChallengesCard.tsx. */
+.periodPill {
+    background: rgb(var(--color-primary-rgb) / 0.16);
+    border-radius: 999px;
+    color: var(--color-primary-light);
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    padding: 0.15rem 0.45rem;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.periodPillEvent {
+    background: rgb(var(--brand-gold-rgb) / 0.2);
+    color: var(--brand-gold);
 }
 
 .tileViolet {

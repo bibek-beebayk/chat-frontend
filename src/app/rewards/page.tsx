@@ -2,14 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { ComingSoonPanel, PageShell } from '@/components/layout/PageShell';
+import { PageShell } from '@/components/layout/PageShell';
 import { LoginStreakCard } from '@/components/home/LoginStreakCard';
 import { Toast } from '@/components/ui/Toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { emitPointsUpdated } from '@/hooks/usePointsBalance';
 import { formatPoints, pointsApi } from '@/lib/points';
 import { rewardsApi } from '@/lib/rewards';
-import { displayLabelForDailyProgressItem, xpApi } from '@/lib/xp';
+import { describeChallengeTiming, xpApi } from '@/lib/xp';
 import { DailyProgressItem, LoginStreakStatus, PointsBalance, PointsInfo, PointsLedgerEntry, PointsRedemptionRequest } from '@/types';
 import styles from './page.module.css';
 
@@ -45,26 +45,85 @@ function ledgerEntryLabel(entry: PointsLedgerEntry): string {
     return entryTypeCopy[entry.entry_type] || entry.entry_type;
 }
 
-// Purely decorative per-item icon - there's no icon concept on XPAction
-// itself, so this is a small local slug map (same approach as
-// DailyChallengesCard's TILE_STYLES) rather than fabricated backend data.
-const CHALLENGE_ICONS: Record<string, string> = {
-    daily_login: '📅',
-    daily_challenge_rounds: '🎲',
-};
+/**
+ * One challenge row - shared by all three tabs (Daily/Weekly/Events) so a
+ * new weekly or event challenge created in admin renders identically to an
+ * existing daily one, with no per-tab markup of its own. `showTiming` is on
+ * for the Weekly/Events tabs, where each row can be on its own reset
+ * schedule (the section header can't summarize it the way Daily's can);
+ * Daily leaves it off since the section header already covers it once.
+ */
+function ChallengeRow({ item, now, showTiming }: { item: DailyProgressItem; now: Date; showTiming?: boolean }) {
+    const percent = item.target_count > 0
+        ? Math.min(100, Math.round((item.current_count / item.target_count) * 100))
+        : (item.completed ? 100 : 0);
 
-function formatResetCountdown(msRemaining: number): string {
-    const totalMinutes = Math.max(0, Math.floor(msRemaining / 60000));
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    return `${hours}h ${minutes}m`;
+    return (
+        <div className={styles.challengeRow}>
+            <span className={styles.challengeIcon} aria-hidden="true">{item.icon || '🎯'}</span>
+            <div className={styles.challengeBody}>
+                <span className={styles.challengeLabel}>{item.label}</span>
+                {item.target_count > 1 && (
+                    <>
+                        <span className={styles.challengeProgressLabel}>{item.current_count} / {item.target_count}</span>
+                        <div className={styles.progressTrack}>
+                            <div className={styles.progressFill} style={{ width: `${percent}%` }} />
+                        </div>
+                    </>
+                )}
+                {showTiming && !item.completed && (
+                    <span className={styles.challengeTiming}>{describeChallengeTiming(item.challenge_period, item.resets_at, now)}</span>
+                )}
+            </div>
+            {item.completed ? (
+                <span className={styles.doneBadge} aria-label="Completed">✓</span>
+            ) : (
+                <span className={styles.xpBadge}>+{item.xp_value} XP</span>
+            )}
+        </div>
+    );
 }
 
-function msUntilNextLocalMidnight(): number {
-    const now = new Date();
-    const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
-    return nextMidnight.getTime() - now.getTime();
+interface ChallengeSectionProps {
+    title: string;
+    resetLabel?: string | null;
+    loading: boolean;
+    error: string | null;
+    onRetry: () => void;
+    items: DailyProgressItem[] | null;
+    now: Date;
+    showRowTiming?: boolean;
+    emptyMessage: string;
 }
+
+function ChallengeSection({ title, resetLabel, loading, error, onRetry, items, now, showRowTiming, emptyMessage }: ChallengeSectionProps) {
+    return (
+        <section className={styles.challengesSection}>
+            <div className={styles.sectionHeader}>
+                <h2>{title}</h2>
+                {resetLabel && <span className={styles.resetTimer}>{resetLabel}</span>}
+            </div>
+
+            {loading && !items ? (
+                <div className={styles.loadingArea}><div className="spinner"></div></div>
+            ) : error && !items ? (
+                <div className={styles.challengesEmpty}>
+                    <p>Unable to load challenges.</p>
+                    <button type="button" className={styles.retryBtn} onClick={onRetry}>Retry</button>
+                </div>
+            ) : !items || items.length === 0 ? (
+                <div className={styles.challengesEmpty}>{emptyMessage}</div>
+            ) : (
+                <div className={styles.challengeList}>
+                    {items.map((item) => (
+                        <ChallengeRow key={item.slug} item={item} now={now} showTiming={showRowTiming} />
+                    ))}
+                </div>
+            )}
+        </section>
+    );
+}
+
 
 export default function RewardsPage() {
     const { user } = useAuth();
@@ -92,7 +151,11 @@ export default function RewardsPage() {
     const [streakLoading, setStreakLoading] = useState(true);
     const [streakError, setStreakError] = useState<string | null>(null);
 
-    const [resetIn, setResetIn] = useState(() => msUntilNextLocalMidnight());
+    // Drives every challenge's "resets in Xh" / "ends in Xd" text - one
+    // ticking clock shared by all three tabs rather than each tab computing
+    // its own countdown, since describeChallengeTiming already reads the
+    // period-appropriate field (resets_at) off each item.
+    const [now, setNow] = useState(() => new Date());
 
     const loadData = useCallback(async () => {
         if (!user || user.user_type !== 'player') {
@@ -170,11 +233,19 @@ export default function RewardsPage() {
     }, [loadData, loadDailyProgress, loadStreak]);
 
     useEffect(() => {
-        const timer = window.setInterval(() => setResetIn(msUntilNextLocalMidnight()), 60000);
+        const timer = window.setInterval(() => setNow(new Date()), 60000);
         return () => window.clearInterval(timer);
     }, []);
 
-    const resetLabel = useMemo(() => formatResetCountdown(resetIn), [resetIn]);
+    // Split once by period rather than each tab re-filtering the same list -
+    // this is the one place a new weekly/event challenge (created purely in
+    // admin) is routed to the right tab; nothing else here is slug-specific.
+    const dailyItems = useMemo(() => dailyProgress?.filter((item) => item.challenge_period === 'daily') ?? null, [dailyProgress]);
+    const weeklyItems = useMemo(() => dailyProgress?.filter((item) => item.challenge_period === 'weekly') ?? null, [dailyProgress]);
+    const eventItems = useMemo(() => dailyProgress?.filter((item) => item.challenge_period === 'event') ?? null, [dailyProgress]);
+
+    const dailyResetLabel = dailyItems && dailyItems.length > 0 ? describeChallengeTiming('daily', dailyItems[0].resets_at, now) : null;
+    const weeklyResetLabel = weeklyItems && weeklyItems.length > 0 ? describeChallengeTiming('weekly', weeklyItems[0].resets_at, now) : null;
 
     const openRedeemModal = () => {
         const currentBalance = Number(balance?.balance ?? 0);
@@ -265,56 +336,38 @@ export default function RewardsPage() {
                         </div>
 
                         {activeTab === 'daily' ? (
-                            <section className={styles.challengesSection}>
-                                <div className={styles.sectionHeader}>
-                                    <h2>Daily Challenges</h2>
-                                    <span className={styles.resetTimer}>Resets in {resetLabel}</span>
-                                </div>
-
-                                {dailyLoading && !dailyProgress ? (
-                                    <div className={styles.loadingArea}><div className="spinner"></div></div>
-                                ) : dailyError && !dailyProgress ? (
-                                    <div className={styles.challengesEmpty}>
-                                        <p>Unable to load challenges.</p>
-                                        <button type="button" className={styles.retryBtn} onClick={loadDailyProgress}>Retry</button>
-                                    </div>
-                                ) : !dailyProgress || dailyProgress.length === 0 ? (
-                                    <div className={styles.challengesEmpty}>No challenges configured right now.</div>
-                                ) : (
-                                    <div className={styles.challengeList}>
-                                        {dailyProgress.map((item) => {
-                                            const percent = item.target_count > 0
-                                                ? Math.min(100, Math.round((item.current_count / item.target_count) * 100))
-                                                : (item.completed ? 100 : 0);
-                                            return (
-                                                <div key={item.slug} className={styles.challengeRow}>
-                                                    <span className={styles.challengeIcon} aria-hidden="true">{CHALLENGE_ICONS[item.slug] || '🎯'}</span>
-                                                    <div className={styles.challengeBody}>
-                                                        <span className={styles.challengeLabel}>{displayLabelForDailyProgressItem(item)}</span>
-                                                        {item.target_count > 1 && (
-                                                            <>
-                                                                <span className={styles.challengeProgressLabel}>{item.current_count} / {item.target_count}</span>
-                                                                <div className={styles.progressTrack}>
-                                                                    <div className={styles.progressFill} style={{ width: `${percent}%` }} />
-                                                                </div>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                    {item.completed ? (
-                                                        <span className={styles.doneBadge} aria-label="Completed">✓</span>
-                                                    ) : (
-                                                        <span className={styles.xpBadge}>+{item.xp_value} XP</span>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-                            </section>
+                            <ChallengeSection
+                                title="Daily Challenges"
+                                resetLabel={dailyResetLabel}
+                                loading={dailyLoading}
+                                error={dailyError}
+                                onRetry={loadDailyProgress}
+                                items={dailyItems}
+                                now={now}
+                                emptyMessage="No daily challenges configured right now."
+                            />
                         ) : activeTab === 'weekly' ? (
-                            <ComingSoonPanel title="Weekly Challenges" />
+                            <ChallengeSection
+                                title="Weekly Challenges"
+                                resetLabel={weeklyResetLabel}
+                                loading={dailyLoading}
+                                error={dailyError}
+                                onRetry={loadDailyProgress}
+                                items={weeklyItems}
+                                now={now}
+                                emptyMessage="No weekly challenges running right now - check back soon."
+                            />
                         ) : (
-                            <ComingSoonPanel title="Event Challenges" />
+                            <ChallengeSection
+                                title="Event Challenges"
+                                loading={dailyLoading}
+                                error={dailyError}
+                                onRetry={loadDailyProgress}
+                                items={eventItems}
+                                now={now}
+                                showRowTiming
+                                emptyMessage="No limited-time events running right now - check back soon."
+                            />
                         )}
 
                         <section className={styles.rewardsSection}>

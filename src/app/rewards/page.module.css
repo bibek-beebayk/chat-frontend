@@ -191,6 +191,14 @@
     font-size: 0.72rem;
 }
 
+/* Weekly/Events rows only (see ChallengeRow's showTiming) - Daily leaves
+   this off since the section header already shows one shared countdown. */
+.challengeTiming {
+    color: var(--color-primary-light);
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
 .progressTrack {
     background: rgba(255, 255, 255, 0.08);
     border-radius: 999px;
