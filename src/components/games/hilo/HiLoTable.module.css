@@ -1,0 +1,168 @@
+/*
+ * The gameplay stage: multiplier above, the card in the middle, result
+ * banner below. Sized to fill the immersive mobile viewport without
+ * scrolling (the design brief's "must fit inside the viewport" rule), and
+ * bounded on larger screens where it sits beside the controls column.
+ */
+.stage {
+    background:
+        radial-gradient(120% 90% at 50% 0%, rgba(124, 58, 237, 0.22), transparent 62%),
+        linear-gradient(180deg, rgba(18, 10, 32, 0.94), rgba(10, 6, 20, 0.97));
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.18);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-height: 0;
+    overflow: hidden;
+    padding: 0.75rem;
+    position: relative;
+    width: 100%;
+}
+
+.topRow {
+    align-items: center;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: space-between;
+    min-height: 1.75rem;
+}
+
+.muteButton {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+    line-height: 1;
+    padding: 0.35rem 0.5rem;
+}
+
+.muteButton:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.multiplierBlock {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.multiplier {
+    background: linear-gradient(135deg, #fbbf24, var(--color-accent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+    font-size: clamp(2.1rem, 9vw, 3rem);
+    font-weight: 950;
+    line-height: 1;
+}
+
+/* The multiplier is the game's loudest visual element - it pulses on every
+   climb rather than snapping to the new value. */
+.multiplierBump {
+    animation: bump 0.42s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+
+.multiplierLost {
+    background: linear-gradient(135deg, #f87171, #ef4444);
+    -webkit-background-clip: text;
+    background-clip: text;
+    opacity: 0.72;
+}
+
+@keyframes bump {
+    0% { transform: scale(1); }
+    45% { transform: scale(1.16); }
+    100% { transform: scale(1); }
+}
+
+.potential {
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.cards {
+    align-items: center;
+    display: grid;
+    flex: 1;
+    gap: 0.5rem;
+    grid-template-columns: 1fr auto 1fr;
+    justify-items: center;
+    min-height: 0;
+}
+
+.previousSlot,
+.streakSlot {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    opacity: 0.85;
+}
+
+.slotLabel {
+    color: var(--color-text-muted);
+    font-size: 0.6rem;
+    font-weight: 850;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.streakValue {
+    color: #fbbf24;
+    font-size: 1.6rem;
+    font-weight: 950;
+    line-height: 1;
+}
+
+.bannerRow {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    min-height: 1.9rem;
+}
+
+.banner {
+    border-radius: var(--radius-md);
+    font-size: 0.82rem;
+    font-weight: 850;
+    letter-spacing: 0.04em;
+    padding: 0.3rem 0.75rem;
+    text-transform: uppercase;
+}
+
+.banner_win {
+    background: rgba(74, 222, 128, 0.14);
+    border: 1px solid rgba(74, 222, 128, 0.4);
+    color: #86efac;
+}
+
+.banner_push {
+    background: rgba(250, 204, 21, 0.14);
+    border: 1px solid rgba(250, 204, 21, 0.4);
+    color: #fde047;
+}
+
+.banner_loss {
+    background: rgba(248, 113, 113, 0.14);
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    color: #fca5a5;
+}
+
+.hint {
+    color: var(--color-text-muted);
+    font-size: 0.8rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .multiplierBump { animation: none; }
+}

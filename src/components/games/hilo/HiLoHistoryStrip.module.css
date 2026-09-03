@@ -1,0 +1,84 @@
+.compactWrap {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.track {
+    display: flex;
+    gap: 0.3rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.track::-webkit-scrollbar {
+    display: none;
+}
+
+.chip {
+    border-radius: 999px;
+    flex-shrink: 0;
+    font-size: 0.68rem;
+    font-weight: 850;
+    padding: 0.2rem 0.5rem;
+}
+
+.chipWin {
+    background: rgba(74, 222, 128, 0.14);
+    border: 1px solid rgba(74, 222, 128, 0.35);
+    color: #86efac;
+}
+
+.chipLoss {
+    background: rgba(248, 113, 113, 0.12);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    color: #fca5a5;
+}
+
+.wrap {
+    background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.16);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: var(--spacing-md);
+}
+
+.label {
+    color: var(--color-text-muted);
+    font-size: 0.68rem;
+    font-weight: 850;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.table {
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    width: 100%;
+}
+
+.table th {
+    color: var(--color-text-muted);
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    padding-bottom: 0.3rem;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.table td {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--color-text-secondary);
+    padding: 0.3rem 0;
+}
+
+.call {
+    text-transform: capitalize;
+}
+
+.outcome_win { color: #86efac; text-transform: capitalize; }
+.outcome_push { color: #fde047; text-transform: capitalize; }
+.outcome_loss { color: #fca5a5; text-transform: capitalize; }

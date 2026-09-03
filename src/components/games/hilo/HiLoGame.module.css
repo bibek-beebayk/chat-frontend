@@ -1,0 +1,212 @@
+/*
+ * Same three-breakpoint structure as RocketGame.module.css: mobile fills the
+ * immersive viewport with the controls docked over the stage; tablet stacks
+ * stage-then-panel; desktop (>=1024px) splits into stage left / controls
+ * right, matching the Plinko and Rocket pages.
+ */
+.page {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin: 0 auto;
+    max-width: 460px;
+    padding: 0.6rem 0.6rem 1rem;
+    width: 100%;
+}
+
+.stageWrap {
+    display: flex;
+    position: relative;
+}
+
+.controlsCol {
+    display: contents;
+}
+
+.controlsHeader {
+    display: none;
+}
+
+/* Below desktop the docked mobile controls are the only controls; the panel
+   variant only appears in the right-hand column. */
+.panelControls {
+    display: none;
+}
+
+.mobileControls {
+    display: block;
+}
+
+.historyPanel {
+    display: none;
+}
+
+.eyebrow {
+    color: var(--color-primary-light);
+    font-size: 0.74rem;
+    font-weight: 850;
+    letter-spacing: 0.05em;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.titleRow {
+    align-items: center;
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: space-between;
+    margin: 0.15rem 0 0.7rem;
+}
+
+.gameTitle {
+    color: var(--color-text-primary);
+    font-size: 1.6rem;
+    font-weight: 950;
+    margin: 0;
+}
+
+/* Desktop's entry point to the rules modal - the ImmersiveGameShell info
+   button it would otherwise use is hidden above 768px. */
+.howToPlayButton {
+    align-items: center;
+    background: rgba(20, 10, 35, 0.85);
+    border: 1px solid rgb(var(--color-accent-rgb) / 0.3);
+    border-radius: 999px;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    flex-shrink: 0;
+    font-size: 0.74rem;
+    font-weight: 850;
+    gap: 0.35rem;
+    padding: 0.35rem 0.7rem;
+    white-space: nowrap;
+}
+
+.howToPlayButton:hover {
+    border-color: rgb(var(--color-accent-rgb) / 0.6);
+    color: var(--color-text-primary);
+}
+
+.howToPlayButton:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.balanceRow {
+    align-items: center;
+    background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.16);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.balanceRow span {
+    color: var(--color-text-muted);
+    font-size: 0.74rem;
+    font-weight: 850;
+    text-transform: uppercase;
+}
+
+.balanceRow strong {
+    background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-size: 1.3rem;
+}
+
+.errorText {
+    color: #fca5a5;
+    font-size: 0.85rem;
+    margin: 0;
+    text-align: center;
+}
+
+.errorPanel {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--radius-lg);
+    color: var(--color-text-primary);
+    margin: var(--spacing-lg) auto;
+    max-width: 480px;
+    padding: var(--spacing-lg);
+    text-align: center;
+}
+
+/* Mobile: the stage fills the viewport below the immersive header, and the
+   game never scrolls - the design brief's hard requirement. */
+@media (max-width: 768px) {
+    .page {
+        gap: 0;
+        height: calc(100dvh - 56px);
+        max-width: none;
+        padding: 0;
+        position: relative;
+    }
+
+    .stageWrap {
+        flex: 1;
+        min-height: 0;
+    }
+
+    .errorText {
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0.5rem;
+        z-index: 6;
+    }
+}
+
+@media (min-width: 700px) {
+    .page {
+        max-width: 560px;
+        padding: 1rem 1rem 1.25rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .page {
+        align-items: start;
+        display: grid;
+        gap: var(--spacing-lg);
+        grid-template-columns: minmax(0, 1.65fr) minmax(320px, 400px);
+        max-width: 1180px;
+        padding: var(--spacing-lg);
+    }
+
+    .stageWrap {
+        grid-column: 1;
+        min-height: 520px;
+    }
+
+    .controlsCol {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+        grid-column: 2;
+    }
+
+    .controlsHeader {
+        display: block;
+    }
+
+    .panelControls,
+    .historyPanel {
+        display: block;
+    }
+
+    /* The docked variant would overlap the stage on desktop, where there's
+       a dedicated controls column for it. */
+    .mobileControls {
+        display: none;
+    }
+
+    .errorText {
+        text-align: left;
+    }
+}

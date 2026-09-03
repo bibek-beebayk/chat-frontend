@@ -13,31 +13,36 @@ const GAME_ROUTES: Record<string, string> = {
     plinko: '/games/plinko',
     slots: '/games/slots',
     rocket: '/games/rocket',
+    hilo: '/games/hilo',
 };
 
 const GAME_ICONS: Record<string, string> = {
     plinko: '🔴',
     slots: '🎰',
     rocket: '🚀',
+    hilo: '🃏',
 };
 
 const GAME_TAGS: Record<string, 'Popular' | 'New'> = {
     plinko: 'Popular',
     slots: 'Popular',
     rocket: 'New',
+    hilo: 'New',
 };
 
 // Real, sourced figures (not invented for display) - see the code comments
 // they're pulled from: plinko/constants.py (rows=8 is the only offered
 // config; RTP band + per-risk max multiplier documented there), slots
 // services/constants (10M-spin simulation result), rocket/constants.py
-// (HOUSE_EDGE and MAX_CRASH_MULTIPLIER). Plinko's volatility is player-
+// (HOUSE_EDGE and MAX_CRASH_MULTIPLIER), hilo/constants.py (HOUSE_EDGE and
+// MAX_MULTIPLIER). Plinko's volatility is player-
 // selectable in-game rather than one fixed value, so it's labeled as such
 // instead of picking one risk tier to represent all of them.
 const GAME_STATS: Record<string, { rtp: string; maxWin: string; volatility: string }> = {
     plinko: { rtp: 'Up to 98.5%', maxWin: '27x', volatility: 'Adjustable' },
     slots: { rtp: '95.71%', maxWin: '81x', volatility: 'Medium' },
     rocket: { rtp: '~96%', maxWin: '1000x', volatility: 'High' },
+    hilo: { rtp: '~97%', maxWin: '100x', volatility: 'Medium' },
 };
 
 function formatRelativeTime(value: string): string {

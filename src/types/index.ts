@@ -709,6 +709,115 @@ export interface RocketHistoryItem {
     created_at: string;
 }
 
+export interface HiLoConfig {
+    enabled: boolean;
+    game_version: string;
+    // Decimal fields - serialize as strings, Number() before arithmetic.
+    min_wager: string;
+    max_wager: string;
+    wager_quick_amounts: number[];
+    max_multiplier: string;
+    max_payout: string;
+    max_steps: number;
+    // The odds formula is not secret - nothing about a Hi-Lo round is, since
+    // the next card doesn't exist until it's requested - so the client can
+    // price both buttons locally with these and stay in step with the
+    // server between requests. See components/games/hilo/odds.ts.
+    house_edge: string;
+    min_step_multiplier: string;
+    ranks: string[];
+    suits: string[];
+}
+
+export type HiLoRank = '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | 'J' | 'Q' | 'K' | 'A';
+export type HiLoSuit = 'hearts' | 'diamonds' | 'clubs' | 'spades';
+export type HiLoDirection = 'higher' | 'lower';
+export type HiLoRoundStatus = 'active' | 'cashed_out' | 'busted';
+export type HiLoOutcome = 'win' | 'push' | 'loss';
+
+export interface HiLoCard {
+    rank: HiLoRank;
+    suit: HiLoSuit;
+}
+
+export interface HiLoSideQuote {
+    available: boolean;
+    probability: string;
+    multiplier: string | null;
+}
+
+export interface HiLoOdds {
+    higher: HiLoSideQuote;
+    lower: HiLoSideQuote;
+    push_probability: string;
+}
+
+export interface HiLoRoundState {
+    round_id: number;
+    status: HiLoRoundStatus;
+    // Decimal fields - serialize as strings, Number() before arithmetic.
+    wager_amount: string;
+    current_card: HiLoCard;
+    multiplier: string;
+    streak: number;
+    // The index of the NEXT prediction - echo it back on predict so a
+    // duplicate click is rejected server-side instead of drawing a second
+    // card. See hilo/services.py::predict.
+    steps_taken: number;
+    // Null once the round has resolved (no prediction left to price).
+    odds: HiLoOdds | null;
+    potential_payout: string;
+    can_cash_out: boolean;
+    // True when the server force-settled the round at a ceiling rather than
+    // the player cashing out - drives the jackpot animation.
+    capped: boolean;
+    payout_amount: string;
+    balance_after: string | null;
+    created_at: string;
+    resolved_at: string | null;
+}
+
+export interface HiLoStepResult {
+    step_index: number;
+    from_card: HiLoCard;
+    prediction: HiLoDirection;
+    to_card: HiLoCard;
+    outcome: HiLoOutcome;
+    step_multiplier: string;
+    multiplier_after: string;
+    created_at: string;
+}
+
+export interface HiLoPredictResponse {
+    step: HiLoStepResult;
+    round: HiLoRoundState;
+}
+
+export interface HiLoHistoryItem {
+    round_id: number;
+    status: HiLoRoundStatus;
+    wager_amount: string;
+    multiplier: string;
+    streak: number;
+    payout_amount: string;
+    capped: boolean;
+    created_at: string;
+    steps: HiLoStepResult[];
+}
+
+export interface HiLoStats {
+    rounds_played: number;
+    total_predictions: number;
+    correct_predictions: number;
+    incorrect_predictions: number;
+    pushes: number;
+    longest_streak: number;
+    highest_multiplier: string;
+    highest_payout: string;
+    total_wagered: string;
+    total_won: string;
+}
+
 export interface ActivityEvent {
     id: number;
     kind: 'account' | 'post' | 'comment' | 'event' | 'reward' | string;

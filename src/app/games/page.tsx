@@ -5,17 +5,19 @@ import Link from 'next/link';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PageShell } from '@/components/layout/PageShell';
 import { gamesApi } from '@/lib/games';
+import { hiloApi } from '@/lib/hilo';
 import { getFavoriteGameSlugs, onFavoriteGamesChanged } from '@/lib/favoriteGames';
 import { plinkoApi } from '@/lib/plinko';
 import { rocketApi } from '@/lib/rocket';
 import { slotsApi } from '@/lib/slots';
-import { Game, PlinkoRound, RocketHistoryItem, SlotRound } from '@/types';
+import { Game, HiLoHistoryItem, PlinkoRound, RocketHistoryItem, SlotRound } from '@/types';
 import styles from './page.module.css';
 
 const GAME_ROUTES: Record<string, string> = {
     plinko: '/games/plinko',
     slots: '/games/slots',
     rocket: '/games/rocket',
+    hilo: '/games/hilo',
 };
 
 // Purely decorative categorization for the mobile "All Games" filter pills -
@@ -25,12 +27,14 @@ const GAME_TAGS: Record<string, 'Popular' | 'New'> = {
     plinko: 'Popular',
     slots: 'Popular',
     rocket: 'New',
+    hilo: 'New',
 };
 
 const GAME_ICONS: Record<string, string> = {
     plinko: '🔴',
     slots: '🎰',
     rocket: '🚀',
+    hilo: '🃏',
 };
 
 const PLINKO_MODE_LABEL: Record<string, string> = {
@@ -56,10 +60,16 @@ interface ContinueEntry {
 }
 
 // Mirrors ContinuePlayingCard.tsx's buildEntries (homepage widget), extended
-// to also include Rocket now that it's a real playable game - kept local
+// to also include Rocket and Hi-Lo now that they're real playable games -
+// kept local
 // since this page's "Continue Playing" carousel has its own distinct visual
 // design (not a reuse of that card).
-function buildContinueEntries(plinkoRounds: PlinkoRound[], slotsRounds: SlotRound[], rocketRounds: RocketHistoryItem[]): ContinueEntry[] {
+function buildContinueEntries(
+    plinkoRounds: PlinkoRound[],
+    slotsRounds: SlotRound[],
+    rocketRounds: RocketHistoryItem[],
+    hiloRounds: HiLoHistoryItem[],
+): ContinueEntry[] {
     const entries: ContinueEntry[] = [];
 
     const byMode = new Map<string, PlinkoRound>();
@@ -87,6 +97,11 @@ function buildContinueEntries(plinkoRounds: PlinkoRound[], slotsRounds: SlotRoun
     if (rocketRounds.length > 0) {
         const latest = rocketRounds.reduce((a, b) => (new Date(b.created_at) > new Date(a.created_at) ? b : a));
         entries.push({ key: 'rocket', label: 'Rollin Rocket', slug: 'rocket', href: GAME_ROUTES.rocket, createdAt: latest.created_at });
+    }
+
+    if (hiloRounds.length > 0) {
+        const latest = hiloRounds.reduce((a, b) => (new Date(b.created_at) > new Date(a.created_at) ? b : a));
+        entries.push({ key: 'hilo', label: 'Rollin Hi-Lo', slug: 'hilo', href: GAME_ROUTES.hilo, createdAt: latest.created_at });
     }
 
     return entries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -125,12 +140,13 @@ export default function GamesPage() {
     }, []);
 
     useEffect(() => {
-        Promise.allSettled([plinkoApi.getHistory(), slotsApi.getHistory(), rocketApi.getHistory()])
-            .then(([plinkoRes, slotsRes, rocketRes]) => {
+        Promise.allSettled([plinkoApi.getHistory(), slotsApi.getHistory(), rocketApi.getHistory(), hiloApi.getHistory()])
+            .then(([plinkoRes, slotsRes, rocketRes, hiloRes]) => {
                 const plinkoRounds = plinkoRes.status === 'fulfilled' ? plinkoRes.value : [];
                 const slotsRounds = slotsRes.status === 'fulfilled' ? slotsRes.value : [];
                 const rocketRounds = rocketRes.status === 'fulfilled' ? rocketRes.value : [];
-                setContinueEntries(buildContinueEntries(plinkoRounds, slotsRounds, rocketRounds));
+                const hiloRounds = hiloRes.status === 'fulfilled' ? hiloRes.value : [];
+                setContinueEntries(buildContinueEntries(plinkoRounds, slotsRounds, rocketRounds, hiloRounds));
             })
             .finally(() => setContinueLoading(false));
     }, []);
