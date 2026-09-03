@@ -2,5 +2,8 @@
    centering a 560px block under a left-aligned heading was what left the
    page looking half-empty on desktop. The tiles fill the row instead. */
 .wrap {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xl);
     width: 100%;
 }

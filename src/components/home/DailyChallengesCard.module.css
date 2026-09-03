@@ -51,6 +51,21 @@
     white-space: nowrap;
 }
 
+/* section layout only - a page-level heading for one of several stacked
+   groups (Daily/Weekly/Special on /challenges), distinct from .header's
+   small uppercase widget label since this is real page content, not a
+   card title. */
+.sectionHeader {
+    margin-bottom: 0.15rem;
+}
+
+.sectionHeader h2 {
+    color: var(--color-text-primary);
+    font-size: 1.05rem;
+    font-weight: 900;
+    margin: 0;
+}
+
 .headerLink {
     color: var(--color-primary-light);
     flex-shrink: 0;

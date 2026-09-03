@@ -15,12 +15,18 @@ interface DailyChallengesCardProps {
     limit?: number;
     /**
      * `preview` (default) is the homepage widget: a bordered panel with its
-     * own title and a View All link. `page` is /challenges itself, where the
-     * PageShell heading already says "Daily Challenges" and links back to
-     * nothing - so the panel chrome and header are dropped and the tiles
-     * fill the content column instead of sitting in a narrow block.
+     * own title and a View All link. `page` is a single, headerless grid
+     * (the page's own heading already names it). `section` is one of
+     * several period-grouped blocks stacked on the same page (Daily /
+     * Weekly / Special on /challenges) - same borderless, full-width tile
+     * grid as `page`, but with its own `title` and no "View All" link,
+     * since linking back to the page it's already on makes no sense.
      */
-    layout?: 'preview' | 'page';
+    layout?: 'preview' | 'page' | 'section';
+    /** section layout only - the heading text, e.g. "Weekly Challenges". */
+    title?: string;
+    /** Overrides the generic "No challenges configured" empty-state copy. */
+    emptyMessage?: string;
 }
 
 // Cycled by index (not slug-semantic) purely to give each tile in the
@@ -34,21 +40,28 @@ const TILE_STYLES: { fallbackIcon: string; className: string }[] = [
     { fallbackIcon: '♦', className: 'tileGold' },
 ];
 
-export function DailyChallengesCard({ items, loading, error, onRetry, limit, layout = 'preview' }: DailyChallengesCardProps) {
+export function DailyChallengesCard({
+    items, loading, error, onRetry, limit, layout = 'preview', title, emptyMessage,
+}: DailyChallengesCardProps) {
     const visible = limit && items ? items.slice(0, limit) : items;
-    const isPage = layout === 'page';
+    const isBare = layout === 'page' || layout === 'section';
 
     return (
-        <div className={`${styles.card} ${isPage ? styles.cardBare : ''}`}>
-            {!isPage && (
+        <div className={`${styles.card} ${isBare ? styles.cardBare : ''}`}>
+            {layout === 'preview' && (
                 <div className={styles.header}>
                     <h3>Daily Challenges</h3>
                     <Link href="/challenges" className={styles.headerLink}>View All</Link>
                 </div>
             )}
+            {layout === 'section' && (
+                <div className={styles.sectionHeader}>
+                    <h2>{title}</h2>
+                </div>
+            )}
 
             {loading && !items ? (
-                <div className={`${styles.track} ${isPage ? styles.trackFill : ''}`}>
+                <div className={`${styles.track} ${isBare ? styles.trackFill : ''}`}>
                     <SkeletonText lines={2} />
                     <SkeletonText lines={2} />
                 </div>
@@ -58,9 +71,9 @@ export function DailyChallengesCard({ items, loading, error, onRetry, limit, lay
                     <button type="button" className={styles.retryBtn} onClick={onRetry}>Retry</button>
                 </div>
             ) : !visible || visible.length === 0 ? (
-                <div className={styles.emptyState}>No challenges configured right now.</div>
+                <div className={styles.emptyState}>{emptyMessage || 'No challenges configured right now.'}</div>
             ) : (
-                <div className={`${styles.track} ${isPage ? styles.trackFill : ''}`}>
+                <div className={`${styles.track} ${isBare ? styles.trackFill : ''}`}>
                     {visible.map((item, index) => {
                         const percent = item.target_count > 0 ? Math.min(100, Math.round((item.current_count / item.target_count) * 100)) : (item.completed ? 100 : 0);
                         const href = item.action_url;

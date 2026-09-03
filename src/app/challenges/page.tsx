@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { PageShell } from '@/components/layout/PageShell';
 import { xpApi } from '@/lib/xp';
@@ -26,11 +26,45 @@ export default function ChallengesPage() {
         load();
     }, [load]);
 
+    // Split once by period rather than rendering one undifferentiated grid -
+    // a new weekly or event challenge created purely in admin lands in the
+    // right section automatically, since this filters on the API's own
+    // challenge_period field rather than any hardcoded slug list.
+    const dailyItems = useMemo(() => items?.filter((item) => item.challenge_period === 'daily') ?? null, [items]);
+    const weeklyItems = useMemo(() => items?.filter((item) => item.challenge_period === 'weekly') ?? null, [items]);
+    const eventItems = useMemo(() => items?.filter((item) => item.challenge_period === 'event') ?? null, [items]);
+
     return (
         <DashboardLayout>
-            <PageShell title="Daily Challenges" eyebrow="Play" description="Complete today's checklist to earn XP toward your next rank.">
+            <PageShell title="Challenges" eyebrow="Play" description="Complete today's checklist, this week's goals, and any limited-time events to earn XP toward your next rank.">
                 <div className={styles.wrap}>
-                    <DailyChallengesCard items={items} loading={loading} error={error} onRetry={load} layout="page" />
+                    <DailyChallengesCard
+                        items={dailyItems}
+                        loading={loading}
+                        error={error}
+                        onRetry={load}
+                        layout="section"
+                        title="Daily Challenges"
+                        emptyMessage="No daily challenges configured right now."
+                    />
+                    <DailyChallengesCard
+                        items={weeklyItems}
+                        loading={loading}
+                        error={error}
+                        onRetry={load}
+                        layout="section"
+                        title="Weekly Challenges"
+                        emptyMessage="No weekly challenges running right now - check back soon."
+                    />
+                    <DailyChallengesCard
+                        items={eventItems}
+                        loading={loading}
+                        error={error}
+                        onRetry={load}
+                        layout="section"
+                        title="Special Challenges"
+                        emptyMessage="No limited-time events running right now - check back soon."
+                    />
                 </div>
             </PageShell>
         </DashboardLayout>
