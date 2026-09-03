@@ -5,14 +5,15 @@ import { useMemo } from 'react';
 import { usePlayerDashboardData } from '@/hooks/usePlayerDashboardData';
 import { displayLabelForDailyProgressItem } from '@/lib/xp';
 import { PromoCard } from '@/types';
+import { PromoCarousel } from './PromoCarousel';
 import { WelcomeBanner } from './WelcomeBanner';
 import { PasswordSetupNotice } from './PasswordSetupNotice';
 import { PlayerProgressCard } from './PlayerProgressCard';
 import { LoginStreakCard } from './LoginStreakCard';
+import { RewardPointsCard } from './RewardPointsCard';
 import { PlayerStatsBar } from './PlayerStatsBar';
 import { TodaysMissionBanner } from './TodaysMissionBanner';
 import { HeroPanel } from './HeroPanel';
-import { PromoCarousel } from './PromoCarousel';
 import { DailyChallengesCard } from './DailyChallengesCard';
 import { RewardsOverviewCard } from './RewardsOverviewCard';
 import { ContinuePlayingCard } from './ContinuePlayingCard';
@@ -26,13 +27,18 @@ import styles from './PlayerHomePage.module.css';
  * Top-level orchestrator for the player-only homepage. Every section is a
  * direct child of one CSS grid (PlayerHomePage.module.css) so each
  * breakpoint's grid-template-areas can genuinely reorder/hide sections
- * (e.g. hero omitted on mobile, streak/events/friends repositioned) without
- * a separate mobile component tree.
+ * without a separate mobile component tree. On desktop the three stat tiles
+ * (.stats) and the right rail (.rail) are real wrappers; on tablet/mobile
+ * they collapse to `display: contents` so their children fall back into the
+ * per-breakpoint grid areas unchanged.
  */
 export function PlayerHomePage() {
     const { streak, dailyProgress, events, onlineFriends, recentActivity, recentGames, recentSlotsGames, posts, refetchSection } =
         usePlayerDashboardData();
 
+    // Feeds the PromoCarousel, which is shown on tablet/mobile only (hidden on
+    // desktop, where TodaysMissionBanner is the single challenge call-to-action
+    // - see PlayerHomePage.module.css .promo).
     const promoCards = useMemo<PromoCard[]>(() => {
         const cards: PromoCard[] = [];
         const roundsChallenge = dailyProgress.data?.find((item) => item.slug === 'daily_challenge_rounds');
@@ -53,20 +59,27 @@ export function PlayerHomePage() {
     return (
         <div className={styles.grid}>
             <div className={styles.welcome}>
-                <WelcomeBanner />
+                <div className={styles.welcomeTop}>
+                    <WelcomeBanner />
+                    <div className={styles.brandMark}><HeroPanel variant="mark" /></div>
+                </div>
                 <PasswordSetupNotice />
             </div>
 
-            <div className={styles.progress}><PlayerProgressCard /></div>
-            <div className={styles.streak}>
-                <LoginStreakCard
-                    streak={streak.data}
-                    loading={streak.loading}
-                    error={streak.error}
-                    onRetry={() => refetchSection('streak')}
-                    onRedeemed={() => refetchSection('streak')}
-                />
+            <div className={styles.stats}>
+                <div className={styles.progress}><PlayerProgressCard /></div>
+                <div className={styles.streak}>
+                    <LoginStreakCard
+                        streak={streak.data}
+                        loading={streak.loading}
+                        error={streak.error}
+                        onRetry={() => refetchSection('streak')}
+                        onRedeemed={() => refetchSection('streak')}
+                    />
+                </div>
+                <div className={styles.rewardPts}><RewardPointsCard /></div>
             </div>
+
             <div className={styles.statsBar}>
                 <PlayerStatsBar
                     streak={streak.data}
@@ -136,21 +149,32 @@ export function PlayerHomePage() {
                 />
             </div>
 
-            <div className={styles.events}>
-                <UpcomingEventsCard
-                    events={events.data}
-                    loading={events.loading}
-                    error={events.error}
-                    onRetry={() => refetchSection('events')}
-                />
-            </div>
-            <div className={styles.friends}>
-                <OnlineFriendsList
-                    connections={onlineFriends.data}
-                    loading={onlineFriends.loading}
-                    error={onlineFriends.error}
-                    onRetry={() => refetchSection('onlineFriends')}
-                />
+            <div className={styles.rail}>
+                <div className={styles.events}>
+                    <UpcomingEventsCard
+                        events={events.data}
+                        loading={events.loading}
+                        error={events.error}
+                        onRetry={() => refetchSection('events')}
+                    />
+                </div>
+                <div className={styles.friends}>
+                    <OnlineFriendsList
+                        connections={onlineFriends.data}
+                        loading={onlineFriends.loading}
+                        error={onlineFriends.error}
+                        onRetry={() => refetchSection('onlineFriends')}
+                    />
+                </div>
+                <div className={styles.activity}>
+                    <RecentActivityCard
+                        activity={recentActivity.data}
+                        loading={recentActivity.loading}
+                        error={recentActivity.error}
+                        onRetry={() => refetchSection('recentActivity')}
+                        limit={3}
+                    />
+                </div>
             </div>
 
             <div className={styles.community}>
@@ -159,16 +183,6 @@ export function PlayerHomePage() {
                     loading={posts.loading}
                     error={posts.error}
                     onRetry={() => refetchSection('posts')}
-                />
-            </div>
-
-            <div className={styles.activity}>
-                <RecentActivityCard
-                    activity={recentActivity.data}
-                    loading={recentActivity.loading}
-                    error={recentActivity.error}
-                    onRetry={() => refetchSection('recentActivity')}
-                    limit={3}
                 />
             </div>
         </div>

@@ -27,13 +27,7 @@
 .grid {
     display: grid;
     gap: var(--spacing-md);
-    grid-template-columns: repeat(3, 1fr);
-}
-
-@media (max-width: 1099px) {
-    .grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    grid-template-columns: repeat(2, 1fr);
 }
 
 @media (max-width: 767px) {
@@ -45,7 +39,7 @@
 .emptyState {
     align-items: center;
     background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
-    border: 1px dashed rgba(var(--color-primary-rgb), 0.24);
+    border: 1px dashed rgb(var(--color-primary-rgb) / 0.24);
     border-radius: var(--radius-lg);
     color: var(--color-text-muted);
     display: flex;
@@ -57,8 +51,8 @@
 }
 
 .retryBtn {
-    background: rgba(var(--color-primary-rgb), 0.16);
-    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    background: rgb(var(--color-primary-rgb) / 0.16);
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.3);
     border-radius: var(--radius-md);
     color: var(--color-text-primary);
     font-size: 0.78rem;
@@ -68,5 +62,5 @@
 
 :global(html[data-theme='light']) .emptyState {
     background: linear-gradient(180deg, #ffffff, #f8f7fc);
-    border-color: rgba(var(--color-primary-rgb), 0.24);
+    border-color: rgb(var(--color-primary-rgb) / 0.24);
 }

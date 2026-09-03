@@ -24,6 +24,8 @@
     margin-left: 260px;
     min-height: 100vh;
     width: calc(100% - 260px);
+    /* Reserve space for the fixed TopNav (70px) so content isn't hidden behind it. */
+    padding-top: 70px;
 }
 
 .contentArea {
@@ -131,5 +133,12 @@
         backdrop-filter: blur(4px);
         -webkit-backdrop-filter: blur(4px);
         z-index: 40;
+    }
+}
+
+/* ImmersiveGameShell hides the TopNav on phones - reclaim its reserved space. */
+@media (max-width: 768px) {
+    :global(body.game-immersive-mobile) .mainWrapper {
+        padding-top: 0;
     }
 }

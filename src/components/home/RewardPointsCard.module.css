@@ -1,0 +1,68 @@
+.card {
+    background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.16);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    justify-content: space-between;
+    padding: var(--spacing-lg);
+    transition: border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.headerRow {
+    align-items: center;
+    display: flex;
+    gap: 0.7rem;
+}
+
+.iconChip {
+    align-items: center;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    border-radius: 50%;
+    color: #fff;
+    display: flex;
+    flex-shrink: 0;
+    height: 44px;
+    justify-content: center;
+    width: 44px;
+}
+
+.label {
+    color: var(--color-text-muted);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.value {
+    color: var(--color-text-primary);
+    font-size: 1.3rem;
+    font-weight: 900;
+    line-height: 1.15;
+    margin: 0.1rem 0 0;
+    white-space: nowrap;
+}
+
+.redeemLink {
+    color: var(--color-primary-light);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+@media (min-width: 1100px) and (hover: hover) {
+    .card:hover {
+        border-color: rgb(var(--color-primary-rgb) / 0.4);
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
+    }
+}
+
+:global(html[data-theme='light']) .card {
+    background: linear-gradient(180deg, #ffffff, #f8f7fc);
+    border-color: rgb(var(--color-primary-rgb) / 0.14);
+}

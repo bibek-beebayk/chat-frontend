@@ -1,7 +1,7 @@
 .panel {
     align-items: center;
     background: linear-gradient(160deg, #2a1a52 0%, #1a0f38 60%, #0c0720 100%);
-    border: 1px solid rgba(var(--color-accent-rgb), 0.25);
+    border: 1px solid rgb(var(--color-accent-rgb) / 0.25);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
     display: flex;
@@ -15,14 +15,45 @@
     text-align: center;
 }
 
+/* Slim inline brand mark - desktop "Welcome back" row. */
+.mark {
+    align-items: center;
+    display: inline-flex;
+    gap: 0.5rem;
+}
+
+.markCrown {
+    filter: drop-shadow(0 0 8px rgb(var(--color-accent-rgb) / 0.5));
+    font-size: 1.4rem;
+    line-height: 1;
+}
+
+.markWordmark {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+}
+
+.mark .rollin {
+    font-size: 1.05rem;
+    letter-spacing: 0.06em;
+}
+
+.markCommunity {
+    color: var(--color-text-muted);
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+}
+
 .glow {
-    background: radial-gradient(circle at 50% 30%, rgba(var(--color-accent-rgb), 0.28), transparent 60%);
+    background: radial-gradient(circle at 50% 30%, rgb(var(--color-accent-rgb) / 0.28), transparent 60%);
     inset: 0;
     position: absolute;
 }
 
 .crown {
-    filter: drop-shadow(0 0 12px rgba(var(--color-accent-rgb), 0.6));
+    filter: drop-shadow(0 0 12px rgb(var(--color-accent-rgb) / 0.6));
     font-size: 3.2rem;
     position: relative;
 }

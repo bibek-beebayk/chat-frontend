@@ -1,15 +1,16 @@
 .grid {
     display: grid;
     gap: var(--spacing-lg);
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 300px);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 320px;
     grid-template-areas:
-        "welcome    welcome    welcome    events"
-        "progress   hero       streak     events"
-        "playCta    hero       rewardsCta friends"
-        "promo      promo      promo      friends"
-        "mission    mission    mission    friends"
-        "challenges rewards    continue   activity"
-        "community  community  community  activity";
+        "welcome    welcome    welcome    rail"
+        "stats      stats      stats      rail"
+        "mission    mission    mission    rail"
+        "playCta    playCta    playCta    rail"
+        "challenges challenges challenges rail"
+        "rewards    rewards    rewards    rail"
+        "continue   continue   continue   rail"
+        "community  community  community  rail";
 }
 
 .welcome {
@@ -18,8 +19,43 @@
     gap: var(--spacing-md);
     grid-area: welcome;
 }
+
+/* Desktop: "Welcome back" on the left, a slim brand mark on the right. */
+.welcomeTop {
+    align-items: center;
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: space-between;
+}
+
+.brandMark {
+    display: flex;
+    flex-shrink: 0;
+}
+
+/* Desktop: three equal stat tiles (rank / streak / reward points) in one row. */
+.stats {
+    grid-area: stats;
+    display: flex;
+    gap: var(--spacing-lg);
+    align-items: stretch;
+}
+
+/* The right rail. On desktop it's taken out of flow and pinned to the
+   viewport (see the @media (min-width: 1100px) block lower down) - the 4th
+   grid column stays reserved at 320px so nothing sits underneath it. On
+   tablet/mobile the `.rail { display: contents }` overrides neutralise all
+   of that and the widgets rejoin the normal single-column flow. */
+.rail {
+    grid-area: rail;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
 .progress { grid-area: progress; }
 .streak { grid-area: streak; }
+.rewardPts { grid-area: rewardPts; }
 .hero { grid-area: hero; }
 .playCtaArea { grid-area: playCta; }
 .rewardsCtaArea { grid-area: rewardsCta; }
@@ -32,6 +68,53 @@
 .friends { grid-area: friends; }
 .community { grid-area: community; }
 .activity { grid-area: activity; }
+
+/* Desktop-only: the tablet/mobile-era standalone CTA slab and the big brand
+   panel have no place in the refreshed desktop grid. */
+@media (min-width: 1100px) {
+    .rewardsCtaArea { display: none; }
+    .hero { display: none; }
+    .promo { display: none; }
+
+    /* Equal-width stat tiles; each wrapper's card fills it. */
+    .progress,
+    .streak,
+    .rewardPts {
+        display: flex;
+        flex: 1 1 0;
+        min-width: 0;
+    }
+    .progress > *,
+    .streak > *,
+    .rewardPts > * {
+        width: 100%;
+    }
+
+    /* Right rail: taken out of flow and pinned to the viewport, exactly like
+       the left nav sidebar. The 4th grid column (320px) stays reserved, so
+       the main content never flows under it. `right` lands the rail on that
+       reserved track: (centred-content right margin) + .contentArea padding.
+       Only scrolls internally when its own content exceeds the space. */
+    .rail {
+        position: fixed;
+        top: calc(70px + var(--spacing-md));
+        right: calc((100vw - 260px - min(100vw - 260px, 1400px)) / 2 + var(--spacing-md));
+        width: 320px;
+        max-height: calc(100vh - 70px - var(--spacing-md) * 2);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-width: thin;
+    }
+
+    .rail::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .rail::-webkit-scrollbar-thumb {
+        background: rgb(var(--color-primary-rgb) / 0.35);
+        border-radius: 999px;
+    }
+}
 
 /* Mobile-only unified Rank/Streak/RP card - see PlayerStatsBar.tsx. Hidden
    above the mobile breakpoint, where .progress/.streak (their separate,
@@ -53,7 +136,7 @@
     padding: 0.85rem 1rem;
     text-decoration: none;
     background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-    box-shadow: 0 8px 22px rgba(var(--color-primary-rgb), 0.3);
+    box-shadow: 0 8px 22px rgb(var(--color-primary-rgb) / 0.3);
     color: #fff;
 }
 
@@ -94,7 +177,7 @@
 }
 
 .playCtaCrown {
-    filter: drop-shadow(0 0 6px rgba(var(--brand-gold-rgb), 0.6));
+    filter: drop-shadow(0 0 6px rgb(var(--brand-gold-rgb) / 0.6));
     flex-shrink: 0;
     height: 30px;
     object-fit: contain;
@@ -153,7 +236,7 @@
     background: transparent;
     border: 1.5px solid var(--brand-gold);
     border-radius: var(--radius-md);
-    box-shadow: 0 0 10px rgba(var(--brand-gold-rgb), 0.55), inset 0 0 8px rgba(var(--brand-gold-rgb), 0.18);
+    box-shadow: 0 0 10px rgb(var(--brand-gold-rgb) / 0.55), inset 0 0 8px rgb(var(--brand-gold-rgb) / 0.18);
     color: var(--brand-gold);
     flex-shrink: 0;
     font-size: 0.68rem;
@@ -163,7 +246,60 @@
     white-space: nowrap;
 }
 
-/* Tablet: right column collapses into the main flow; two-column body */
+/* Desktop: playCta spans the full main column. Placed AFTER the base
+   .playCta* rules above so it actually wins the cascade (media queries carry
+   no extra specificity - source order decides). The baked-in golden-
+   decoration PNG (1100x367, ~3:1) smears when stretched to this ~13:1
+   banner, so desktop uses a CSS treatment instead: brand-purple gradient +
+   gold frame + gold glow from the right. Single row: bigger logo + text on
+   the left, Play Now pinned to the far right. */
+@media (min-width: 1100px) {
+    .playCta {
+        align-items: center;
+        flex-direction: row;
+        gap: 1.25rem;
+        min-height: 104px;
+        padding: 1rem 1.5rem;
+        background-image: none;
+        background:
+            radial-gradient(90% 260% at 100% 60%, rgb(var(--brand-gold-rgb) / 0.22), rgb(var(--brand-gold-rgb) / 0.06) 30%, transparent 55%),
+            radial-gradient(130% 180% at 2% 0%, rgb(var(--color-primary-rgb) / 0.28), transparent 42%),
+            linear-gradient(100deg, #170a30 0%, #241246 46%, #3a1f66 100%);
+        border: 1px solid rgb(var(--brand-gold-rgb) / 0.5);
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgb(var(--brand-gold-rgb) / 0.1);
+    }
+
+    .playCtaTop {
+        flex: 1;
+        gap: 1rem;
+    }
+
+    /* Bigger logo, kept at its natural 128x81 aspect (no forced square). */
+    .playCtaCrown {
+        height: 64px;
+        width: auto;
+    }
+
+    .playCtaTitle {
+        font-size: 1.25rem;
+    }
+
+    .playCtaSubtitle {
+        font-size: 0.86rem;
+    }
+
+    /* Pinned to the far right, vertically centered. */
+    .playCtaBtn {
+        align-self: center;
+        margin-left: auto;
+        font-size: 0.92rem;
+        padding: 0.6rem 1.6rem;
+    }
+}
+
+/* Tablet: right column collapses into the main flow; two-column body.
+   .stats/.rail are display:contents so their children fall back to their
+   own grid areas below - tablet layout is unchanged from before. */
 @media (max-width: 1099px) {
     .grid {
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -179,6 +315,16 @@
             "events     friends"
             "community  community"
             "activity   activity";
+    }
+
+    .stats,
+    .rail {
+        display: contents;
+    }
+
+    .brandMark,
+    .rewardPts {
+        display: none;
     }
 }
 
@@ -208,9 +354,16 @@
             "activity";
     }
 
+    .stats,
+    .rail {
+        display: contents;
+    }
+
     .hero,
     .progress,
     .streak,
+    .rewardPts,
+    .brandMark,
     .rewardsCtaArea {
         display: none;
     }

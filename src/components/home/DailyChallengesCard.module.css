@@ -1,6 +1,6 @@
 .card {
     background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
-    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.16);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     display: flex;
@@ -8,28 +8,40 @@
     gap: var(--spacing-sm);
     height: 100%;
     padding: var(--spacing-lg);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+@media (min-width: 1100px) and (hover: hover) {
+    .card:hover {
+        border-color: rgb(var(--color-primary-rgb) / 0.4);
+        box-shadow: var(--shadow-lg);
+    }
 }
 
 .header {
     align-items: center;
     display: flex;
+    gap: 0.5rem;
     justify-content: space-between;
 }
 
 .header h3 {
     color: var(--color-text-primary);
-    font-size: 0.9rem;
+    font-size: 0.82rem;
     font-weight: 850;
     letter-spacing: 0.03em;
     margin: 0;
     text-transform: uppercase;
+    white-space: nowrap;
 }
 
 .headerLink {
     color: var(--color-primary-light);
+    flex-shrink: 0;
     font-size: 0.78rem;
     font-weight: 700;
     text-decoration: none;
+    white-space: nowrap;
 }
 
 .track {
@@ -47,9 +59,23 @@
     display: none;
 }
 
+/* Desktop: this card is now full main-column width (its own row). Drop the
+   horizontal scroll track; lay the 2-3 tiles out at a fixed, sensible width
+   rather than stretching them across the whole row. Placed after the base
+   .track rule so it wins the cascade. */
+@media (min-width: 1100px) {
+    .track {
+        grid-auto-flow: row;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 280px));
+        justify-content: start;
+        overflow-x: visible;
+        scroll-snap-type: none;
+    }
+}
+
 .tile {
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.16);
     border-radius: var(--radius-lg);
     color: inherit;
     display: block;
@@ -77,7 +103,7 @@
 }
 
 .tileViolet {
-    background: rgba(var(--color-primary-rgb), 0.22);
+    background: rgb(var(--color-primary-rgb) / 0.22);
     color: var(--color-primary-light);
 }
 
@@ -87,7 +113,7 @@
 }
 
 .tileGold {
-    background: rgba(var(--brand-gold-rgb), 0.22);
+    background: rgb(var(--brand-gold-rgb) / 0.22);
     color: var(--brand-gold);
 }
 
@@ -144,8 +170,8 @@
 }
 
 .retryBtn {
-    background: rgba(var(--color-primary-rgb), 0.16);
-    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    background: rgb(var(--color-primary-rgb) / 0.16);
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.3);
     border-radius: var(--radius-md);
     color: var(--color-text-primary);
     font-size: 0.78rem;
@@ -155,5 +181,5 @@
 
 :global(html[data-theme='light']) .card {
     background: linear-gradient(180deg, #ffffff, #f8f7fc);
-    border-color: rgba(var(--color-primary-rgb), 0.14);
+    border-color: rgb(var(--color-primary-rgb) / 0.14);
 }

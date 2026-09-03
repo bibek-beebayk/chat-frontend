@@ -1,6 +1,6 @@
 .card {
     background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
-    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.16);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     display: flex;
@@ -8,6 +8,15 @@
     gap: 0.5rem;
     padding: var(--spacing-lg);
     height: 100%;
+    transition: border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+@media (min-width: 1100px) and (hover: hover) {
+    .card:hover {
+        border-color: rgb(var(--color-primary-rgb) / 0.4);
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
+    }
 }
 
 .embedded {
@@ -80,8 +89,8 @@
 
 .retryBtn {
     align-self: flex-start;
-    background: rgba(var(--color-primary-rgb), 0.16);
-    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    background: rgb(var(--color-primary-rgb) / 0.16);
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.3);
     border-radius: var(--radius-md);
     color: var(--color-text-primary);
     font-size: 0.8rem;
@@ -118,7 +127,7 @@
 
 .modal {
     background: linear-gradient(160deg, #241640, #150b2c);
-    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.3);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
     display: flex;
@@ -211,5 +220,5 @@
 
 :global(html[data-theme='light']) .card {
     background: linear-gradient(180deg, #ffffff, #f8f7fc);
-    border-color: rgba(var(--color-primary-rgb), 0.14);
+    border-color: rgb(var(--color-primary-rgb) / 0.14);
 }
