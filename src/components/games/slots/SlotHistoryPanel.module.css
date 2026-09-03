@@ -1,6 +1,6 @@
 .panel {
     background: linear-gradient(180deg, rgba(20, 10, 35, 0.88), rgba(13, 8, 24, 0.92));
-    border: 1px solid rgba(var(--color-primary-rgb), 0.16);
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.16);
     border-radius: var(--radius-lg);
     padding: var(--spacing-md);
 }
@@ -28,8 +28,8 @@
 
 .retryBtn {
     align-self: flex-start;
-    background: rgba(var(--color-primary-rgb), 0.16);
-    border: 1px solid rgba(var(--color-primary-rgb), 0.3);
+    background: rgb(var(--color-primary-rgb) / 0.16);
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.3);
     border-radius: var(--radius-md);
     color: var(--color-text-primary);
     font-size: 0.78rem;
@@ -76,7 +76,7 @@
 }
 
 .multiplier {
-    background: rgba(var(--color-accent-rgb), 0.16);
+    background: rgb(var(--color-accent-rgb) / 0.16);
     border-radius: 999px;
     color: var(--color-accent);
     font-size: 0.7rem;

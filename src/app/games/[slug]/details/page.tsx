@@ -135,73 +135,73 @@ export default function GameDetailsPage() {
                     <div className={styles.emptyState}>Game not found.</div>
                 ) : (
                     <div className={styles.layout}>
-                        <div className={styles.heroCol}>
-                            <div className={styles.hero}>
-                                {game.thumbnail ? (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img src={game.thumbnail} alt={`${game.name} thumbnail`} className={styles.heroImg} />
-                                ) : (
-                                    <span className={styles.heroFallback} aria-hidden="true">{GAME_ICONS[slug] || '🎮'}</span>
-                                )}
-                                <div className={styles.heroScrim} aria-hidden="true" />
-                            </div>
-                            {playRoute && (
-                                <Link href={playRoute} className={styles.playBtnDesktop}>Play Now</Link>
+                        <div className={styles.hero}>
+                            {game.thumbnail && (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={game.thumbnail} alt="" aria-hidden="true" className={styles.heroBg} />
                             )}
+                            <div className={styles.heroInner}>
+                                <div className={styles.heroArt}>
+                                    {game.thumbnail ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img src={game.thumbnail} alt={`${game.name} thumbnail`} className={styles.heroImg} />
+                                    ) : (
+                                        <span className={styles.heroFallback} aria-hidden="true">{GAME_ICONS[slug] || '🎮'}</span>
+                                    )}
+                                </div>
+
+                                <div className={styles.heroInfo}>
+                                    <div className={styles.titleRow}>
+                                        <h2 className={styles.gameName}>{game.name}</h2>
+                                        {tag && <span className={styles.tag}>{tag}</span>}
+                                    </div>
+                                    {game.description && <p className={styles.description}>{game.description}</p>}
+
+                                    {stats && (
+                                        <div className={styles.statsGrid}>
+                                            <div className={styles.statTile}>
+                                                <span className={styles.statLabel}>RTP</span>
+                                                <strong className={styles.statValue}>{stats.rtp}</strong>
+                                            </div>
+                                            <div className={styles.statTile}>
+                                                <span className={styles.statLabel}>Max Win</span>
+                                                <strong className={styles.statValue}>{stats.maxWin}</strong>
+                                            </div>
+                                            <div className={styles.statTile}>
+                                                <span className={styles.statLabel}>Volatility</span>
+                                                <strong className={styles.statValue}>{stats.volatility}</strong>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {playRoute && (
+                                        <Link href={playRoute} className={styles.playBtn}>Play Now</Link>
+                                    )}
+                                </div>
+                            </div>
                         </div>
 
-                        <div className={styles.infoCol}>
-                            <div className={styles.titleRow}>
-                                <h2 className={styles.gameName}>{game.name}</h2>
-                                {tag && <span className={styles.tag}>{tag}</span>}
-                            </div>
-                            {game.description && <p className={styles.description}>{game.description}</p>}
-
-                            {playRoute && (
-                                <div className={styles.playBarMobile}>
-                                    <Link href={playRoute} className={styles.playBtnMobile}>Play Now</Link>
-                                </div>
+                        <section className={styles.recentWins}>
+                            <h3 className={styles.sectionTitle}>Recent Wins</h3>
+                            {winsLoading ? (
+                                <div className={styles.winsLoading}><div className="spinner"></div></div>
+                            ) : wins.length === 0 ? (
+                                <p className={styles.emptyWins}>No recent wins yet - be the first!</p>
+                            ) : (
+                                <ul className={styles.winsList}>
+                                    {wins.map((win, index) => (
+                                        <li key={`${win.username}-${win.created_at}-${index}`} className={styles.winRow}>
+                                            <span className={styles.winAvatar} aria-hidden="true">
+                                                {win.username.charAt(0).toUpperCase()}
+                                            </span>
+                                            <span className={styles.winName}>{win.username}</span>
+                                            <span className={styles.winMultiplier}>{Number(win.multiplier).toFixed(2)}x</span>
+                                            <span className={styles.winTime}>{formatRelativeTime(win.created_at)}</span>
+                                        </li>
+                                    ))}
+                                </ul>
                             )}
-
-                            {stats && (
-                                <div className={styles.statsGrid}>
-                                    <div className={styles.statTile}>
-                                        <span className={styles.statLabel}>RTP</span>
-                                        <strong className={styles.statValue}>{stats.rtp}</strong>
-                                    </div>
-                                    <div className={styles.statTile}>
-                                        <span className={styles.statLabel}>Max Win</span>
-                                        <strong className={styles.statValue}>{stats.maxWin}</strong>
-                                    </div>
-                                    <div className={styles.statTile}>
-                                        <span className={styles.statLabel}>Volatility</span>
-                                        <strong className={styles.statValue}>{stats.volatility}</strong>
-                                    </div>
-                                </div>
-                            )}
-
-                            <section className={styles.recentWins}>
-                                <h3 className={styles.sectionTitle}>Recent Wins</h3>
-                                {winsLoading ? (
-                                    <div className={styles.winsLoading}><div className="spinner"></div></div>
-                                ) : wins.length === 0 ? (
-                                    <p className={styles.emptyWins}>No recent wins yet - be the first!</p>
-                                ) : (
-                                    <ul className={styles.winsList}>
-                                        {wins.map((win, index) => (
-                                            <li key={`${win.username}-${win.created_at}-${index}`} className={styles.winRow}>
-                                                <span className={styles.winAvatar} aria-hidden="true">
-                                                    {win.username.charAt(0).toUpperCase()}
-                                                </span>
-                                                <span className={styles.winName}>{win.username}</span>
-                                                <span className={styles.winMultiplier}>{Number(win.multiplier).toFixed(2)}x</span>
-                                                <span className={styles.winTime}>{formatRelativeTime(win.created_at)}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </section>
-                        </div>
+                        </section>
                     </div>
                 )}
             </main>

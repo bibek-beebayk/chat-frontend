@@ -92,15 +92,17 @@ export function RocketGame() {
 
     const sync = useRocketSync(currentRound, config, handleResolved);
 
-    // Visual-only phase derived from the sync engine's throttled countdown
-    // state - currentRound.phase itself is only ever a snapshot from the
-    // moment the round was placed/last polled, so this is what actually
-    // drives the countdown -> launch -> flight transition on screen.
+    // Visual-only phase. Once the sync engine has produced a countdown value
+    // it's authoritative; until then (the first frame or two right after a
+    // bet is placed, before useRocketSync's rAF loop has run) fall back to
+    // the round's own server snapshot phase - otherwise a just-placed round
+    // briefly reads as 'running', firing the ignition sound + flashing the
+    // Cash Out button before the countdown even starts.
     const visualPhase: 'countdown' | 'running' | null = !currentRound
         ? null
-        : sync.secondsRemaining !== null && sync.secondsRemaining > 0.05
-            ? 'countdown'
-            : 'running';
+        : sync.secondsRemaining !== null
+            ? (sync.secondsRemaining > 0.05 ? 'countdown' : 'running')
+            : (currentRound.phase === 'running' ? 'running' : 'countdown');
 
     // Countdown tick sounds + haptics, and the one-shot ignition/launch FX
     // at the moment flight actually begins.
@@ -308,26 +310,42 @@ export function RocketGame() {
                         )}
                     </div>
 
-                    {config && (
-                        <RocketControls
-                            config={config}
-                            wagerInput={wagerInput}
-                            onWagerChange={setWagerInput}
-                            autoCashoutEnabled={autoCashoutEnabled}
-                            onAutoCashoutEnabledChange={setAutoCashoutEnabled}
-                            autoCashoutInput={autoCashoutInput}
-                            onAutoCashoutChange={setAutoCashoutInput}
-                            balance={effectiveBalance}
-                            currentRound={currentRound}
-                            visualPhase={visualPhase}
-                            liveMultiplier={sync.displayMultiplier}
-                            busy={busy}
-                            onPlaceBet={handlePlaceBet}
-                            onCashOut={handleCashOut}
-                        />
-                    )}
+                    {/* Desktop: this becomes the right-hand controls column
+                        (stage on the left), mirroring the Plinko / Rollin 3x3
+                        layout. On mobile/tablet it's `display: contents` so
+                        RocketControls sits below the stage as before and the
+                        header stays hidden. */}
+                    <div className={styles.controlsCol}>
+                        <div className={styles.controlsHeader}>
+                            <p className={styles.eyebrow}>Games</p>
+                            <h1 className={styles.gameTitle}>Rollin Rocket</h1>
+                            <div className={styles.balanceRow}>
+                                <span>Reward Points</span>
+                                <strong>{effectiveBalance.toLocaleString()} RP</strong>
+                            </div>
+                        </div>
 
-                    {errorMessage && <p className={styles.errorText}>{errorMessage}</p>}
+                        {config && (
+                            <RocketControls
+                                config={config}
+                                wagerInput={wagerInput}
+                                onWagerChange={setWagerInput}
+                                autoCashoutEnabled={autoCashoutEnabled}
+                                onAutoCashoutEnabledChange={setAutoCashoutEnabled}
+                                autoCashoutInput={autoCashoutInput}
+                                onAutoCashoutChange={setAutoCashoutInput}
+                                balance={effectiveBalance}
+                                currentRound={currentRound}
+                                visualPhase={visualPhase}
+                                liveMultiplier={sync.displayMultiplier}
+                                busy={busy}
+                                onPlaceBet={handlePlaceBet}
+                                onCashOut={handleCashOut}
+                            />
+                        )}
+
+                        {errorMessage && <p className={styles.errorText}>{errorMessage}</p>}
+                    </div>
                 </div>
             </ImmersiveGameShell>
             <RocketRulesModal isOpen={rulesOpen} onClose={() => setRulesOpen(false)} />

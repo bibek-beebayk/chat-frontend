@@ -8,6 +8,23 @@
     }
 }
 
+/* Desktop: a slot game has a fixed aspect and can't fill an ultrawide
+   content area, so instead of letting it float with dead margins, centre it
+   on a softly-lit stage that fills the viewport. */
+@media (min-width: 860px) {
+    .page {
+        align-items: center;
+        background:
+            radial-gradient(680px 520px at 50% 42%, rgb(var(--color-accent-rgb) / 0.08), transparent 70%),
+            radial-gradient(1200px 860px at 50% 52%, rgb(var(--color-primary-rgb) / 0.06), transparent 78%);
+        display: flex;
+        flex: 1;
+        justify-content: center;
+        min-height: calc(100vh - 128px);
+        padding: var(--spacing-xl) var(--spacing-lg);
+    }
+}
+
 .emptyState {
     color: var(--color-text-secondary);
     padding: var(--spacing-xl);

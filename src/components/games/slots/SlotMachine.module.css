@@ -2,15 +2,9 @@
     display: grid;
     gap: var(--spacing-lg);
     grid-template-columns: 1fr;
-    justify-content: center;
     margin: 0 auto;
     max-width: 920px;
-}
-
-@media (min-width: 860px) {
-    .wrap {
-        grid-template-columns: minmax(0, 460px) minmax(240px, 320px);
-    }
+    width: 100%;
 }
 
 .errorPanel {
@@ -24,16 +18,14 @@
     text-align: center;
 }
 
-.boardColumn {
-    display: flex;
-    justify-content: center;
-}
-
+/* Mobile/tablet: one card holding the header + reels + controls (the panels
+   below are transparent passthrough). Desktop dissolves .boardCard and
+   places its pieces in a 2-column grid - see the @media block at the end. */
 .boardCard {
     background:
-        radial-gradient(ellipse 70% 60% at 50% 0%, rgba(var(--color-accent-rgb), 0.14), transparent 60%),
+        radial-gradient(ellipse 70% 60% at 50% 0%, rgb(var(--color-accent-rgb) / 0.14), transparent 60%),
         linear-gradient(180deg, rgba(20, 10, 35, 0.92), rgba(10, 6, 20, 0.96));
-    border: 1px solid rgba(var(--color-accent-rgb), 0.28);
+    border: 1px solid rgb(var(--color-accent-rgb) / 0.28);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-lg);
     display: flex;
@@ -41,6 +33,11 @@
     gap: 0.9rem;
     padding: var(--spacing-lg);
     width: 100%;
+}
+
+.gridPanel,
+.controlsPanel {
+    display: contents;
 }
 
 .boardHeader {
@@ -83,7 +80,7 @@
         radial-gradient(ellipse 90% 80% at 50% 12%, rgba(255, 221, 122, 0.1), transparent 60%),
         repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0px, rgba(0, 0, 0, 0.3) 2px, transparent 2px, transparent 14px),
         linear-gradient(180deg, #2b0a0a 0%, #4a0f0f 45%, #1c0606 100%);
-    border: 2px solid rgba(var(--color-accent-rgb), 0.55);
+    border: 2px solid rgb(var(--color-accent-rgb) / 0.55);
     border-radius: var(--radius-lg);
     box-shadow:
         inset 0 0 28px rgba(0, 0, 0, 0.65),
@@ -175,8 +172,8 @@
 
 .winBanner {
     align-items: center;
-    background: rgba(var(--color-accent-rgb), 0.12);
-    border: 1px solid rgba(var(--color-accent-rgb), 0.35);
+    background: rgb(var(--color-accent-rgb) / 0.12);
+    border: 1px solid rgb(var(--color-accent-rgb) / 0.35);
     border-radius: 999px;
     display: flex;
     gap: 0.6rem;
@@ -184,14 +181,14 @@
 }
 
 .winBannerMedium {
-    background: rgba(var(--color-accent-rgb), 0.2);
-    box-shadow: 0 0 20px rgba(var(--color-accent-rgb), 0.35);
+    background: rgb(var(--color-accent-rgb) / 0.2);
+    box-shadow: 0 0 20px rgb(var(--color-accent-rgb) / 0.35);
 }
 
 .winBannerBig {
     animation: bigWinPulse 1100ms ease-in-out infinite;
-    background: rgba(var(--color-accent-rgb), 0.28);
-    box-shadow: 0 0 30px rgba(var(--color-accent-rgb), 0.55);
+    background: rgb(var(--color-accent-rgb) / 0.28);
+    box-shadow: 0 0 30px rgb(var(--color-accent-rgb) / 0.55);
 }
 
 @keyframes bigWinPulse {
@@ -228,6 +225,7 @@
 
 .linkBtn {
     color: var(--color-text-secondary);
+    cursor: pointer;
     font-size: 0.82rem;
     font-weight: 700;
     padding: 0.4rem;
@@ -245,5 +243,95 @@
 @media (max-width: 768px) {
     .footerLinks {
         display: none;
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* Desktop: Plinko-style split - reels on the left, header + controls  */
+/* + spin history in a sidebar on the right. Placed after all base     */
+/* rules so it wins the cascade.                                       */
+/* ------------------------------------------------------------------ */
+
+@media (min-width: 860px) {
+    .wrap {
+        grid-template-columns: minmax(0, 500px) minmax(300px, 360px);
+        grid-template-rows: auto auto 1fr;
+        grid-template-areas:
+            "reels  header"
+            "reels  controls"
+            "reels  history";
+        gap: var(--spacing-lg);
+        max-width: 920px;
+        height: clamp(520px, calc(100vh - 210px), 760px);
+    }
+
+    /* dissolve the mobile card - its children become grid items */
+    .boardCard {
+        display: contents;
+    }
+
+    /* left column: a full-height cabinet with the reel frame centred inside */
+    .gridPanel {
+        grid-area: reels;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.9rem;
+        background:
+            radial-gradient(ellipse 80% 55% at 50% 0%, rgb(var(--color-accent-rgb) / 0.16), transparent 62%),
+            linear-gradient(180deg, rgba(22, 11, 38, 0.94), rgba(9, 5, 18, 0.97));
+        border: 1px solid rgb(var(--color-accent-rgb) / 0.32);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-lg);
+        padding: var(--spacing-md);
+    }
+
+    .gridWrap {
+        align-items: center;
+        height: 460px;
+        padding: 0.6rem;
+    }
+
+    .gridWrap > div {
+        transform: scale(1.4);
+        transform-origin: center;
+    }
+
+    .boardHeader {
+        grid-area: header;
+        align-items: center;
+    }
+
+    .title {
+        font-size: 1.6rem;
+    }
+
+    .balanceValue {
+        font-size: 1.15rem;
+    }
+
+    .controlsPanel {
+        grid-area: controls;
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+    }
+
+    .footerLinks {
+        justify-content: flex-start;
+    }
+
+    .sideColumn {
+        grid-area: history;
+        display: flex;
+        min-height: 0;
+    }
+
+    /* the history panel fills the remaining right-column height and scrolls
+       its own list rather than growing the page */
+    .sideColumn > * {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
     }
 }

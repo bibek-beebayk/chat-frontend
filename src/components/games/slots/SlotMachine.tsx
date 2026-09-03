@@ -204,16 +204,21 @@ export function SlotMachine({ paytableOpen, onOpenPaytable, onClosePaytable }: S
 
     return (
         <div className={styles.wrap}>
-            <div className={styles.boardColumn}>
-                <div className={styles.boardCard}>
-                    <div className={styles.boardHeader}>
-                        <h1 className={styles.title}>Rollin 3x3</h1>
-                        <div className={styles.balance}>
-                            <span className={styles.balanceLabel}>Reward Points</span>
-                            <span className={styles.balanceValue}>{effectiveBalance.toLocaleString()} RP</span>
-                        </div>
+            {/* Left on desktop: the reels. On mobile .boardCard is a real card
+                wrapping the header + reels + controls; on desktop it dissolves
+                (display: contents) and its pieces are placed in the 2-column
+                grid - reels left, everything else right (mirrors the Plinko
+                page layout). */}
+            <div className={styles.boardCard}>
+                <div className={styles.boardHeader}>
+                    <h1 className={styles.title}>Rollin 3x3</h1>
+                    <div className={styles.balance}>
+                        <span className={styles.balanceLabel}>Reward Points</span>
+                        <span className={styles.balanceValue}>{effectiveBalance.toLocaleString()} RP</span>
                     </div>
+                </div>
 
+                <div className={styles.gridPanel}>
                     <div className={styles.gridWrap}>
                         {config && (
                             <SlotGrid
@@ -233,7 +238,9 @@ export function SlotMachine({ paytableOpen, onOpenPaytable, onClosePaytable }: S
                             <ResultBanner round={lastRound} />
                         )}
                     </div>
+                </div>
 
+                <div className={styles.controlsPanel}>
                     {config && (
                         <SlotControls
                             wager={wager}

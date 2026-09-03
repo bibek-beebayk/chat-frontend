@@ -146,7 +146,7 @@ export default function GamesPage() {
 
     return (
         <DashboardLayout>
-            <PageShell title="" eyebrow="" description="">
+            <PageShell title="Rollin Games" eyebrow="" description="Play Rollin Games and earn rewards!">
                 {loading ? (
                     <div className={styles.loadingArea}><div className="spinner"></div></div>
                 ) : games.length === 0 ? (

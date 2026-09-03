@@ -146,12 +146,12 @@ export function RocketControls({
                 )}
             </div>
 
-            {!isRunning && (
-                <div className={styles.returnRow}>
-                    <span>Potential Return</span>
-                    <strong>{potentialReturn.toLocaleString(undefined, { maximumFractionDigits: 2 })} RP</strong>
-                </div>
-            )}
+            {/* Always rendered so the Place Play / Cash Out button below never
+                shifts position when a round starts. */}
+            <div className={styles.returnRow}>
+                <span>Potential Return</span>
+                <strong>{potentialReturn.toLocaleString(undefined, { maximumFractionDigits: 2 })} RP</strong>
+            </div>
 
             {isRunning ? (
                 <button

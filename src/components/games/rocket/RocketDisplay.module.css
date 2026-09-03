@@ -455,6 +455,14 @@
     }
 }
 
+/* Desktop 2-column layout (see RocketGame.module.css) - the stage owns the
+   wider left column, so give it a bit more height to match. */
+@media (min-width: 1024px) {
+    .stage {
+        height: clamp(560px, 74vh, 800px);
+    }
+}
+
 /* ---------- Reduced motion / accessibility ---------- */
 
 .reducedMotion,

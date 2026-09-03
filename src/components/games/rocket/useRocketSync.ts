@@ -104,7 +104,11 @@ export function useRocketSync(
             if (!snapshot) return;
             const perfDeltaSeconds = (performance.now() - snapshot.perfTimeAtSync) / 1000;
 
-            let secondsRemaining: number | null = null;
+            // An active round with no countdown left is in flight - report 0,
+            // never null. `null` (IDLE_STATE only) then unambiguously means
+            // "the loop hasn't produced a value for this round yet", which is
+            // what RocketGame uses to pick the initial visual phase.
+            let secondsRemaining = 0;
             let elapsedSeconds = snapshot.elapsedSeconds + perfDeltaSeconds;
             if (snapshot.secondsRemaining != null) {
                 secondsRemaining = Math.max(0, snapshot.secondsRemaining - perfDeltaSeconds);

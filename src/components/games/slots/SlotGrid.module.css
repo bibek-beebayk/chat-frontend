@@ -5,7 +5,7 @@
 
 .reelSlot {
     border-radius: var(--radius-md);
-    box-shadow: inset 0 0 0 1px rgba(var(--color-accent-rgb), 0.25);
+    box-shadow: inset 0 0 0 1px rgb(var(--color-accent-rgb) / 0.25);
     position: relative;
 }
 
@@ -14,7 +14,7 @@
    TILE_HEIGHT assuming reels stay flush, so a real border/gap here would
    throw that math off by a few pixels. */
 .reelSlot:not(:last-child)::after {
-    background: linear-gradient(180deg, transparent, rgba(var(--color-accent-rgb), 0.6) 15%, rgba(var(--color-accent-rgb), 0.6) 85%, transparent);
+    background: linear-gradient(180deg, transparent, rgb(var(--color-accent-rgb) / 0.6) 15%, rgb(var(--color-accent-rgb) / 0.6) 85%, transparent);
     bottom: 4px;
     content: '';
     position: absolute;
@@ -42,7 +42,7 @@
 
 .cellWinning {
     animation: pulseWin 900ms ease-in-out infinite;
-    box-shadow: inset 0 0 0 3px var(--color-accent), 0 0 18px rgba(var(--color-accent-rgb), 0.85);
+    box-shadow: inset 0 0 0 3px var(--color-accent), 0 0 18px rgb(var(--color-accent-rgb) / 0.85);
 }
 
 .cellDimmed {
@@ -51,9 +51,9 @@
 
 @keyframes pulseWin {
     0%, 100% {
-        box-shadow: inset 0 0 0 3px var(--color-accent), 0 0 14px rgba(var(--color-accent-rgb), 0.7);
+        box-shadow: inset 0 0 0 3px var(--color-accent), 0 0 14px rgb(var(--color-accent-rgb) / 0.7);
     }
     50% {
-        box-shadow: inset 0 0 0 3px #fff2c9, 0 0 26px rgba(var(--color-accent-rgb), 1);
+        box-shadow: inset 0 0 0 3px #fff2c9, 0 0 26px rgb(var(--color-accent-rgb) / 1);
     }
 }

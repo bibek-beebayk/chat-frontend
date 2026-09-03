@@ -18,13 +18,15 @@
 
 .iconBtn {
     align-items: center;
-    background: rgba(var(--color-primary-rgb), 0.1);
-    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+    background: rgb(var(--color-primary-rgb) / 0.1);
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.2);
     border-radius: 999px;
     color: var(--color-text-primary);
+    cursor: pointer;
     display: inline-flex;
     height: 40px;
     justify-content: center;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
     width: 40px;
 }
 
@@ -34,7 +36,7 @@
 }
 
 .iconBtn:hover {
-    background: rgba(var(--color-primary-rgb), 0.16);
+    background: rgb(var(--color-primary-rgb) / 0.16);
 }
 
 .iconBtnActive {
@@ -71,20 +73,39 @@
 
 .layout {
     display: grid;
-    gap: var(--spacing-md);
+    gap: var(--spacing-lg);
 }
 
 /* ---------- Hero ---------- */
 
 .hero {
-    aspect-ratio: 16 / 11;
-    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-    border-radius: var(--radius-lg);
-    overflow: hidden;
     position: relative;
 }
 
+.heroBg {
+    display: none;
+}
+
+.heroInner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    position: relative;
+    z-index: 1;
+}
+
+.heroArt {
+    aspect-ratio: 16 / 11;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    border-radius: var(--radius-lg);
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+
 .heroImg {
+    display: block;
     height: 100%;
     object-fit: cover;
     width: 100%;
@@ -99,18 +120,12 @@
     width: 100%;
 }
 
-.heroScrim {
-    background: linear-gradient(180deg, transparent 60%, rgba(0, 0, 0, 0.35));
-    inset: 0;
-    pointer-events: none;
-    position: absolute;
+.heroInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    min-width: 0;
 }
-
-.playBtnDesktop {
-    display: none;
-}
-
-/* ---------- Info column ---------- */
 
 .titleRow {
     align-items: center;
@@ -120,27 +135,29 @@
 
 .gameName {
     color: var(--color-text-primary);
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     font-weight: 950;
+    letter-spacing: -0.01em;
     margin: 0;
 }
 
 .tag {
-    background: rgba(var(--color-primary-rgb), 0.18);
+    background: rgb(var(--color-primary-rgb) / 0.18);
     border-radius: 999px;
     color: var(--color-primary-light);
     flex-shrink: 0;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 900;
+    letter-spacing: 0.04em;
     padding: 0.28rem 0.65rem;
     text-transform: uppercase;
 }
 
 .description {
     color: var(--color-text-secondary);
-    font-size: 0.92rem;
+    font-size: 0.94rem;
     line-height: 1.55;
-    margin: 0.6rem 0 0;
+    margin: 0;
 }
 
 /* ---------- Stats ---------- */
@@ -149,12 +166,12 @@
     display: grid;
     gap: 0.6rem;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    margin-top: 1.1rem;
+    margin-top: 0.3rem;
 }
 
 .statTile {
-    background: rgba(255, 255, 255, 0.045);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgb(var(--color-primary-rgb) / 0.08);
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.16);
     border-radius: var(--radius-md);
     display: grid;
     gap: 0.3rem;
@@ -164,22 +181,40 @@
 
 .statLabel {
     color: var(--color-text-muted);
-    font-size: 0.68rem;
+    font-size: 0.66rem;
     font-weight: 800;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
 }
 
 .statValue {
     color: var(--color-text-primary);
-    font-size: 1rem;
+    font-size: 1.02rem;
     font-weight: 900;
+}
+
+/* ---------- Play Now ---------- */
+
+.playBtn {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    border-radius: var(--radius-md);
+    box-shadow: 0 12px 28px rgb(var(--color-primary-rgb) / 0.3);
+    color: #fff;
+    display: block;
+    font-size: 0.98rem;
+    font-weight: 900;
+    margin-top: 0.4rem;
+    padding: 0.95rem;
+    text-align: center;
+    text-decoration: none;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    width: 100%;
 }
 
 /* ---------- Recent Wins ---------- */
 
 .recentWins {
-    margin-top: 1.3rem;
+    margin-top: 0.3rem;
 }
 
 .sectionTitle {
@@ -187,7 +222,7 @@
     font-size: 0.76rem;
     font-weight: 900;
     letter-spacing: 0.06em;
-    margin: 0 0 0.7rem;
+    margin: 0 0 0.8rem;
     text-transform: uppercase;
 }
 
@@ -213,12 +248,12 @@
 
 .winRow {
     align-items: center;
-    background: rgba(255, 255, 255, 0.035);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgb(var(--color-primary-rgb) / 0.06);
+    border: 1px solid rgb(var(--color-primary-rgb) / 0.12);
     border-radius: var(--radius-md);
     display: flex;
     gap: 0.65rem;
-    padding: 0.6rem 0.75rem;
+    padding: 0.6rem 0.8rem;
 }
 
 .winAvatar {
@@ -248,7 +283,7 @@
 
 .winMultiplier {
     color: var(--color-accent);
-    font-size: 0.88rem;
+    font-size: 0.9rem;
     font-weight: 900;
 }
 
@@ -256,25 +291,6 @@
     color: var(--color-text-muted);
     flex-shrink: 0;
     font-size: 0.76rem;
-}
-
-/* ---------- Play Now ---------- */
-
-.playBarMobile {
-    margin-top: 1rem;
-}
-
-.playBtnMobile {
-    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-    border-radius: var(--radius-md);
-    box-shadow: 0 12px 28px rgba(102, 32, 214, 0.28);
-    color: #fff;
-    display: block;
-    font-size: 0.96rem;
-    font-weight: 900;
-    padding: 0.95rem;
-    text-align: center;
-    width: 100%;
 }
 
 /* ---------- Light theme ---------- */
@@ -286,7 +302,7 @@
 
 :global(html[data-theme='light']) .statTile,
 :global(html[data-theme='light']) .winRow {
-    background: rgba(99, 102, 241, 0.045);
+    background: rgba(99, 102, 241, 0.05);
     border-color: rgba(99, 102, 241, 0.14);
 }
 
@@ -294,45 +310,123 @@
 
 @media (min-width: 880px) {
     .main {
-        max-width: 1040px;
+        max-width: 1080px;
         padding: 1.5rem;
     }
 
-    .layout {
-        align-items: start;
-        grid-template-columns: 360px minmax(0, 1fr);
-        gap: var(--spacing-lg);
-    }
-
-    .heroCol {
-        display: grid;
-        gap: 0.85rem;
-        position: sticky;
-        top: 1.5rem;
-    }
-
+    /* Hero becomes one full-width banner: blurred game art behind, a crisp
+       art card on the left, all the game info + Play on the right. No side
+       column, so nothing is left empty. */
     .hero {
-        aspect-ratio: 4 / 3;
+        border: 1px solid rgb(var(--color-primary-rgb) / 0.2);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
     }
 
-    .playBtnDesktop {
-        background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-        border-radius: var(--radius-md);
-        box-shadow: 0 12px 28px rgba(102, 32, 214, 0.28);
-        color: #fff;
+    .heroBg {
         display: block;
-        font-size: 0.96rem;
-        font-weight: 900;
-        padding: 0.95rem;
-        text-align: center;
+        filter: blur(64px) saturate(1.4) brightness(0.5);
+        height: 100%;
+        inset: 0;
+        object-fit: cover;
+        position: absolute;
+        transform: scale(1.35);
         width: 100%;
+        z-index: 0;
     }
 
-    .playBarMobile {
-        display: none;
+    .hero::after {
+        background: linear-gradient(105deg, rgba(14, 8, 26, 0.94) 0%, rgba(22, 13, 42, 0.82) 48%, rgba(34, 20, 64, 0.62) 100%);
+        content: '';
+        inset: 0;
+        position: absolute;
+        z-index: 0;
+    }
+
+    .heroInner {
+        align-items: center;
+        flex-direction: row;
+        gap: var(--spacing-lg);
+        padding: var(--spacing-lg);
+    }
+
+    .heroArt {
+        aspect-ratio: 4 / 3;
+        box-shadow: 0 16px 44px rgba(0, 0, 0, 0.55);
+        width: 300px;
+    }
+
+    .heroInfo {
+        flex: 1;
+        gap: 0.85rem;
+        justify-content: center;
     }
 
     .gameName {
-        font-size: 1.7rem;
+        font-size: 1.9rem;
+    }
+
+    .description {
+        font-size: 0.98rem;
+        max-width: 52ch;
+    }
+
+    .statsGrid {
+        max-width: 460px;
+    }
+
+    .statTile {
+        background: rgb(255 255 255 / 0.06);
+        border-color: rgb(255 255 255 / 0.12);
+    }
+
+    .playBtn {
+        align-self: flex-start;
+        margin-top: 0.5rem;
+        padding: 0.9rem 2.4rem;
+        width: auto;
+    }
+
+    .playBtn:hover {
+        box-shadow: 0 16px 34px rgb(var(--color-primary-rgb) / 0.4);
+        transform: translateY(-2px);
+    }
+
+    /* Wins fill the full width in a responsive multi-column grid rather than
+       one endless tall list. */
+    .recentWins {
+        margin-top: var(--spacing-md);
+    }
+
+    .winsList {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 0.6rem;
+    }
+
+    .winRow {
+        transition: border-color var(--transition-fast);
+    }
+
+    .winRow:hover {
+        border-color: rgb(var(--color-primary-rgb) / 0.3);
+    }
+
+    /* Light theme: a clean light banner instead of the blurred-art treatment. */
+    :global(html[data-theme='light']) .heroBg {
+        display: none;
+    }
+
+    :global(html[data-theme='light']) .hero::after {
+        background: linear-gradient(105deg, #ffffff 0%, #f3f1ff 100%);
+    }
+
+    :global(html[data-theme='light']) .hero {
+        border-color: rgba(99, 102, 241, 0.18);
+    }
+
+    :global(html[data-theme='light']) .statTile {
+        background: rgba(99, 102, 241, 0.06);
+        border-color: rgba(99, 102, 241, 0.16);
     }
 }

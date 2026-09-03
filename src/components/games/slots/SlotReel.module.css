@@ -33,13 +33,13 @@
     color: transparent;
     font-family: Georgia, 'Times New Roman', serif;
     font-weight: 900;
-    filter: drop-shadow(0 0 8px rgba(var(--color-accent-rgb), 0.6));
+    filter: drop-shadow(0 0 8px rgb(var(--color-accent-rgb) / 0.6));
 }
 
 .crown {
-    filter: drop-shadow(0 0 8px rgba(var(--color-accent-rgb), 0.5));
+    filter: drop-shadow(0 0 8px rgb(var(--color-accent-rgb) / 0.5));
 }
 
 .gem {
-    filter: drop-shadow(0 0 6px rgba(var(--color-primary-rgb), 0.5));
+    filter: drop-shadow(0 0 6px rgb(var(--color-primary-rgb) / 0.5));
 }
