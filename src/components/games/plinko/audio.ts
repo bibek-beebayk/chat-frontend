@@ -51,6 +51,30 @@ export function playPegHit() {
 
 export type WinTier = 'minimal' | 'subtle' | 'medium' | 'large' | 'extreme';
 
+/**
+ * Losing landing (<1x). A downward pitch bend on two detuned triangle
+ * oscillators - reads as a "deflating" failure without being harsh or long.
+ */
+function playLossTone(ctx: AudioContext) {
+    const start = ctx.currentTime;
+    const gainNode = ctx.createGain();
+    gainNode.gain.setValueAtTime(0, start);
+    gainNode.gain.linearRampToValueAtTime(0.12, start + 0.02);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, start + 0.42);
+    gainNode.connect(ctx.destination);
+
+    for (const detune of [0, 8]) {
+        const osc = ctx.createOscillator();
+        osc.type = 'triangle';
+        osc.detune.setValueAtTime(detune, start);
+        osc.frequency.setValueAtTime(300, start);
+        osc.frequency.exponentialRampToValueAtTime(120, start + 0.34);
+        osc.connect(gainNode);
+        osc.start(start);
+        osc.stop(start + 0.44);
+    }
+}
+
 const WIN_TIER_NOTES: Record<Exclude<WinTier, 'minimal'>, number[]> = {
     subtle: [523.25, 659.25],
     medium: [523.25, 659.25, 783.99],
@@ -59,15 +83,15 @@ const WIN_TIER_NOTES: Record<Exclude<WinTier, 'minimal'>, number[]> = {
 };
 
 /**
- * Every landing gets an audible reaction, even a below-1x result - a soft
- * neutral thud for 'minimal' instead of silence, then an ascending arpeggio
- * (more notes, brighter tone) for bigger wins.
+ * Every landing gets an audible reaction. A below-1x result ('minimal') is a
+ * real loss, so it gets a short descending "deflate" - the clear tonal
+ * opposite of the ascending arpeggio wins get (more notes, brighter tone).
  */
 export function playWinChime(tier: WinTier) {
     const ctx = getContext();
     if (!ctx) return;
     if (tier === 'minimal') {
-        tone(ctx, 180, ctx.currentTime, 0.14, 0.08, 'sine');
+        playLossTone(ctx);
         return;
     }
     const notes = WIN_TIER_NOTES[tier];
