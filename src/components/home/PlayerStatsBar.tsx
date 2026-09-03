@@ -39,7 +39,7 @@ export function PlayerStatsBar({ streak, streakLoading, streakError, onRetryStre
                         {xpLoading && !xp ? (
                             <Skeleton width={26} height={26} borderRadius="50%" />
                         ) : xp ? (
-                            <RankBadge rank={xp.rank} size="sm" />
+                            <RankBadge rank={xp.rank} size="sm" badgeUrl={xp.rank_badge_url} />
                         ) : null}
                     </div>
                     <div className={styles.colBody}>

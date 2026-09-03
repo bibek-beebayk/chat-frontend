@@ -36,7 +36,7 @@ export function PlayerProgressCard() {
     return (
         <div className={styles.card}>
             <div className={styles.headerRow}>
-                <RankBadge rank={data.rank} size="md" />
+                <RankBadge rank={data.rank} size="md" badgeUrl={data.rank_badge_url} />
                 <div>
                     <p className={styles.rankLabel}>{data.rank_label}</p>
                     <p className={styles.xpLine}>

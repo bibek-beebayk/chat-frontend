@@ -25,8 +25,12 @@ export default function LevelsPage() {
         <DashboardLayout>
             <main className={styles.main}>
                 <header className={styles.hero}>
-                    <span className={styles.heroIcon} aria-hidden="true">👑</span>
-                    <h1 className={styles.heroTitle}>Rollin <span>Levels</span></h1>
+                    <span className={styles.heroCrown} aria-hidden="true">👑</span>
+                    <h1 className={styles.heroTitle}>
+                        <span className={styles.sparkle} aria-hidden="true">✦</span>
+                        Rollin <span className={styles.heroTitleAccent}>Levels</span>
+                        <span className={styles.sparkle} aria-hidden="true">✦</span>
+                    </h1>
                     <p className={styles.heroTagline}>Climb the ranks. Earn epic rewards. Join the elite.</p>
                 </header>
 
@@ -37,16 +41,13 @@ export default function LevelsPage() {
                 ) : (
                     <>
                         <Link href={`/levels/${currentTier.slug}`} className={styles.currentCard}>
-                            <div className={styles.currentCardCol}>
-                                <RankBadge rank={currentTier.slug} size="md" />
-                                <div>
-                                    <span className={styles.currentCardLabel}>Current Level</span>
-                                    <strong className={styles.currentCardValue}>{currentTier.label}</strong>
-                                </div>
+                            <RankBadge rank={currentTier.slug} size="lg" badgeUrl={currentTier.badge_url} />
+                            <div className={styles.currentCardText}>
+                                <span className={styles.metaLabel}>Current Level</span>
+                                <strong className={styles.currentCardValue}>{currentTier.label}</strong>
                             </div>
-                            <div className={styles.currentCardDivider} aria-hidden="true" />
-                            <div className={styles.currentCardCol}>
-                                <span className={styles.currentCardLabel}>Total XP</span>
+                            <div className={styles.currentCardXp}>
+                                <span className={styles.metaLabel}>Total XP</span>
                                 <strong className={styles.currentCardValue}>{data.caller.total_xp.toLocaleString()}</strong>
                             </div>
                         </Link>
@@ -56,16 +57,18 @@ export default function LevelsPage() {
                                 <Link
                                     key={tier.slug}
                                     href={`/levels/${tier.slug}`}
-                                    className={`${styles.tierRow} ${tier.is_current ? styles.tierRowCurrent : ''} ${!tier.is_unlocked ? styles.tierRowLocked : ''}`}
+                                    className={`${styles.tierRow} ${styles[tier.slug]} ${tier.is_current ? styles.tierRowCurrent : ''} ${!tier.is_unlocked ? styles.tierRowLocked : ''}`}
                                 >
-                                    <RankBadge rank={tier.slug} size="md" />
+                                    <RankBadge rank={tier.slug} size="md" badgeUrl={tier.badge_url} />
                                     <div className={styles.tierRowInfo}>
                                         <span className={styles.tierRowLabel}>{tier.label}</span>
                                         <span className={styles.tierRowRange}>
-                                            {tier.min_xp.toLocaleString()}{tier.max_xp != null ? ` - ${tier.max_xp.toLocaleString()}` : '+'} XP
+                                            {tier.min_xp.toLocaleString()}{tier.max_xp != null ? ` – ${tier.max_xp.toLocaleString()}` : '+'} XP
                                         </span>
                                     </div>
-                                    {tier.is_current && <span className={styles.tierRowBadge}>Current</span>}
+                                    {tier.is_current
+                                        ? <span className={styles.currentPill}>Current</span>
+                                        : !tier.is_unlocked && <LockIcon />}
                                     <ChevronIcon />
                                 </Link>
                             ))}
@@ -100,8 +103,17 @@ export default function LevelsPage() {
 
 function ChevronIcon() {
     return (
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.chevron}>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={styles.chevron}>
             <polyline points="9 18 15 12 9 6" />
+        </svg>
+    );
+}
+
+function LockIcon() {
+    return (
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.lock}>
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         </svg>
     );
 }

@@ -228,7 +228,7 @@ export default function ProfilePage() {
                             {isPlayer && xpStatus && (
                                 <>
                                     <div className={styles.rankRow}>
-                                        <RankBadge rank={xpStatus.rank} size="sm" />
+                                        <RankBadge rank={xpStatus.rank} size="sm" badgeUrl={xpStatus.rank_badge_url} />
                                         <span className={styles.rankLabel} style={{ color: RANK_TEXT_COLORS[xpStatus.rank] }}>{xpStatus.rank_label}</span>
                                     </div>
                                     <div className={styles.xpRow}>

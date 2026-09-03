@@ -435,6 +435,7 @@ export interface XpStatus {
     total_xp: number;
     rank: RankSlug;
     rank_label: string;
+    rank_badge_url: string | null;
     rank_min_xp: number;
     next_rank: RankSlug | null;
     next_rank_xp: number | null;
@@ -469,6 +470,7 @@ export interface RankTierEntry {
     sub_ranges: RankSubRange[] | null;
     rank_up_bonus_rp: number | null;
     tagline: string;
+    badge_url: string | null;
     is_current: boolean;
     is_unlocked: boolean;
 }

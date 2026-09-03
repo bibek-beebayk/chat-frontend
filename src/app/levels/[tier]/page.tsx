@@ -45,7 +45,7 @@ export default function LevelDetailPage() {
                 ) : (
                     <>
                         <div className={styles.heroBlock}>
-                            <RankBadge rank={tier.slug} size="lg" />
+                            <RankBadge rank={tier.slug} size="lg" badgeUrl={tier.badge_url} />
                             <p className={styles.xpRange}>
                                 {tier.min_xp.toLocaleString()}{tier.max_xp != null ? ` - ${tier.max_xp.toLocaleString()}` : '+'} XP
                             </p>
