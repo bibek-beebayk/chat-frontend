@@ -22,6 +22,23 @@
     width: 100%;
 }
 
+@media (max-width: 768px) {
+    /*
+     * HiLoControls' mobile variant docks over the stage with
+     * position: absolute (see HiLoControls.module.css's .mobile), so it
+     * takes up no space in this flex column - .cards below, being flex: 1,
+     * centers the card in the FULL stage height by default, which lands it
+     * right under those docked buttons. Reserving that same height here
+     * (predict row + push note + cash out button + the panel's own
+     * padding, ~12.5rem) shrinks the space .cards actually centers within,
+     * so the card sits clear of the controls, closer to the multiplier,
+     * instead of behind them.
+     */
+    .stage {
+        padding-bottom: 12.5rem;
+    }
+}
+
 .topRow {
     align-items: center;
     display: flex;
