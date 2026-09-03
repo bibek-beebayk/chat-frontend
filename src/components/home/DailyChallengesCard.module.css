@@ -11,8 +11,24 @@
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
+/* /challenges renders this as the page's own content, not a widget on a
+   busier screen: the PageShell heading already names it, so the panel
+   background, border and padding would just be a box drawn around the
+   whole page. Tiles sit directly on the page instead. */
+.cardBare {
+    background: none;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+}
+
+.cardBare:hover {
+    border-color: transparent;
+    box-shadow: none;
+}
+
 @media (min-width: 1100px) and (hover: hover) {
-    .card:hover {
+    .card:not(.cardBare):hover {
         border-color: rgb(var(--color-primary-rgb) / 0.4);
         box-shadow: var(--shadow-lg);
     }
@@ -71,6 +87,19 @@
         overflow-x: visible;
         scroll-snap-type: none;
     }
+}
+
+/* On /challenges the tiles are the page's whole content, so they wrap into
+   as many equal columns as fit and share the column width - rather than the
+   preview's fixed-width tiles, which left most of the row empty here.
+   Declared outside the 1100px query (and after it, so it wins) so the same
+   fill behaviour applies at tablet widths too, where the preview's
+   horizontal scroll track makes no sense for a full page either. */
+.trackFill {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+    overflow-x: visible;
+    scroll-snap-type: none;
 }
 
 .tile {
@@ -182,4 +211,11 @@
 :global(html[data-theme='light']) .card {
     background: linear-gradient(180deg, #ffffff, #f8f7fc);
     border-color: rgb(var(--color-primary-rgb) / 0.14);
+}
+
+/* Higher specificity than the light-theme rule above, which would otherwise
+   repaint the panel background the bare variant just removed. */
+:global(html[data-theme='light']) .card.cardBare {
+    background: none;
+    border-color: transparent;
 }

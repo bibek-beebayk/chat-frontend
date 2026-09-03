@@ -1,4 +1,6 @@
+/* No width cap or centering here - PageShell already bounds the column, and
+   centering a 560px block under a left-aligned heading was what left the
+   page looking half-empty on desktop. The tiles fill the row instead. */
 .wrap {
-    margin: 0 auto;
-    max-width: 560px;
+    width: 100%;
 }

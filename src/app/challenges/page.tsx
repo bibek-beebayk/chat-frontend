@@ -30,7 +30,7 @@ export default function ChallengesPage() {
         <DashboardLayout>
             <PageShell title="Daily Challenges" eyebrow="Play" description="Complete today's checklist to earn XP toward your next rank.">
                 <div className={styles.wrap}>
-                    <DailyChallengesCard items={items} loading={loading} error={error} onRetry={load} hideViewAll />
+                    <DailyChallengesCard items={items} loading={loading} error={error} onRetry={load} layout="page" />
                 </div>
             </PageShell>
         </DashboardLayout>
