@@ -16,6 +16,7 @@ function RegisterPageContent() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [emailOptIn, setEmailOptIn] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
@@ -42,7 +43,7 @@ function RegisterPageContent() {
         setLoading(true);
 
         try {
-            const response = await register({ username, email, user_type: 'player', password, confirm_password: confirmPassword });
+            const response = await register({ username, email, user_type: 'player', password, confirm_password: confirmPassword, email_marketing_opt_in: emailOptIn });
 
             // Store email for OTP verification page
             localStorage.setItem('pendingVerificationEmail', response.email);
@@ -193,6 +194,15 @@ function RegisterPageContent() {
                         )}
                         required
                     />
+
+                    <label className={styles.checkbox}>
+                        <input
+                            type="checkbox"
+                            checked={emailOptIn}
+                            onChange={(e) => setEmailOptIn(e.target.checked)}
+                        />
+                        Email me about offers and rewards (optional)
+                    </label>
 
                     <Button
                         type="submit"

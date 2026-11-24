@@ -929,6 +929,7 @@ export interface RegisterData {
     confirm_password: string;
     user_type: UserType;
     email?: string;
+    email_marketing_opt_in?: boolean;
 }
 
 // API response types
